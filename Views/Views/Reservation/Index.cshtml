@@ -1,0 +1,464 @@
+@model Reservation
+@{
+    ViewData["Title"] = "Rezervasyon";
+    var vehicles = ViewBag.Vehicles as List<Vehicle>;
+    var regions = ViewBag.Regions as List<Region>;
+    var selectedVehicleId = ViewBag.SelectedVehicleId as int?;
+    var regionIdFromUrl = ViewBag.RegionId as int?;
+    var pickupLocation = ViewBag.PickupLocation as string;
+    var dropoffLocation = ViewBag.DropoffLocation as string;
+    var selectedVehicle = ViewBag.SelectedVehicle as Vehicle;
+    var selectedRegion = ViewBag.SelectedRegion as Region;
+}
+
+<!-- Page Header -->
+<section class="page-header" style="content-visibility: auto;">
+    <div class="container">
+        <h1>Rezervasyon</h1>
+        <nav class="breadcrumb">
+            <a asp-controller="Home" asp-action="Index">Ana Sayfa</a>
+            <span>/</span>
+            <span>Rezervasyon</span>
+        </nav>
+    </div>
+</section>
+
+<!-- Seçilen Bilgiler -->
+@if (selectedVehicle != null || selectedRegion != null)
+{
+<section class="selected-info-section" style="content-visibility: auto;">
+    <div class="container">
+        <div class="selected-info-box">
+            <h4><i class="bi bi-check-circle-fill"></i> Seçimleriniz</h4>
+            <div class="selected-info-grid">
+                @if (selectedRegion != null)
+                {
+                    <div class="selected-item">
+                        <span class="label">Bölge:</span>
+                        <span class="value">@pickupLocation → @dropoffLocation</span>
+                        @if (selectedRegion.Price > 0)
+                        {
+                            <span class="price">@selectedRegion.Price.ToString("N0") €</span>
+                        }
+                    </div>
+                }
+                @if (selectedVehicle != null)
+                {
+                    <div class="selected-item">
+                        <span class="label">Araç:</span>
+                        <span class="value">@selectedVehicle.Name</span>
+                        <span class="specs">@selectedVehicle.PassengerCapacity Yolcu, @selectedVehicle.LuggageCapacity Bagaj</span>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</section>
+}
+
+<!-- Reservation Form -->
+<section class="reservation section" style="content-visibility: auto;">
+    <div class="container">
+        <div class="reservation-wrapper">
+            <div class="reservation-info">
+                <span class="section-subtitle">Online Rezervasyon</span>
+                <h2 class="section-title">Transfer Rezervasyonu</h2>
+                <p>
+                    Aşağıdaki formu doldurarak hızlıca rezervasyon talebinizi oluşturabilirsiniz. 
+                    Ekibimiz en kısa sürede sizinle iletişime geçecektir.
+                </p>
+
+                <div class="reservation-features">
+                    <div class="res-feature">
+                        <i class="bi bi-check-circle"></i>
+                        <span>Ücretsiz iptal</span>
+                    </div>
+                    <div class="res-feature">
+                        <i class="bi bi-check-circle"></i>
+                        <span>Sabit fiyat garantisi</span>
+                    </div>
+                    <div class="res-feature">
+                        <i class="bi bi-check-circle"></i>
+                        <span>7/24 destek</span>
+                    </div>
+                    <div class="res-feature">
+                        <i class="bi bi-check-circle"></i>
+                        <span>Profesyonel şoförler</span>
+                    </div>
+                </div>
+
+                <div class="reservation-contact">
+                    <p>Telefon ile rezervasyon için:</p>
+                    <a href="tel:+905303471580" class="contact-phone">
+                        <i class="bi bi-telephone"></i>
+                        +90 530 347 1580
+                    </a>
+                    <a href="https://wa.me/905303471580" class="btn btn-whatsapp" target="_blank">
+                        <i class="bi bi-whatsapp"></i>
+                        WhatsApp ile Ulaşın
+                    </a>
+                </div>
+            </div>
+
+            <div class="reservation-form-wrapper">
+                <form asp-action="Create" method="post" class="reservation-form" id="reservationForm">
+                    @Html.AntiForgeryToken()
+
+                    <!-- 1. Bölge ve Araç (Akış: Önce bölge, sonra araç - araç zorunlu) -->
+                    <div class="form-section">
+                        <h4><i class="bi bi-geo-alt"></i> Bölge ve Araç Seçimi</h4>
+                        
+                        <div class="form-group">
+                            <label for="RegionId">Bölge *</label>
+                            <select name="RegionId" id="regionSelect" class="form-control" required data-regions="@(regions != null ? "1" : "0")">
+                                <option value="">— Bölge seçiniz —</option>
+                                @if (regions != null)
+                                {
+                                    @foreach (var r in regions)
+                                    {
+                                        var isSelected = (selectedRegion != null && selectedRegion.Id == r.Id) || (regionIdFromUrl.HasValue && regionIdFromUrl.Value == r.Id);
+                                        if (isSelected)
+                                        {
+                                            <option value="@r.Id" data-price="@r.Price" data-start="@r.StartPoint" data-name="@r.Name" selected>@r.Name — @r.StartPoint → @r.Name (@r.Price.ToString("N0") €)</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="@r.Id" data-price="@r.Price" data-start="@r.StartPoint" data-name="@r.Name">@r.Name — @r.StartPoint → @r.Name (@r.Price.ToString("N0") €)</option>
+                                        }
+                                    }
+                                }
+                            </select>
+                            <small class="form-hint">Transfer yapacağınız bölgeyi seçin. Bölgeler sayfasından da seçip bu sayfaya gelebilirsiniz.</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label asp-for="VehicleId">Araç *</label>
+                            <select asp-for="VehicleId" class="form-control" id="vehicleSelect" required>
+                                <option value="">— Araç seçiniz —</option>
+                                @if (vehicles != null)
+                                {
+                                    @foreach (var vehicle in vehicles)
+                                    {
+                                        if (selectedVehicleId.HasValue && selectedVehicleId.Value == vehicle.Id)
+                                        {
+                                            <option value="@vehicle.Id" data-price="@vehicle.PricePerKm" data-min="@vehicle.MinimumPrice" selected>@vehicle.Name — @vehicle.PassengerCapacity Yolcu (@vehicle.MinimumPrice.ToString("N0") €)</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="@vehicle.Id" data-price="@vehicle.PricePerKm" data-min="@vehicle.MinimumPrice">@vehicle.Name — @vehicle.PassengerCapacity Yolcu (@vehicle.MinimumPrice.ToString("N0") €)</option>
+                                        }
+                                    }
+                                }
+                            </select>
+                            <span asp-validation-for="VehicleId" class="text-danger"></span>
+                        </div>
+
+                        <div class="reservation-price-box" id="reservationPriceBox" style="display: none;">
+                            <h5><i class="bi bi-tag"></i> Ücret Bilgilendirmesi</h5>
+                            <p id="priceRegionText"></p>
+                            <p id="priceVehicleText"></p>
+                            <p class="price-note">Kesin fiyat rezervasyon onayında bildirilecektir.</p>
+                        </div>
+                    </div>
+
+                    <!-- 2. 1. Kişi: İletişim bilgileri (Ad Soyad, Telefon, E-posta) -->
+                    <div class="form-section">
+                        <h4><i class="bi bi-person"></i> 1. Yolcu — İletişim Bilgileri</h4>
+                        <p class="form-hint mb-2">İlk yolcu için ad soyad, telefon ve e-posta zorunludur. Diğer yolcuların isimleri aşağıda alınacaktır.</p>
+                        <div class="form-group">
+                            <label asp-for="CustomerName">Ad Soyad *</label>
+                            <input asp-for="CustomerName" class="form-control" placeholder="Adınız Soyadınız" required />
+                            <span asp-validation-for="CustomerName" class="text-danger"></span>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label asp-for="CustomerPhone">Telefon *</label>
+                                <input asp-for="CustomerPhone" type="tel" class="form-control" placeholder="Örn: +90 532 123 45 67 veya +1 555 123 4567" required maxlength="30" />
+                                <span asp-validation-for="CustomerPhone" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="CustomerEmail">E-posta</label>
+                                <input asp-for="CustomerEmail" class="form-control" placeholder="ornek@email.com" />
+                                <span asp-validation-for="CustomerEmail" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Alınacak Nokta -->
+                    <div class="form-section">
+                        <h4><i class="bi bi-geo-alt"></i> Alınacak Nokta</h4>
+                        
+                        @{
+                            var pickupIsAirport = !string.IsNullOrEmpty(pickupLocation) && 
+                                (pickupLocation.Contains("Havalimanı") || pickupLocation.Contains("Airport"));
+                        }
+                        <div class="form-group">
+                            <label asp-for="PickupLocationType">Nokta Türü *</label>
+                            <select asp-for="PickupLocationType" class="form-control" id="pickupType" required>
+                                <option value="">Seçiniz</option>
+                                @if (pickupIsAirport)
+                                {
+                                    <option value="0" selected>Havalimanı</option>
+                                    <option value="1">Otel</option>
+                                }
+                                else if (!string.IsNullOrEmpty(pickupLocation))
+                                {
+                                    <option value="0">Havalimanı</option>
+                                    <option value="1" selected>Otel</option>
+                                }
+                                else
+                                {
+                                    <option value="0">Havalimanı</option>
+                                    <option value="1">Otel</option>
+                                }
+                            </select>
+                            <small class="form-hint">Sadece havalimanı–otel arası transfer. Varış seçenekleri alışa göre otomatik güncellenir.</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label asp-for="PickupLocation">Konum *</label>
+                            <input asp-for="PickupLocation" class="form-control" id="pickupLocation" placeholder="Örn: İstanbul Havalimanı, Otel Adı..." required value="@(pickupLocation ?? "")" />
+                            <span asp-validation-for="PickupLocation" class="text-danger"></span>
+                            <small class="form-hint">Tam adres veya otel/havalimanı ismini yazınız</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label asp-for="PickupLocationDetail">Detay (Opsiyonel)</label>
+                            <input asp-for="PickupLocationDetail" class="form-control" placeholder="Kapı no, kat, terminal vb." value="" />
+                        </div>
+                    </div>
+
+                    <!-- Bırakılacak Nokta -->
+                    <div class="form-section">
+                        <h4><i class="bi bi-geo-alt-fill"></i> Bırakılacak Nokta</h4>
+                        
+                        @{
+                            var dropoffIsAirport = !string.IsNullOrEmpty(dropoffLocation) && 
+                                (dropoffLocation.Contains("Havalimanı") || dropoffLocation.Contains("Airport"));
+                        }
+                        <div class="form-group">
+                            <label asp-for="DropoffLocationType">Nokta Türü *</label>
+                            <select asp-for="DropoffLocationType" class="form-control" id="dropoffType" required>
+                                <option value="">Seçiniz</option>
+                                @if (dropoffIsAirport)
+                                {
+                                    <option value="0" selected>Havalimanı</option>
+                                    <option value="1">Otel</option>
+                                }
+                                else if (!string.IsNullOrEmpty(dropoffLocation))
+                                {
+                                    <option value="0">Havalimanı</option>
+                                    <option value="1" selected>Otel</option>
+                                }
+                                else
+                                {
+                                    <option value="0">Havalimanı</option>
+                                    <option value="1">Otel</option>
+                                }
+                            </select>
+                            <small class="form-hint">Alış havalimanı ise sadece otel, alış otel ise sadece havalimanı seçilebilir.</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label asp-for="DropoffLocation">Konum *</label>
+                            <input asp-for="DropoffLocation" class="form-control" id="dropoffLocation" placeholder="Örn: Hilton İstanbul Bomonti, Sabiha Gökçen Havalimanı..." required value="@(dropoffLocation ?? "")" />
+                            <span asp-validation-for="DropoffLocation" class="text-danger"></span>
+                            <small class="form-hint">Tam adres veya otel/havalimanı ismini yazınız</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label asp-for="DropoffLocationDetail">Detay (Opsiyonel)</label>
+                            <input asp-for="DropoffLocationDetail" class="form-control" placeholder="Kapı no, kat vb." value="" />
+                        </div>
+                    </div>
+
+                    <!-- Tarih ve Saat -->
+                    <div class="form-section">
+                        <h4><i class="bi bi-calendar-event"></i> Tarih ve Saat</h4>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label asp-for="TransferDate">Transfer Tarihi *</label>
+                                <input asp-for="TransferDate" type="date" class="form-control" required min="@DateTime.Today.ToString("yyyy-MM-dd")" />
+                                <span asp-validation-for="TransferDate" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="TransferTime">Transfer Saati *</label>
+                                <input asp-for="TransferTime" type="time" class="form-control" required />
+                                <span asp-validation-for="TransferTime" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Havayolu ve Uçuş -->
+                    <div class="form-section">
+                        <h4><i class="bi bi-airplane"></i> Havayolu ve Uçuş Bilgisi</h4>
+                        <div class="form-group">
+                            <label asp-for="AirlineCompany">Havayolu Şirketi</label>
+                            <input asp-for="AirlineCompany" class="form-control" placeholder="Örn: Turkish Airlines, Lufthansa" maxlength="100" />
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="FlightNumber">Uçuş Kodu</label>
+                            <input asp-for="FlightNumber" class="form-control" placeholder="Örn: TK1234" />
+                            <small class="form-hint">Havalimanı transferlerinde uçuş takibi için</small>
+                        </div>
+                    </div>
+
+                    <!-- Yolcu Sayısı ve Diğer Yolcular -->
+                    <div class="form-section">
+                        <h4><i class="bi bi-people"></i> Yolcu Bilgileri</h4>
+                        <p class="form-hint mb-2">1. yolcunun iletişim bilgileri yukarıda. 2. ve sonraki yolcular için sadece <strong>Ad Soyad</strong> giriniz.</p>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label asp-for="PassengerCount">Yolcu Sayısı *</label>
+                                <select asp-for="PassengerCount" class="form-control" id="passengerCount" required>
+                                    @for (int i = 1; i <= 10; i++)
+                                    {
+                                        <option value="@i">@i Yolcu</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="LuggageCount">Bagaj Sayısı</label>
+                                <select asp-for="LuggageCount" class="form-control">
+                                    @for (int i = 0; i <= 10; i++)
+                                    {
+                                        <option value="@i">@i Bagaj</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group" id="additionalPassengersGroup">
+                            <label asp-for="AdditionalPassengerNames">2. ve sonraki yolcular (sadece Ad Soyad)</label>
+                            <textarea asp-for="AdditionalPassengerNames" class="form-control" rows="3" placeholder="Her satıra bir kişi: Ad Soyad&#10;Örn: Ahmet Yılmaz&#10;Ayşe Kaya"></textarea>
+                            <small class="form-hint">Yolcu sayısı 2 veya daha fazlaysa, diğer yolcuların ad ve soyadlarını her satıra bir kişi yazınız.</small>
+                        </div>
+                    </div>
+
+                    <!-- Notlar -->
+                    <div class="form-section">
+                        <h4><i class="bi bi-chat-text"></i> Ek Notlar</h4>
+                        
+                        <div class="form-group">
+                            <label asp-for="Notes">Özel İstekleriniz</label>
+                            <textarea asp-for="Notes" class="form-control" rows="3" placeholder="Bebek koltuğu, karşılama tabelası vb."></textarea>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-lg btn-block">
+                        <i class="bi bi-check-circle"></i>
+                        Rezervasyon Talebi Gönder
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const dateInput = document.querySelector('input[name="TransferDate"]');
+    const timeInput = document.querySelector('input[name="TransferTime"]');
+    const form = document.getElementById('reservationForm');
+    const pickupType = document.getElementById('pickupType');
+    const dropoffType = document.getElementById('dropoffType');
+    const regionSelect = document.getElementById('regionSelect');
+    const vehicleSelect = document.getElementById('vehicleSelect');
+    const priceBox = document.getElementById('reservationPriceBox');
+    const priceRegionText = document.getElementById('priceRegionText');
+    const priceVehicleText = document.getElementById('priceVehicleText');
+
+    if (regionSelect) {
+        regionSelect.addEventListener('change', function() {
+            const opt = this.options[this.selectedIndex];
+            if (opt && opt.value) {
+                const start = opt.getAttribute('data-start');
+                const name = opt.getAttribute('data-name');
+                if (start && name) {
+                    const pickup = document.getElementById('pickupLocation');
+                    const dropoff = document.getElementById('dropoffLocation');
+                    if (pickup) pickup.value = start;
+                    if (dropoff) dropoff.value = name;
+                }
+            }
+        });
+        if (regionSelect.value) regionSelect.dispatchEvent(new Event('change'));
+    }
+
+    function updatePriceBox() {
+        const regionOpt = regionSelect && regionSelect.options[regionSelect.selectedIndex];
+        const vehicleOpt = vehicleSelect && vehicleSelect.options[vehicleSelect.selectedIndex];
+        const hasRegion = regionOpt && regionOpt.value && regionOpt.getAttribute('data-price');
+        const hasVehicle = vehicleOpt && vehicleOpt.value && vehicleOpt.getAttribute('data-min');
+        if (priceBox) priceBox.style.display = (hasRegion || hasVehicle) ? 'block' : 'none';
+        if (hasRegion && priceRegionText) {
+            var sym = '€';
+            try { var c = JSON.parse(sessionStorage.getItem('imperial_currency')); if (c && c.symbol) sym = c.symbol; } catch(e) {}
+            priceRegionText.textContent = 'Bölge fiyatı: ' + regionOpt.getAttribute('data-price') + ' ' + sym;
+        }
+        if (hasVehicle && priceVehicleText) {
+            var sym = '€';
+            try { var c = JSON.parse(sessionStorage.getItem('imperial_currency')); if (c && c.symbol) sym = c.symbol; } catch(e) {}
+            priceVehicleText.textContent = 'Seçilen araç minimum: ' + vehicleOpt.getAttribute('data-min') + ' ' + sym;
+        }
+    }
+    if (regionSelect) regionSelect.addEventListener('change', updatePriceBox);
+    if (vehicleSelect) vehicleSelect.addEventListener('change', updatePriceBox);
+    updatePriceBox();
+
+    function applyTransferLogic() {
+        if (!pickupType || !dropoffType) return;
+        const pickupVal = pickupType.value;
+        dropoffType.innerHTML = '';
+        if (pickupVal === '0') { dropoffType.innerHTML = '<option value="1">Otel</option>'; dropoffType.value = '1'; }
+        else if (pickupVal === '1') { dropoffType.innerHTML = '<option value="0">Havalimanı</option>'; dropoffType.value = '0'; }
+        else { dropoffType.innerHTML = '<option value="">Seçiniz</option><option value="0">Havalimanı</option><option value="1">Otel</option>'; }
+    }
+    if (pickupType) pickupType.addEventListener('change', applyTransferLogic);
+    applyTransferLogic();
+
+    const today = new Date();
+    const todayStr = today.toISOString().split('T')[0];
+    dateInput.min = todayStr;
+    
+    function validateDateTime() {
+        const selectedDate = dateInput.value;
+        const selectedTime = timeInput.value;
+        if (!selectedDate || !selectedTime) return true;
+        const now = new Date();
+        const selectedDateTime = new Date(selectedDate + 'T' + selectedTime);
+        const minTime = new Date(now.getTime() + 60 * 60 * 1000);
+        return selectedDateTime >= minTime;
+    }
+    
+    function updateTimeMin() {
+        const selectedDate = dateInput.value;
+        const today = new Date();
+        const todayStr = today.toISOString().split('T')[0];
+        if (selectedDate === todayStr) {
+            const minHour = today.getHours() + 2;
+            const minMinute = today.getMinutes();
+            if (minHour < 24) {
+                timeInput.min = String(minHour).padStart(2, '0') + ':' + String(minMinute).padStart(2, '0');
+            } else {
+                const tomorrow = new Date(today);
+                tomorrow.setDate(tomorrow.getDate() + 1);
+                dateInput.value = tomorrow.toISOString().split('T')[0];
+                dateInput.min = tomorrow.toISOString().split('T')[0];
+                timeInput.min = '00:00';
+            }
+        } else { timeInput.min = '00:00'; }
+    }
+    dateInput.addEventListener('change', updateTimeMin);
+    form.addEventListener('submit', function(e) {
+        if (!validateDateTime()) {
+            e.preventDefault();
+            alert('Lütfen geçerli bir tarih ve saat seçiniz.\n\nRezervasyon en az 1 saat sonrası için yapılabilir.');
+            return false;
+        }
+    });
+    updateTimeMin();
+});
+</script>
+}

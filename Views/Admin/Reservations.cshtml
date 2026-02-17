@@ -1,0 +1,107 @@
+@model IEnumerable<AdminReservationListItem>
+@{
+    ViewData["Title"] = "Rezervasyonlar";
+    Layout = "_AdminLayout";
+    var currentStatus = ViewBag.CurrentStatus as ReservationStatus?;
+}
+
+<!-- Reservations Card -->
+<div class="admin-card">
+    <div class="card-header">
+        <h2>Rezervasyonlar</h2>
+        <a asp-action="CreateReservation" class="btn btn-primary btn-add-reservation">
+            <i class="bi bi-plus-lg"></i> Yeni Rezervasyon Ekle
+        </a>
+    </div>
+    <div class="card-body">
+        <!-- Filters -->
+        <div class="admin-filters mb-4">
+            <a asp-action="Reservations" class="filter-btn @(currentStatus == null ? "active" : "")">Tümü</a>
+            <a asp-action="Reservations" asp-route-status="0" class="filter-btn @(currentStatus == ReservationStatus.Beklemede ? "active" : "")">Beklemede</a>
+            <a asp-action="Reservations" asp-route-status="1" class="filter-btn @(currentStatus == ReservationStatus.Onaylandi ? "active" : "")">Onaylandı</a>
+            <a asp-action="Reservations" asp-route-status="2" class="filter-btn @(currentStatus == ReservationStatus.Tamamlandi ? "active" : "")">Tamamlandı</a>
+            <a asp-action="Reservations" asp-route-status="3" class="filter-btn @(currentStatus == ReservationStatus.IptalEdildi ? "active" : "")">İptal</a>
+        </div>
+        @if (Model.Any())
+        {
+            <div class="table-responsive">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Müşteri</th>
+                            <th>Transfer Tarihi</th>
+                            <th>Alış</th>
+                            <th>Bırakış</th>
+                            <th>Araç</th>
+                            <th>Durum</th>
+                            <th>Kayıt</th>
+                            <th>İşlem</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>@item.Id</td>
+                                <td>
+                                    <strong>@item.CustomerName</strong>
+                                    <br><small>@item.CustomerPhone</small>
+                                </td>
+                                <td>
+                                    @(item.TransferDate?.ToString("dd.MM.yyyy") ?? "-")
+                                    <br><small>@item.TransferTime</small>
+                                </td>
+                                <td>
+                                    <small>@item.PickupLocation</small>
+                                </td>
+                                <td>
+                                    <small>@item.DropoffLocation</small>
+                                </td>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(item.VehicleName))
+                                    {
+                                        <small>@item.VehicleName</small>
+                                    }
+                                    else
+                                    {
+                                        <small class="text-muted">-</small>
+                                    }
+                                </td>
+                                <td>
+                                    @switch (item.Status)
+                                    {
+                                        case ReservationStatus.Beklemede:
+                                            <span class="badge badge-warning">Beklemede</span>
+                                            break;
+                                        case ReservationStatus.Onaylandi:
+                                            <span class="badge badge-success">Onaylandı</span>
+                                            break;
+                                        case ReservationStatus.Tamamlandi:
+                                            <span class="badge badge-info">Tamamlandı</span>
+                                            break;
+                                        case ReservationStatus.IptalEdildi:
+                                            <span class="badge badge-danger">İptal</span>
+                                            break;
+                                    }
+                                </td>
+                                <td>
+                                    <small>@(item.CreatedAt?.ToString("dd.MM.yy HH:mm") ?? "-")</small>
+                                </td>
+                                <td>
+                                    <a href="@Url.Action("ReservationDetails", "Admin", new { id = item.Id })" class="btn btn-sm btn-outline" title="Detayları gör">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <p class="text-muted text-center">Bu filtreye uygun rezervasyon bulunmuyor.</p>
+        }
+    </div>
+</div>

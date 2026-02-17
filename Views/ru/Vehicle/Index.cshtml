@@ -1,0 +1,186 @@
+@model IEnumerable<Vehicle>
+@{
+    ViewData["Title"] = "Наши автомобили";
+    var currentLang = "ru";
+    var t = new Dictionary<string, string> {
+        ["Home"] = "Главная", ["OurVehicles"] = "Наши автомобили", ["VIPFleet"] = "VIP-парк", ["LuxuryFleet"] = "Наш люксовый автопарк",
+        ["Intro"] = "Imperial VIP предлагает премиум-автомобили для эксклюзивных поездок. Все наши автомобили регулярно обслуживаются и обеспечивают максимальный комфорт.",
+        ["Passenger"] = "Пассажир", ["Luggage"] = "Багаж", ["Pieces"] = "шт.", ["SelectVehicle"] = "Выбрать авто",
+        ["ContactForPrice"] = "Цена по запросу", ["SelectBook"] = "Выберите и забронируйте", ["BookNow"] = "Забронировать",
+        ["Maintenance"] = "Регулярное ТО", ["MaintenanceDesc"] = "Все автомобили проходят регулярное техническое обслуживание. Ваша безопасность — приоритет.",
+        ["Hygiene"] = "Гигиена", ["HygieneDesc"] = "Перед каждой поездкой автомобили тщательно моются и дезинфицируются.",
+        ["AC"] = "Кондиционер", ["ACDesc"] = "Во всех автомобилях двухзонный климат-контроль.",
+        ["Wifi"] = "WiFi и зарядка", ["WifiDesc"] = "WiFi и USB-зарядка во время поездки."
+    };
+}
+<section class="page-header">
+    <div class="container">
+        <h1>@t["OurVehicles"]</h1>
+        <nav class="breadcrumb">
+            <a asp-controller="Home" asp-action="Index" asp-route-lang="@currentLang">@t["Home"]</a>
+            <span>/</span>
+            <span>@t["OurVehicles"]</span>
+        </nav>
+    </div>
+</section>
+<section class="vehicles-intro section" style="content-visibility: auto;">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-subtitle">@t["VIPFleet"]</span>
+            <h2 class="section-title">@t["LuxuryFleet"]</h2>
+            <p class="section-description">@t["Intro"]</p>
+        </div>
+    </div>
+</section>
+<section class="vehicles-list section" style="content-visibility: auto;">
+    <div class="container">
+        <div class="vehicles-full-grid">
+            @foreach (var vehicle in Model)
+            {
+                var validAlbumImages = (vehicle.Images != null ? vehicle.Images.Where(i => !string.IsNullOrWhiteSpace(i?.ImageUrl)) : Enumerable.Empty<VehicleImage>()).OrderBy(i => i.SortOrder).ToList();
+                var mainImageUrl = validAlbumImages.FirstOrDefault()?.ImageUrl ?? (!string.IsNullOrWhiteSpace(vehicle.ImageUrl) ? vehicle.ImageUrl : "/images/imgs/no-image.jpg");
+                var thumbUrls = validAlbumImages.Select(i => i.ImageUrl).ToList();
+                var showThumbs = thumbUrls.Count > 0;
+                <div class="vehicle-card-full">
+                    <div class="vehicle-album">
+                        <div class="vehicle-album-main">
+                            <img src="@mainImageUrl" alt="@vehicle.Name" loading="lazy" decoding="async" class="vehicle-album-main-img" onerror="this.src='/images/imgs/no-image.jpg'" />
+                            <span class="vehicle-type-badge">@vehicle.Type</span>
+                        </div>
+                        @if (showThumbs)
+                        {
+                            <div class="vehicle-album-thumbs">
+                                @{ var thumbIndex = 0; }
+                                @foreach (var url in thumbUrls)
+                                {
+                                    <button type="button" class="vehicle-thumb @(thumbIndex == 0 ? "active" : "")" data-src="@url" aria-label="@(thumbIndex == 0 ? "Главное фото" : "Фото")">
+                                        <img src="@url" alt="" loading="lazy" onerror="this.parentElement.style.display='none'" />
+                                    </button>
+                                    thumbIndex++;
+                                }
+                            </div>
+                        }
+                    </div>
+                    <div class="vehicle-details">
+                        <div class="vehicle-header">
+                            <h3>@vehicle.Name</h3>
+                            <span class="vehicle-brand">@vehicle.Brand @vehicle.Model</span>
+                        </div>
+                        <p class="vehicle-description">@vehicle.Description</p>
+                        <div class="vehicle-specs-grid">
+                            <div class="spec-item"><i class="bi bi-people"></i><span>@t["Passenger"]: Мин 1 – Макс @vehicle.PassengerCapacity</span></div>
+                            <div class="spec-item"><i class="bi bi-briefcase"></i><span>@t["Luggage"]: @vehicle.LuggageCapacity @t["Pieces"]</span></div>
+                        </div>
+                        @if (!string.IsNullOrEmpty(vehicle.Features))
+                        {
+                            <div class="vehicle-features">
+                                @foreach (var feature in vehicle.Features.Split(','))
+                                {
+                                    <span class="feature-tag"><i class="bi bi-check"></i>@feature.Trim()</span>
+                                }
+                            </div>
+                        }
+                    </div>
+                    <div class="vehicle-price-block">
+                        <div class="vehicle-price-main">
+                            @{
+                                var hasPrice = vehicle.MinimumPrice > 0 || vehicle.MinimumPriceUsd > 0 || vehicle.MinimumPriceTry > 0;
+                            }
+                            @if (hasPrice)
+                            {
+                                <span class="vehicle-price-value" data-amount-eur="@vehicle.MinimumPrice.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)" data-amount-usd="@vehicle.MinimumPriceUsd.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)" data-amount-try="@vehicle.MinimumPriceTry.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)">
+                                    @vehicle.MinimumPrice.ToString("N2", System.Globalization.CultureInfo.GetCultureInfo("tr-TR")) <span class="vehicle-currency-symbol">€</span>
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="vehicle-price-no-price">@t["ContactForPrice"]</span>
+                            }
+                        </div>
+                        <div class="vehicle-actions">
+                            <a asp-controller="Reservation" asp-action="Index" asp-route-lang="@currentLang" asp-route-vehicleId="@vehicle.Id" class="btn btn-primary btn-select-vehicle">
+                                <i class="bi bi-car-front"></i> @t["SelectVehicle"]
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</section>
+<section class="vehicle-info section" style="content-visibility: auto;">
+    <div class="container">
+        <div class="info-grid">
+            <div class="info-card">
+                <div class="info-icon"><i class="bi bi-tools"></i></div>
+                <h4>@t["Maintenance"]</h4>
+                <p>@t["MaintenanceDesc"]</p>
+            </div>
+            <div class="info-card">
+                <div class="info-icon"><i class="bi bi-droplet"></i></div>
+                <h4>@t["Hygiene"]</h4>
+                <p>@t["HygieneDesc"]</p>
+            </div>
+            <div class="info-card">
+                <div class="info-icon"><i class="bi bi-snow"></i></div>
+                <h4>@t["AC"]</h4>
+                <p>@t["ACDesc"]</p>
+            </div>
+            <div class="info-card">
+                <div class="info-icon"><i class="bi bi-wifi"></i></div>
+                <h4>@t["Wifi"]</h4>
+                <p>@t["WifiDesc"]</p>
+            </div>
+        </div>
+    </div>
+</section>
+<section class="cta section" style="content-visibility: auto;">
+    <div class="container">
+        <div class="cta-content">
+            <h2>@t["SelectBook"]</h2>
+            <p>Создайте бронирование VIP-трансфера.</p>
+            <a asp-controller="Reservation" asp-action="Index" asp-route-lang="@currentLang" class="btn btn-primary btn-lg">
+                <i class="bi bi-calendar-check"></i> @t["BookNow"]
+            </a>
+        </div>
+    </div>
+</section>
+@section Scripts {
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    function updateVehiclePrices() {
+        var cur = window.getImperialCurrency ? window.getImperialCurrency() : { symbol: '€', code: 'EUR' };
+        var code = (cur.code || 'EUR').toUpperCase();
+        document.querySelectorAll('.vehicle-price-value').forEach(function(el) {
+            var amount = parseFloat(el.getAttribute('data-amount-' + code));
+            if (isNaN(amount) || amount <= 0) {
+                var eur = parseFloat(el.getAttribute('data-amount-eur'));
+                if (!isNaN(eur) && eur > 0 && window.convertFromEur) amount = window.convertFromEur(eur);
+                else if (isNaN(amount) || amount <= 0) amount = eur || 0;
+            }
+            var formatted = (typeof amount === 'number' ? amount : 0).toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            if (el.childNodes.length && el.childNodes[0].nodeType === 3) el.childNodes[0].textContent = formatted + ' ';
+            var symSpan = el.querySelector('.vehicle-currency-symbol');
+            if (symSpan) symSpan.textContent = cur.symbol;
+        });
+    }
+    updateVehiclePrices();
+    window.addEventListener('imperialCurrencyChanged', updateVehiclePrices);
+    window.addEventListener('imperialCurrencyRatesReady', updateVehiclePrices);
+    document.querySelectorAll('.vehicle-album-thumbs').forEach(function(thumbBar) {
+        var mainImg = thumbBar.closest('.vehicle-album').querySelector('.vehicle-album-main-img');
+        if (!mainImg) return;
+        thumbBar.querySelectorAll('.vehicle-thumb').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                var src = this.getAttribute('data-src');
+                if (src && mainImg.src !== src) {
+                    mainImg.src = src;
+                    thumbBar.querySelectorAll('.vehicle-thumb').forEach(function(b) { b.classList.remove('active'); });
+                    this.classList.add('active');
+                }
+            });
+        });
+    });
+});
+</script>
+}

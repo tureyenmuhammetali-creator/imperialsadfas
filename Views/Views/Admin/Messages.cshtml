@@ -1,0 +1,61 @@
+@model IEnumerable<Contact>
+@{
+    ViewData["Title"] = "Mesajlar";
+    Layout = "_AdminLayout";
+}
+
+<div class="admin-card">
+    <div class="card-body">
+        @if (Model.Any())
+        {
+            <div class="table-responsive">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>Gönderen</th>
+                            <th>Konu</th>
+                            <th>Tarih</th>
+                            <th>İşlem</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr class="@(!item.IsRead ? "unread" : "")">
+                                <td>
+                                    @if (!item.IsRead)
+                                    {
+                                        <span class="unread-dot"></span>
+                                    }
+                                </td>
+                                <td>
+                                    <strong>@item.FullName</strong>
+                                    <br><small>@item.Email</small>
+                                </td>
+                                <td>@item.Subject</td>
+                                <td>@item.CreatedAt.ToString("dd.MM.yyyy HH:mm")</td>
+                                <td>
+                                    <a asp-action="MessageDetails" asp-route-id="@item.Id" class="btn btn-sm btn-outline">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    <form asp-action="DeleteMessage" method="post" style="display:inline;" onsubmit="return confirm('Bu mesajı silmek istediğinize emin misiniz?');">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@item.Id" />
+                                        <button type="submit" class="btn btn-sm btn-danger">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <p class="text-muted text-center">Henüz mesaj bulunmuyor.</p>
+        }
+    </div>
+</div>

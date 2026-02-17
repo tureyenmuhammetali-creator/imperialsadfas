@@ -1,0 +1,575 @@
+@model Reservation
+@{
+    var currentLang = ViewContext.RouteData.Values["lang"]?.ToString() ?? "tr";
+    var t = new Dictionary<string, Dictionary<string, string>> {
+        ["tr"] = new Dictionary<string, string> {
+            ["Title"] = "Rezervasyon", ["Home"] = "Ana Sayfa", ["YourSelections"] = "Seçimleriniz", ["Region"] = "Bölge", ["Vehicle"] = "Araç", ["Passenger"] = "Yolcu", ["Luggage"] = "Bagaj",
+            ["PleaseSelectVehicle"] = "Lütfen araç seçiniz",
+            ["TravelInfo"] = "Seyahat Bilgisi", ["TransferDir"] = "Transfer yönü *", ["FromAirport"] = "Havalimanından alınacak", ["ToAirport"] = "Havalimanına gidilecek", ["AirportHotel"] = "Havalimanı → Otel", ["HotelAirport"] = "Otel → Havalimanı",
+            ["RegionLabel"] = "Gideceğiniz bölge (otel) *", ["RegionLabel2"] = "Alınacağınız bölge *", ["RegionHint"] = "Müşteri havalimanından alınacak; gideceği otelin bölgesini seçin.", ["RegionHint2"] = "Müşteri otelden havalimanına gidecek; alınacağı bölgeyi seçin.",
+            ["SelectRegion"] = "— Bölge seçiniz —", ["Pickup"] = "Alış Noktası *", ["Dropoff"] = "Bırakış Noktası *", ["SelectVehicle"] = "— Araç seçiniz —", ["HotelName"] = "Otel Adı", ["Airline"] = "Havayolu Şirketi",
+            ["DateTime"] = "Varış Tarih ve Saati *", ["FlightNo"] = "Varış Uçuş Numarası", ["ReturnTransfer"] = "Dönüş transferi istiyorum", ["ReturnTransferDesc"] = "Gidiş-dönüş transfer avantajı", ["ReturnDateTime"] = "Dönüş Tarih ve Saati", ["ReturnFlight"] = "Dönüş Uçuş Numarası",
+            ["Adults"] = "Yetişkin Sayısı", ["Children"] = "Çocuk Sayısı", ["ChildSeat"] = "Çocuk koltuğu sayısı", ["PersonalInfo"] = "Kişisel Bilgiler", ["PersonalHint"] = "1. yolcu iletişim bilgileri; 2. ve sonraki yolcular sadece ad soyad.",
+            ["FullName"] = "Ad Soyad *", ["Phone"] = "Telefon *", ["Email"] = "E-posta", ["AddPassengers"] = "2. ve sonraki yolcular (sadece Ad Soyad)", ["AdultLabel"] = "Yetişkin", ["ChildLabel"] = "Çocuk", ["Notes"] = "Notlar",
+            ["TransferDetails"] = "Transfer Detayları", ["Outbound"] = "Gidiş Bilgisi", ["Return"] = "Dönüş Bilgisi", ["Total"] = "Toplam", ["Price"] = "Fiyat", ["Complete"] = "Rezervasyonu Tamamla",
+            ["PlaceholderRegion"] = "Bölge seçince dolacak", ["PlaceholderHotel"] = "Otel adını giriniz", ["PlaceholderAirline"] = "Havayolu şirketi adını giriniz", ["PlaceholderFlight"] = "Örn: TK1234, AA1234",
+            ["PlaceholderName"] = "Adınız Soyadınız", ["PlaceholderPhone"] = "+90 5XX XXX XX XX", ["PlaceholderEmail"] = "ornek@email.com", ["PlaceholderAdd"] = "Her satıra bir kişi: Ad Soyad", ["PlaceholderNotes"] = "Özel istekleriniz",
+            ["ValidateDateTime"] = "Lütfen geçerli bir varış tarih ve saati seçiniz. Rezervasyon en az 1 saat sonrası için yapılabilir.",
+            ["InfoBanner"] = "Rezervasyonlar sadece otel – havalimanı arasındadır. Otelden havalimanına gitmek için transfer yönünden <strong>\"Havalimanına gidilecek\"</strong> seçeneğini, havalimanından otele gitmek için ise <strong>\"Havalimanından alınacak\"</strong> seçeneğini seçin."
+        },
+        ["de"] = new Dictionary<string, string> {
+            ["Title"] = "Reservierung", ["Home"] = "Startseite", ["YourSelections"] = "Ihre Auswahl", ["Region"] = "Region", ["Vehicle"] = "Fahrzeug", ["Passenger"] = "Passagier", ["Luggage"] = "Gepäck",
+            ["PleaseSelectVehicle"] = "Bitte wählen Sie ein Fahrzeug",
+            ["TravelInfo"] = "Reiseinformationen", ["TransferDir"] = "Transferrichtung *", ["FromAirport"] = "Abholung vom Flughafen", ["ToAirport"] = "Fahrt zum Flughafen", ["AirportHotel"] = "Flughafen → Hotel", ["HotelAirport"] = "Hotel → Flughafen",
+            ["RegionLabel"] = "Zielregion (Hotel) *", ["RegionLabel2"] = "Abholregion *", ["RegionHint"] = "Kunde wird vom Flughafen abgeholt; Zielregion wählen.", ["RegionHint2"] = "Kunde fährt vom Hotel zum Flughafen; Abholregion wählen.",
+            ["SelectRegion"] = "— Region wählen —", ["Pickup"] = "Abholort *", ["Dropoff"] = "Ablieferort *", ["SelectVehicle"] = "— Fahrzeug wählen —", ["HotelName"] = "Hotelname", ["Airline"] = "Fluggesellschaft",
+            ["DateTime"] = "Ankunftsdatum und -zeit *", ["FlightNo"] = "Ankunftsflugnummer", ["ReturnTransfer"] = "Rücktransfer gewünscht", ["ReturnTransferDesc"] = "Hin- und Rücktransfer Vorteil", ["ReturnDateTime"] = "Rücktransferdatum und -zeit", ["ReturnFlight"] = "Rückflugnummer",
+            ["Adults"] = "Anzahl Erwachsene", ["Children"] = "Anzahl Kinder", ["ChildSeat"] = "Kindersitze", ["PersonalInfo"] = "Persönliche Daten", ["PersonalHint"] = "1. Passagier: Kontaktdaten; weitere: nur Name.",
+            ["FullName"] = "Name *", ["Phone"] = "Telefon *", ["Email"] = "E-Mail", ["AddPassengers"] = "Weitere Passagiere (nur Name)", ["AdultLabel"] = "Erwachsene", ["ChildLabel"] = "Kind", ["Notes"] = "Anmerkungen",
+            ["TransferDetails"] = "Transferdetails", ["Outbound"] = "Hinflug", ["Return"] = "Rückfahrt", ["Total"] = "Gesamt", ["Price"] = "Preis", ["Complete"] = "Reservierung abschließen",
+            ["PlaceholderRegion"] = "Wird nach Region ausgefüllt", ["PlaceholderHotel"] = "Hotelname", ["PlaceholderAirline"] = "Fluggesellschaft", ["PlaceholderFlight"] = "z.B. TK1234",
+            ["PlaceholderName"] = "Ihr Name", ["PlaceholderPhone"] = "+90 5XX XXX XX XX", ["PlaceholderEmail"] = "beispiel@email.com", ["PlaceholderAdd"] = "Ein Name pro Zeile", ["PlaceholderNotes"] = "Sonderwünsche",
+            ["ValidateDateTime"] = "Bitte gültiges Datum und Uhrzeit wählen. Reservierung mindestens 1 Stunde im Voraus.",
+            ["InfoBanner"] = "Reservierungen gelten nur zwischen Hotel und Flughafen. Um vom Hotel zum Flughafen zu fahren, wählen Sie bei der Transferrichtung <strong>\"Fahrt zum Flughafen\"</strong>. Um vom Flughafen zum Hotel zu fahren, wählen Sie <strong>\"Abholung vom Flughafen\"</strong>."
+        },
+        ["ru"] = new Dictionary<string, string> {
+            ["Title"] = "Бронирование", ["Home"] = "Главная", ["YourSelections"] = "Ваш выбор", ["Region"] = "Регион", ["Vehicle"] = "Автомобиль", ["Passenger"] = "Пассажир", ["Luggage"] = "Багаж",
+            ["PleaseSelectVehicle"] = "Пожалуйста, выберите автомобиль",
+            ["TravelInfo"] = "Информация о поездке", ["TransferDir"] = "Направление трансфера *", ["FromAirport"] = "Встреча в аэропорту", ["ToAirport"] = "Поездка в аэропорт", ["AirportHotel"] = "Аэропорт → Отель", ["HotelAirport"] = "Отель → Аэропорт",
+            ["RegionLabel"] = "Регион назначения (отель) *", ["RegionLabel2"] = "Регион посадки *", ["RegionHint"] = "Клиент прибывает в аэропорт; выберите регион отеля.", ["RegionHint2"] = "Клиент едет из отеля в аэропорт; выберите регион посадки.",
+            ["SelectRegion"] = "— Выберите регион —", ["Pickup"] = "Место посадки *", ["Dropoff"] = "Место высадки *", ["SelectVehicle"] = "— Выберите автомобиль —", ["HotelName"] = "Название отеля", ["Airline"] = "Авиакомпания",
+            ["DateTime"] = "Дата и время прибытия *", ["FlightNo"] = "Номер рейса прибытия", ["ReturnTransfer"] = "Нужен обратный трансфер", ["ReturnTransferDesc"] = "Преимущество туда-обратно", ["ReturnDateTime"] = "Дата и время обратного трансфера", ["ReturnFlight"] = "Номер обратного рейса",
+            ["Adults"] = "Взрослых", ["Children"] = "Детей", ["ChildSeat"] = "Детских кресел", ["PersonalInfo"] = "Персональные данные", ["PersonalHint"] = "1-й пассажир: контакты; остальные: только имя.",
+            ["FullName"] = "Имя *", ["Phone"] = "Телефон *", ["Email"] = "Эл. почта", ["AddPassengers"] = "Другие пассажиры (только имя)", ["AdultLabel"] = "Взрослый", ["ChildLabel"] = "Ребёнок", ["Notes"] = "Заметки",
+            ["TransferDetails"] = "Детали трансфера", ["Outbound"] = "Туда", ["Return"] = "Обратно", ["Total"] = "Итого", ["Price"] = "Цена", ["Complete"] = "Завершить бронирование",
+            ["PlaceholderRegion"] = "Заполнится после выбора региона", ["PlaceholderHotel"] = "Название отеля", ["PlaceholderAirline"] = "Авиакомпания", ["PlaceholderFlight"] = "Напр. TK1234",
+            ["PlaceholderName"] = "Ваше имя", ["PlaceholderPhone"] = "+90 5XX XXX XX XX", ["PlaceholderEmail"] = "example@email.com", ["PlaceholderAdd"] = "Одно имя на строку", ["PlaceholderNotes"] = "Особые пожелания",
+            ["ValidateDateTime"] = "Выберите дату и время. Бронирование минимум за 1 час.",
+            ["InfoBanner"] = "Бронирования осуществляются только между отелем и аэропортом. Чтобы добраться из отеля в аэропорт, выберите направление <strong>«Поездка в аэропорт»</strong>. Чтобы добраться из аэропорта в отель, выберите <strong>«Встреча в аэропорту»</strong>."
+        },
+        ["en"] = new Dictionary<string, string> {
+            ["Title"] = "Reservation", ["Home"] = "Home", ["YourSelections"] = "Your Selections", ["Region"] = "Region", ["Vehicle"] = "Vehicle", ["Passenger"] = "Passenger", ["Luggage"] = "Luggage",
+            ["PleaseSelectVehicle"] = "Please select a vehicle",
+            ["TravelInfo"] = "Travel Information", ["TransferDir"] = "Transfer direction *", ["FromAirport"] = "Pick-up from airport", ["ToAirport"] = "Drop-off at airport", ["AirportHotel"] = "Airport → Hotel", ["HotelAirport"] = "Hotel → Airport",
+            ["RegionLabel"] = "Destination region (hotel) *", ["RegionLabel2"] = "Pick-up region *", ["RegionHint"] = "Customer will be picked up from airport; select hotel region.", ["RegionHint2"] = "Customer travels from hotel to airport; select pick-up region.",
+            ["SelectRegion"] = "— Select region —", ["Pickup"] = "Pick-up Point *", ["Dropoff"] = "Drop-off Point *", ["SelectVehicle"] = "— Select vehicle —", ["HotelName"] = "Hotel Name", ["Airline"] = "Airline",
+            ["DateTime"] = "Arrival Date and Time *", ["FlightNo"] = "Arrival Flight Number", ["ReturnTransfer"] = "I want return transfer", ["ReturnTransferDesc"] = "Round-trip transfer advantage", ["ReturnDateTime"] = "Return Date and Time", ["ReturnFlight"] = "Return Flight Number",
+            ["Adults"] = "Number of Adults", ["Children"] = "Number of Children", ["ChildSeat"] = "Child seats", ["PersonalInfo"] = "Personal Information", ["PersonalHint"] = "1st passenger: contact details; others: name only.",
+            ["FullName"] = "Full Name *", ["Phone"] = "Phone *", ["Email"] = "Email", ["AddPassengers"] = "Additional passengers (name only)", ["AdultLabel"] = "Adult", ["ChildLabel"] = "Child", ["Notes"] = "Notes",
+            ["TransferDetails"] = "Transfer Details", ["Outbound"] = "Outbound", ["Return"] = "Return", ["Total"] = "Total", ["Price"] = "Price", ["Complete"] = "Complete Reservation",
+            ["PlaceholderRegion"] = "Fills when region selected", ["PlaceholderHotel"] = "Hotel name", ["PlaceholderAirline"] = "Airline name", ["PlaceholderFlight"] = "e.g. TK1234, AA1234",
+            ["PlaceholderName"] = "Your name", ["PlaceholderPhone"] = "+90 5XX XXX XX XX", ["PlaceholderEmail"] = "example@email.com", ["PlaceholderAdd"] = "One name per line", ["PlaceholderNotes"] = "Special requests",
+            ["ValidateDateTime"] = "Please select a valid date and time. Reservation must be at least 1 hour in advance.",
+            ["InfoBanner"] = "Reservations are only between hotel and airport. To travel from hotel to airport, select <strong>\"Drop-off at airport\"</strong> from the transfer direction. To travel from airport to hotel, select <strong>\"Pick-up from airport\"</strong>."
+        }
+    };
+    var txt = t.ContainsKey(currentLang) ? t[currentLang] : t["tr"];
+    ViewData["Title"] = txt["Title"];
+    var vehicles = ViewBag.Vehicles as List<Vehicle>;
+    var regions = ViewBag.Regions as List<Region>;
+    var selectedVehicleId = ViewBag.SelectedVehicleId as int?;
+    var regionIdFromUrl = ViewBag.RegionId as int?;
+    var pickupLocation = ViewBag.PickupLocation as string;
+    var dropoffLocation = ViewBag.DropoffLocation as string;
+    var selectedVehicle = ViewBag.SelectedVehicle as Vehicle;
+    var selectedRegion = ViewBag.SelectedRegion as Region;
+    // Ana sayfadaki "Yolcu Sayısı" ile gelen değer (rezervasyon ekranında yetişkin sayısına yansır)
+    var passengerCountFromUrl = ViewBag.PassengerCount as int?;
+    var initialAdults = passengerCountFromUrl ?? 1;
+}
+
+<!-- Page Header -->
+<section class="page-header" style="content-visibility: auto;">
+    <div class="container">
+        <h1>@txt["Title"]</h1>
+        <nav class="breadcrumb">
+            <a asp-controller="Home" asp-action="Index" asp-route-lang="@currentLang">@txt["Home"]</a>
+            <span>/</span>
+            <span>@txt["Title"]</span>
+        </nav>
+    </div>
+</section>
+
+<!-- Seçilen Bilgiler -->
+@if (selectedVehicle != null || selectedRegion != null)
+{
+<section class="selected-info-section" style="content-visibility: auto;">
+    <div class="container">
+        <div class="selected-info-box">
+            <h4><i class="bi bi-check-circle-fill"></i> @txt["YourSelections"]</h4>
+            <div class="selected-info-grid">
+                @if (selectedRegion != null)
+                {
+                    <div class="selected-item">
+                        <span class="label">@txt["Region"]:</span>
+                        <span class="value">@pickupLocation → @dropoffLocation</span>
+                        @if (selectedRegion.Price > 0)
+                        {
+                            <span class="price">@selectedRegion.Price.ToString("N0") €</span>
+                        }
+                    </div>
+                }
+                @if (selectedVehicle != null)
+                {
+                    <div class="selected-item">
+                        <span class="label">@txt["Vehicle"]:</span>
+                        <span class="value">@selectedVehicle.Name</span>
+                        <span class="specs">@selectedVehicle.PassengerCapacity @txt["Passenger"], @selectedVehicle.LuggageCapacity @txt["Luggage"]</span>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</section>
+}
+
+<!-- Rezervasyon: İki sütun (Seyahat Bilgisi | Transfer Detayları) -->
+<section class="reservation section reservation-two-col" style="content-visibility: auto;">
+    <div class="container-wide">
+        <form asp-action="Create" asp-route-lang="@currentLang" method="post" class="reservation-form" id="reservationForm">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="PickupLocationType" id="pickupTypeHidden" value="1" />
+            <input type="hidden" asp-for="DropoffLocationType" id="dropoffTypeHidden" value="0" />
+            <input type="hidden" asp-for="PassengerCount" id="passengerCountHidden" value="@(initialAdults)" />
+            <input type="hidden" asp-for="LuggageCount" value="0" />
+
+            <div class="reservation-grid">
+                <!-- Sol: Seyahat Bilgisi -->
+                <div class="reservation-form-col">
+                    <!-- Bilgilendirme Şeridi -->
+                    <div class="reservation-info-banner">
+                        <i class="bi bi-info-circle-fill"></i>
+                        <span>@Html.Raw(txt["InfoBanner"])</span>
+                    </div>
+
+                    <h2 class="reservation-form-title">@txt["TravelInfo"]</h2>
+
+                    <div class="form-group">
+                        <label class="control-label">@txt["TransferDir"]</label>
+                        <div class="transfer-direction-group">
+                            <label class="direction-option">
+                                <input type="radio" name="transferDirection" value="airportToHotel" id="dirAirportToHotel" checked />
+                                <span>@txt["FromAirport"]</span>
+                                <small>@txt["AirportHotel"]</small>
+                            </label>
+                            <label class="direction-option">
+                                <input type="radio" name="transferDirection" value="hotelToAirport" id="dirHotelToAirport" />
+                                <span>@txt["ToAirport"]</span>
+                                <small>@txt["HotelAirport"]</small>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="regionSelect" id="regionLabel">@txt["RegionLabel"]</label>
+                        <select name="RegionId" id="regionSelect" class="form-control" required>
+                            <option value="">@txt["SelectRegion"]</option>
+                            @if (regions != null)
+                            {
+                                @foreach (var r in regions)
+                                {
+                                    var isSelected = (selectedRegion != null && selectedRegion.Id == r.Id) || (regionIdFromUrl.HasValue && regionIdFromUrl.Value == r.Id);
+                                    if (isSelected)
+                                    {
+                                        <option value="@r.Id" data-price="@r.Price" data-start="@r.StartPoint" data-name="@r.Name" selected>@r.Name</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@r.Id" data-price="@r.Price" data-start="@r.StartPoint" data-name="@r.Name">@r.Name</option>
+                                    }
+                                }
+                            }
+                        </select>
+                        <small class="form-hint" id="regionHint">@txt["RegionHint"]</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="PickupLocation">@txt["Pickup"]</label>
+                        <input asp-for="PickupLocation" class="form-control" id="pickupLocation" placeholder="@txt["PlaceholderRegion"]" required value="@(pickupLocation ?? "")" readonly />
+                        <span asp-validation-for="PickupLocation" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="DropoffLocation">@txt["Dropoff"]</label>
+                        <input asp-for="DropoffLocation" class="form-control" id="dropoffLocation" placeholder="@txt["PlaceholderRegion"]" required value="@(dropoffLocation ?? "")" readonly />
+                        <span asp-validation-for="DropoffLocation" class="text-danger"></span>
+                    </div>
+
+                    @if (!selectedVehicleId.HasValue)
+                    {
+                        <div class="alert alert-info vehicle-select-hint" role="alert">
+                            <i class="bi bi-info-circle-fill vehicle-select-hint-icon"></i>
+                            <span class="vehicle-select-hint-text">@txt["PleaseSelectVehicle"]</span>
+                        </div>
+                    }
+                    <div class="form-group">
+                        <label asp-for="VehicleId">@txt["Vehicle"] *</label>
+                        <select asp-for="VehicleId" class="form-control" id="vehicleSelect" required>
+                            <option value="">@txt["SelectVehicle"]</option>
+                            @if (vehicles != null)
+                            {
+                                @foreach (var vehicle in vehicles)
+                                {
+                                    if (selectedVehicleId.HasValue && selectedVehicleId.Value == vehicle.Id)
+                                    {
+                                        <option value="@vehicle.Id" data-min-eur="@vehicle.MinimumPrice.ToString(System.Globalization.CultureInfo.InvariantCulture)" data-min-usd="@vehicle.MinimumPriceUsd.ToString(System.Globalization.CultureInfo.InvariantCulture)" data-min-try="@vehicle.MinimumPriceTry.ToString(System.Globalization.CultureInfo.InvariantCulture)" data-name="@vehicle.Name" selected>@vehicle.Name</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@vehicle.Id" data-min-eur="@vehicle.MinimumPrice.ToString(System.Globalization.CultureInfo.InvariantCulture)" data-min-usd="@vehicle.MinimumPriceUsd.ToString(System.Globalization.CultureInfo.InvariantCulture)" data-min-try="@vehicle.MinimumPriceTry.ToString(System.Globalization.CultureInfo.InvariantCulture)" data-name="@vehicle.Name">@vehicle.Name</option>
+                                    }
+                                }
+                            }
+                        </select>
+                        <span asp-validation-for="VehicleId" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="HotelName">@txt["HotelName"]</label>
+                        <input asp-for="HotelName" class="form-control" placeholder="@txt["PlaceholderHotel"]" maxlength="200" />
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="AirlineCompany">@txt["Airline"]</label>
+                        <input asp-for="AirlineCompany" class="form-control" placeholder="@txt["PlaceholderAirline"]" maxlength="100" />
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="TransferDate">@txt["DateTime"]</label>
+                        <div class="form-row form-row-sm">
+                            <input asp-for="TransferDate" type="date" class="form-control" required min="@DateTime.Today.ToString("yyyy-MM-dd")" id="transferDate" />
+                            <input asp-for="TransferTime" type="time" class="form-control" required id="transferTime" />
+                        </div>
+                        <span asp-validation-for="TransferDate" class="text-danger"></span>
+                        <span asp-validation-for="TransferTime" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="FlightNumber">@txt["FlightNo"]</label>
+                        <input asp-for="FlightNumber" class="form-control" placeholder="@txt["PlaceholderFlight"]" />
+                    </div>
+
+                    <div class="form-group form-group-toggle return-toggle-wrap">
+                        <label class="toggle-label">
+                            <input type="checkbox" asp-for="IsReturnTransfer" id="isReturnTransfer" />
+                            <span class="return-toggle-icon">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M5 12h14M12 5l7 7-7 7"/>
+                                </svg>
+                            </span>
+                            <span class="return-toggle-content">
+                                <span class="toggle-text">@txt["ReturnTransfer"]</span>
+                                <span class="return-toggle-desc">@txt["ReturnTransferDesc"]</span>
+                            </span>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+
+                    <div id="returnTransferFields" class="return-transfer-fields" style="display: none;">
+                        <div class="form-group">
+                            <label asp-for="ReturnTransferDate">@txt["ReturnDateTime"]</label>
+                            <div class="form-row form-row-sm">
+                                <input asp-for="ReturnTransferDate" type="date" class="form-control" id="returnTransferDate" min="@DateTime.Today.ToString("yyyy-MM-dd")" />
+                                <input asp-for="ReturnTransferTime" type="time" class="form-control" id="returnTransferTime" />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="ReturnFlightNumber">@txt["ReturnFlight"]</label>
+                            <input asp-for="ReturnFlightNumber" class="form-control" placeholder="@txt["PlaceholderFlight"]" maxlength="20" />
+                        </div>
+                    </div>
+
+                    <div class="form-row form-row-sm">
+                        <div class="form-group">
+                            <label asp-for="NumberOfAdults">@txt["Adults"]</label>
+                            <input asp-for="NumberOfAdults" type="number" class="form-control" min="1" max="20" value="@(initialAdults)" />
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="NumberOfChildren">@txt["Children"]</label>
+                            <input asp-for="NumberOfChildren" type="number" class="form-control" min="0" max="20" value="0" />
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="ChildSeatCount">@txt["ChildSeat"]</label>
+                        <input asp-for="ChildSeatCount" type="number" class="form-control" min="0" max="10" value="0" />
+                    </div>
+
+                    <h3 class="reservation-subtitle">@txt["PersonalInfo"]</h3>
+                    <p class="form-hint mb-2">@txt["PersonalHint"]</p>
+                    <div class="form-group">
+                        <label asp-for="CustomerName">@txt["FullName"]</label>
+                        <input asp-for="CustomerName" class="form-control" placeholder="@txt["PlaceholderName"]" required />
+                        <span asp-validation-for="CustomerName" class="text-danger"></span>
+                    </div>
+                    <div class="form-row form-row-sm">
+                        <div class="form-group">
+                            <label asp-for="CustomerPhone">@txt["Phone"]</label>
+                            <input asp-for="CustomerPhone" type="tel" class="form-control" placeholder="@txt["PlaceholderPhone"]" required maxlength="30" />
+                            <span asp-validation-for="CustomerPhone" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="CustomerEmail">@txt["Email"]</label>
+                            <input asp-for="CustomerEmail" class="form-control" placeholder="@txt["PlaceholderEmail"]" />
+                        </div>
+                    </div>
+                    <div class="form-group" id="additionalPassengersGroup">
+                        <label>@txt["AddPassengers"]</label>
+                        <div id="additionalPassengerInputs"></div>
+                        <input type="hidden" name="AdditionalPassengerNames" id="additionalPassengerNamesHidden" />
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="Notes">@txt["Notes"]</label>
+                        <textarea asp-for="Notes" class="form-control" rows="2" placeholder="@txt["PlaceholderNotes"]"></textarea>
+                    </div>
+                </div>
+
+                <!-- Sağ: Transfer Detayları -->
+                <div class="reservation-summary-col">
+                    <div class="transfer-details-card">
+                        <h2 class="transfer-details-title">@txt["TransferDetails"]</h2>
+
+                        <div class="transfer-block">
+                            <h4 class="transfer-block-title">@txt["Outbound"]</h4>
+                            <p class="transfer-detail"><strong>@txt["Pickup"]</strong> <span id="summaryPickup">—</span></p>
+                            <p class="transfer-detail"><strong>@txt["Dropoff"]</strong> <span id="summaryDropoff">—</span></p>
+                            <p class="transfer-detail"><strong>@txt["Vehicle"]:</strong> <span id="summaryVehicle">—</span></p>
+                            <p class="transfer-detail transfer-price"><strong>@txt["Price"]:</strong> <span id="summaryPrice">—</span></p>
+                        </div>
+
+                        <div id="returnTransferBlock" class="transfer-block" style="display: none;">
+                            <h4 class="transfer-block-title">@txt["Return"]</h4>
+                            <p class="transfer-detail"><strong>@txt["Pickup"]</strong> <span id="summaryReturnPickup">—</span></p>
+                            <p class="transfer-detail"><strong>@txt["Dropoff"]</strong> <span id="summaryReturnDropoff">—</span></p>
+                            <p class="transfer-detail"><strong>@txt["Vehicle"]:</strong> <span id="summaryReturnVehicle">—</span></p>
+                            <p class="transfer-detail transfer-price"><strong>@txt["Price"]:</strong> <span id="summaryReturnPrice">—</span></p>
+                        </div>
+
+                        <div class="transfer-total">
+                            <strong>@txt["Total"]:</strong> <span id="summaryTotal">—</span>
+                        </div>
+
+                        <button type="submit" class="btn-complete-reservation">
+                            @txt["Complete"]
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</section>
+
+@section Scripts {
+<script>
+var _resTxt = {
+    regionLabel: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(txt["RegionLabel"])),
+    regionLabel2: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(txt["RegionLabel2"])),
+    regionHint: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(txt["RegionHint"])),
+    regionHint2: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(txt["RegionHint2"])),
+    validateDateTime: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(txt["ValidateDateTime"])),
+    passengerLabel: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(txt["FullName"])),
+    placeholderName: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(txt["PlaceholderName"])),
+    adultLabel: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(txt["AdultLabel"])),
+    childLabel: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(txt["ChildLabel"]))
+};
+document.addEventListener('DOMContentLoaded', function() {
+    var form = document.getElementById('reservationForm');
+    var regionSelect = document.getElementById('regionSelect');
+    var vehicleSelect = document.getElementById('vehicleSelect');
+
+    // URL'den vehicleId al - araç kartından gelindiğinde dropdown'ı seç (prefetch/cache sorunlarına karşı)
+    var urlParams = new URLSearchParams(window.location.search);
+    var vehicleIdFromUrl = urlParams.get('vehicleId');
+    if (vehicleIdFromUrl && vehicleSelect) {
+        var opt = vehicleSelect.querySelector('option[value="' + vehicleIdFromUrl + '"]');
+        if (opt) {
+            vehicleSelect.value = vehicleIdFromUrl;
+        }
+    }
+    var pickupInput = document.getElementById('pickupLocation');
+    var dropoffInput = document.getElementById('dropoffLocation');
+    var dateInput = document.querySelector('input[name="TransferDate"]');
+    var timeInput = document.querySelector('input[name="TransferTime"]');
+    var isReturnCheck = document.getElementById('isReturnTransfer');
+    var returnFields = document.getElementById('returnTransferFields');
+    var returnBlock = document.getElementById('returnTransferBlock');
+
+    function updateSummary() {
+        var pickup = pickupInput && pickupInput.value ? pickupInput.value : '—';
+        var dropoff = dropoffInput && dropoffInput.value ? dropoffInput.value : '—';
+        var vehicleOpt = vehicleSelect && vehicleSelect.options[vehicleSelect.selectedIndex];
+        var vehicleName = (vehicleOpt && vehicleOpt.value && vehicleOpt.getAttribute('data-name')) ? vehicleOpt.getAttribute('data-name') : '—';
+        var regionOpt = regionSelect && regionSelect.options[regionSelect.selectedIndex];
+        var regionPriceEur = (regionOpt && regionOpt.value && regionOpt.getAttribute('data-price')) ? parseFloat(regionOpt.getAttribute('data-price')) : 0;
+        var cur = window.getImperialCurrency ? window.getImperialCurrency() : { symbol: '€', code: 'EUR' };
+        var code = (cur.code || 'EUR').toUpperCase();
+        var vehicleMinEur = (vehicleOpt && vehicleOpt.value && vehicleOpt.getAttribute('data-min-eur')) ? parseFloat(vehicleOpt.getAttribute('data-min-eur')) : 0;
+        var vehicleMinByCurrency = (vehicleOpt && vehicleOpt.value) ? parseFloat(vehicleOpt.getAttribute('data-min-' + code)) : 0;
+        if (isNaN(vehicleMinByCurrency) || vehicleMinByCurrency <= 0) {
+            vehicleMinByCurrency = (window.convertFromEur && vehicleMinEur > 0) ? window.convertFromEur(vehicleMinEur) : vehicleMinEur;
+        }
+        var regionPriceByCurrency = (regionPriceEur > 0 && window.convertFromEur) ? window.convertFromEur(regionPriceEur) : (regionPriceEur || 0);
+        var priceEur = (regionPriceEur || 0) + (vehicleMinEur || 0);
+        var price = (window.convertFromEur && priceEur > 0) ? window.convertFromEur(priceEur) : (regionPriceByCurrency + (vehicleMinByCurrency || 0));
+        var sym = cur.symbol;
+        var singlePrice = price.toFixed(2).replace('.', ',') + ' ' + sym;
+        var isReturn = isReturnCheck && isReturnCheck.checked;
+        var total = isReturn ? price * 2 : price;
+        var totalStr = total.toFixed(2).replace('.', ',') + ' ' + sym;
+
+        if (document.getElementById('summaryPickup')) document.getElementById('summaryPickup').textContent = pickup;
+        if (document.getElementById('summaryDropoff')) document.getElementById('summaryDropoff').textContent = dropoff;
+        if (document.getElementById('summaryVehicle')) document.getElementById('summaryVehicle').textContent = vehicleName;
+        if (document.getElementById('summaryPrice')) document.getElementById('summaryPrice').textContent = singlePrice;
+        if (document.getElementById('summaryTotal')) document.getElementById('summaryTotal').textContent = totalStr;
+
+        if (returnBlock) returnBlock.style.display = isReturn ? 'block' : 'none';
+        if (isReturn) {
+            if (document.getElementById('summaryReturnPickup')) document.getElementById('summaryReturnPickup').textContent = dropoff;
+            if (document.getElementById('summaryReturnDropoff')) document.getElementById('summaryReturnDropoff').textContent = pickup;
+            if (document.getElementById('summaryReturnVehicle')) document.getElementById('summaryReturnVehicle').textContent = vehicleName;
+            if (document.getElementById('summaryReturnPrice')) document.getElementById('summaryReturnPrice').textContent = singlePrice;
+        }
+    }
+
+    function applyDirectionAndRegion() {
+        var isAirportToHotel = document.getElementById('dirAirportToHotel') && document.getElementById('dirAirportToHotel').checked;
+        var regionLabel = document.getElementById('regionLabel');
+        var regionHint = document.getElementById('regionHint');
+        if (regionLabel) regionLabel.textContent = isAirportToHotel ? _resTxt.regionLabel : _resTxt.regionLabel2;
+        if (regionHint) regionHint.textContent = isAirportToHotel ? _resTxt.regionHint : _resTxt.regionHint2;
+        var opt = regionSelect && regionSelect.options[regionSelect.selectedIndex];
+        if (opt && opt.value) {
+            var start = opt.getAttribute('data-start');
+            var name = opt.getAttribute('data-name');
+            if (isAirportToHotel) {
+                if (pickupInput) pickupInput.value = start || '';
+                if (dropoffInput) dropoffInput.value = name || '';
+            } else {
+                if (pickupInput) pickupInput.value = name || '';
+                if (dropoffInput) dropoffInput.value = start || '';
+            }
+        }
+        updateSummary();
+    }
+    if (regionSelect) {
+        regionSelect.addEventListener('change', applyDirectionAndRegion);
+    }
+    var dirAirport = document.getElementById('dirAirportToHotel');
+    var dirHotel = document.getElementById('dirHotelToAirport');
+    if (dirAirport) dirAirport.addEventListener('change', applyDirectionAndRegion);
+    if (dirHotel) dirHotel.addEventListener('change', applyDirectionAndRegion);
+    if (vehicleSelect) {
+        vehicleSelect.addEventListener('change', function() {
+            updateSummary();
+            var hint = document.querySelector('.vehicle-select-hint');
+            if (hint && this.value && parseInt(this.value, 10) > 0) hint.style.display = 'none';
+        });
+    }
+    if (pickupInput) pickupInput.addEventListener('input', updateSummary);
+    if (dropoffInput) dropoffInput.addEventListener('input', updateSummary);
+    if (isReturnCheck) {
+        isReturnCheck.addEventListener('change', function() {
+            returnFields.style.display = this.checked ? 'block' : 'none';
+            updateSummary();
+        });
+    }
+    window.addEventListener('imperialCurrencyChanged', updateSummary);
+    window.addEventListener('imperialCurrencyRatesReady', updateSummary);
+    applyDirectionAndRegion();
+    if (returnFields && isReturnCheck) returnFields.style.display = isReturnCheck.checked ? 'block' : 'none';
+    setTimeout(updateSummary, 50);
+
+    var today = new Date();
+    var todayStr = today.toISOString().split('T')[0];
+    if (dateInput) dateInput.min = todayStr;
+
+    function validateDateTime() {
+        if (!dateInput || !timeInput || !dateInput.value || !timeInput.value) return true;
+        var selected = new Date(dateInput.value + 'T' + timeInput.value);
+        var minTime = new Date(today.getTime() + 60 * 60 * 1000);
+        return selected >= minTime;
+    }
+    function renderAdditionalPassengerInputs() {
+        var adults = parseInt(document.querySelector('input[name="NumberOfAdults"]').value, 10) || 1;
+        var children = parseInt(document.querySelector('input[name="NumberOfChildren"]').value, 10) || 0;
+        var total = adults + children;
+        var adultLabel = _resTxt.adultLabel || 'Yetişkin';
+        var childLabel = _resTxt.childLabel || 'Çocuk';
+        var container = document.getElementById('additionalPassengerInputs');
+        var hidden = document.getElementById('additionalPassengerNamesHidden');
+        if (!container || !hidden) return;
+        container.innerHTML = '';
+        var idx = 0;
+        for (var i = 0; i < adults - 1; i++) {
+            var label = document.createElement('label');
+            label.className = 'control-label';
+            label.textContent = (i + 2) + '. ' + adultLabel;
+            var input = document.createElement('input');
+            input.type = 'text';
+            input.className = 'form-control';
+            input.placeholder = _resTxt.placeholderName || 'Ad Soyad';
+            input.name = 'additionalPassenger_' + (++idx);
+            var div = document.createElement('div');
+            div.className = 'form-group form-group-sm';
+            div.style.marginBottom = '12px';
+            div.appendChild(label);
+            div.appendChild(input);
+            container.appendChild(div);
+        }
+        for (var j = 0; j < children; j++) {
+            var label = document.createElement('label');
+            label.className = 'control-label';
+            label.textContent = (j + 1) + '. ' + childLabel;
+            var input = document.createElement('input');
+            input.type = 'text';
+            input.className = 'form-control';
+            input.placeholder = _resTxt.placeholderName || 'Ad Soyad';
+            input.name = 'additionalPassenger_' + (++idx);
+            var div = document.createElement('div');
+            div.className = 'form-group form-group-sm';
+            div.style.marginBottom = '12px';
+            div.appendChild(label);
+            div.appendChild(input);
+            container.appendChild(div);
+        }
+        document.getElementById('additionalPassengersGroup').style.display = (adults > 1 || children > 0) ? 'block' : 'none';
+        var passengerCountHidden = document.getElementById('passengerCountHidden');
+        if (passengerCountHidden) passengerCountHidden.value = total.toString();
+    }
+    function collectAdditionalPassengerNames() {
+        var inputs = document.querySelectorAll('#additionalPassengerInputs input[type="text"]');
+        var names = [];
+        for (var i = 0; i < inputs.length; i++) {
+            var v = (inputs[i].value || '').trim();
+            if (v) names.push(v);
+        }
+        var hidden = document.getElementById('additionalPassengerNamesHidden');
+        if (hidden) hidden.value = names.join('; ');
+    }
+    var adultsInput = document.querySelector('input[name="NumberOfAdults"]');
+    var childrenInput = document.querySelector('input[name="NumberOfChildren"]');
+    if (adultsInput) adultsInput.addEventListener('change', renderAdditionalPassengerInputs);
+    if (adultsInput) adultsInput.addEventListener('input', renderAdditionalPassengerInputs);
+    if (childrenInput) childrenInput.addEventListener('change', renderAdditionalPassengerInputs);
+    if (childrenInput) childrenInput.addEventListener('input', renderAdditionalPassengerInputs);
+    renderAdditionalPassengerInputs();
+
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            var adults = parseInt(document.querySelector('input[name="NumberOfAdults"]').value, 10) || 1;
+            var children = parseInt(document.querySelector('input[name="NumberOfChildren"]').value, 10) || 0;
+            var passengerCountHidden = document.getElementById('passengerCountHidden');
+            if (passengerCountHidden) passengerCountHidden.value = (adults + children).toString();
+            collectAdditionalPassengerNames();
+            if (!validateDateTime()) {
+                e.preventDefault();
+                alert(_resTxt.validateDateTime);
+                return false;
+            }
+        });
+    }
+});
+</script>
+}
+

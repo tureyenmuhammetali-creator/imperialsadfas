@@ -1,0 +1,85 @@
+@model IEnumerable<Region>
+@{
+    var currentLang = ViewContext.RouteData.Values["lang"]?.ToString() ?? "tr";
+    var t = new Dictionary<string, Dictionary<string, string>> {
+        ["tr"] = new Dictionary<string, string> { ["Title"] = "Tüm Bölgeler", ["Subtitle"] = "Hedefinizi seçin ve VIP transfer yolculuğunuza başlayın", ["PricesFrom"] = "Fiyatlar:", ["From"] = "'den başlayan", ["Reservation"] = "Rezervasyon Yap" },
+        ["de"] = new Dictionary<string, string> { ["Title"] = "Alle Regionen", ["Subtitle"] = "Wählen Sie Ihr Ziel und starten Sie Ihre VIP-Transfer-Reise", ["PricesFrom"] = "Preise ab", ["From"] = "", ["Reservation"] = "Reservierung" },
+        ["ru"] = new Dictionary<string, string> { ["Title"] = "Все регионы", ["Subtitle"] = "Выберите направление и начните поездку VIP-трансфера", ["PricesFrom"] = "Цены от", ["From"] = "", ["Reservation"] = "Забронировать" },
+        ["en"] = new Dictionary<string, string> { ["Title"] = "All Regions", ["Subtitle"] = "Choose your destination and start your VIP transfer journey", ["PricesFrom"] = "Prices from", ["From"] = "", ["Reservation"] = "Make Reservation" }
+    };
+    var txt = t.ContainsKey(currentLang) ? t[currentLang] : t["tr"];
+    ViewData["Title"] = txt["Title"];
+}
+<div class="all-regions-page imperial-doc-style" style="content-visibility: auto;">
+    <!-- Sayfa başı – attığın ilk görsel: koyu lacivert banner, taç, IMPERIALVIP -->
+    <div class="imperial-page-first-image">
+        <img src="/images/imgs/imperial-page-header.png" alt="Imperial VIP Transfer" class="imperial-page-header-img" />
+    </div>
+
+    <!-- İçerik alanı -->
+    <div class="imperial-doc-content">
+        <div class="container">
+            <p class="imperial-doc-subtitle">@txt["Subtitle"]</p>
+            <div class="all-regions-grid">
+                @foreach (var region in Model)
+                {
+                    var regionName = currentLang != "tr" && !string.IsNullOrWhiteSpace(region.NameEn) ? region.NameEn : region.Name;
+                    var startPoint = currentLang != "tr" && !string.IsNullOrWhiteSpace(region.StartPointEn) ? region.StartPointEn : region.StartPoint;
+                    <a asp-action="RegionDetail" asp-route-id="@region.Id" asp-route-lang="@currentLang" class="region-card">
+                        <div class="region-image">
+                            @if (!string.IsNullOrEmpty(region.ImageUrl))
+                            {
+                                var imgSrc = Url.Content("~/" + (region.ImageUrl ?? "").Replace('\\', '/').TrimStart('/'));
+                                imgSrc += "?v=" + (region.UpdatedAt?.Ticks ?? region.Id);
+                                <img src="@imgSrc"
+                                     alt="@regionName"
+                                     loading="lazy"
+                                     decoding="async"
+                                     onerror="this.style.display='none'; var ph=this.nextElementSibling; if(ph) ph.style.display='flex';" />
+                                <div class="region-placeholder" style="display:none"><i class="bi bi-geo-alt"></i></div>
+                            }
+                            else
+                            {
+                                <div class="region-placeholder"><i class="bi bi-geo-alt"></i></div>
+                            }
+                        </div>
+                        <div class="region-overlay">
+                            <h3 class="region-name">@regionName</h3>
+                            <p class="region-route">@startPoint → @regionName</p>
+                            <p class="region-price">@txt["PricesFrom"] <strong><span class="region-price-value" data-amount-eur="@region.Price.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)">@region.Price.ToString("N0", System.Globalization.CultureInfo.GetCultureInfo("tr-TR"))</span> <span class="region-currency-symbol">€</span></strong>@txt["From"]</p>
+                            <span class="btn btn-accent btn-sm">@txt["Reservation"]</span>
+                        </div>
+                    </a>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Sayfa sonu – attığın son görsel: koyu lacivert, taç, IMPERIALVIP, iletişim -->
+    <div class="imperial-page-last-image">
+        <img src="/images/imgs/imperial-page-footer.png" alt="Imperial VIP Transfer - İletişim" class="imperial-page-footer-img" />
+    </div>
+</div>
+
+@section Scripts {
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    function updateRegionPrices() {
+        var cur = window.getImperialCurrency ? window.getImperialCurrency() : { symbol: '€', code: 'EUR' };
+        document.querySelectorAll('.region-price-value').forEach(function(el) {
+            var eur = parseFloat(el.getAttribute('data-amount-eur'));
+            if (isNaN(eur)) return;
+            var amount = (cur.code === 'EUR') ? eur : (window.convertFromEur ? window.convertFromEur(eur) : eur);
+            var formatted = (typeof amount === 'number' ? amount : 0).toLocaleString('tr-TR', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+            if (el.childNodes.length && el.childNodes[0].nodeType === 3) el.childNodes[0].textContent = formatted;
+            else el.textContent = formatted;
+            var sym = el.parentElement && el.parentElement.querySelector('.region-currency-symbol');
+            if (sym) sym.textContent = cur.symbol || '€';
+        });
+    }
+    updateRegionPrices();
+    window.addEventListener('imperialCurrencyChanged', updateRegionPrices);
+    window.addEventListener('imperialCurrencyRatesReady', updateRegionPrices);
+});
+</script>
+}

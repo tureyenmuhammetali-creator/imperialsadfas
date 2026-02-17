@@ -1,0 +1,113 @@
+@{
+    ViewData["Title"] = "Наши водители";
+    var currentLang = "ru";
+}
+
+<style>
+    body { background: #0f172a !important; }
+    @@keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
+
+<section class="page-header" style="opacity: 0; animation: fadeIn 0.3s ease-in forwards;">
+    <div class="container">
+        <h1>Наши водители</h1>
+        <nav class="breadcrumb">
+            <a asp-controller="Home" asp-action="Index" asp-route-lang="@currentLang">Главная</a>
+            <span>/</span>
+            <span>Наши водители</span>
+        </nav>
+    </div>
+</section>
+
+<section class="drivers-intro section" style="opacity: 0; animation: fadeIn 0.3s 0.1s ease-in forwards; content-visibility: auto;">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-subtitle">Профессиональная команда</span>
+            <h2 class="section-title">Наши водители создают разницу</h2>
+            <p class="section-description">
+                Самое ценное в Imperial VIP — наша команда профессиональных водителей. 
+                Каждый тщательно отобран, обучен и имеет многолетний опыт.
+            </p>
+        </div>
+    </div>
+</section>
+
+<section class="driver-features section section-dark" style="opacity: 0; animation: fadeIn 0.3s 0.2s ease-in forwards; content-visibility: auto;">
+    <div class="container">
+        <div class="driver-features-grid">
+            <div class="driver-feature">
+                <div class="feature-icon"><i class="bi bi-mortarboard"></i></div>
+                <h3>Обученная команда</h3>
+                <p>Все наши водители прошли обучение VIP-сервису и сертифицированы по профессиональным техникам вождения.</p>
+            </div>
+            <div class="driver-feature">
+                <div class="feature-icon"><i class="bi bi-translate"></i></div>
+                <h3>Иностранные языки</h3>
+                <p>Для международных гостей у нас есть англоговорящие водители.</p>
+            </div>
+            <div class="driver-feature">
+                <div class="feature-icon"><i class="bi bi-clock-history"></i></div>
+                <h3>Опыт</h3>
+                <p>С многолетним опытом они оптимально управляют городским трафиком и доставят вас вовремя.</p>
+            </div>
+            <div class="driver-feature">
+                <div class="feature-icon"><i class="bi bi-emoji-smile"></i></div>
+                <h3>Дружелюбный сервис</h3>
+                <p>Гостеприимство — наш образ жизни. Мы всегда дружелюбны и готовы помочь.</p>
+            </div>
+            <div class="driver-feature">
+                <div class="feature-icon"><i class="bi bi-geo-alt"></i></div>
+                <h3>Знание города</h3>
+                <p>Стамбул и окрестности они знают как свои пять пальцев. Выбирают самые быстрые и безопасные маршруты.</p>
+            </div>
+            <div class="driver-feature">
+                <div class="feature-icon"><i class="bi bi-person-badge"></i></div>
+                <h3>Профессиональный вид</h3>
+                <p>Наши водители всегда в чистой и опрятной форме. Первое впечатление важно.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="driver-promise section" style="opacity: 0; animation: fadeIn 0.3s 0.3s ease-in forwards; content-visibility: auto;">
+    <div class="container">
+        <div class="promise-content">
+            <div class="promise-text">
+                <span class="section-subtitle">Наше обещание</span>
+                <h2 class="section-title">Вам не придётся звонить</h2>
+                <p>
+                    Наше главное обещание в Imperial VIP: <strong>Нашим гостям никогда не придётся звонить водителю.</strong>
+                </p>
+                <p>
+                    Наши водители ждут в назначенное время в назначенном месте. При аэропортовых трансферах отслеживаем рейс, 
+                    сообщаем о задержках. Встречаем с табличкой с вашим именем.
+                </p>
+                <ul class="promise-list">
+                    <li><i class="bi bi-check-circle-fill"></i><span>SMS/WhatsApp уведомление перед трансфером</span></li>
+                    <li><i class="bi bi-check-circle-fill"></i><span>Контакты водителя сообщаются заранее</span></li>
+                    <li><i class="bi bi-check-circle-fill"></i><span>Именная встреча в аэропорту</span></li>
+                    <li><i class="bi bi-check-circle-fill"></i><span>Отслеживание рейса и управление задержками</span></li>
+                    <li><i class="bi bi-check-circle-fill"></i><span>Помощь с багажом</span></li>
+                </ul>
+            </div>
+            <div class="promise-image">
+                <img src="/images/driver.jpg" alt="Imperial VIP Водитель" loading="lazy" decoding="async" onerror="this.style.display='none'" />
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="cta section" style="opacity: 0; animation: fadeIn 0.3s 0.4s ease-in forwards; content-visibility: auto;">
+    <div class="container">
+        <div class="cta-content">
+            <h2>Оцените профессиональный сервис</h2>
+            <p>Забронируйте сейчас и почувствуйте разницу Imperial VIP.</p>
+            <a asp-controller="Reservation" asp-action="Index" asp-route-lang="@currentLang" class="btn btn-primary btn-lg">
+                <i class="bi bi-calendar-check"></i> Забронировать
+            </a>
+        </div>
+    </div>
+</section>

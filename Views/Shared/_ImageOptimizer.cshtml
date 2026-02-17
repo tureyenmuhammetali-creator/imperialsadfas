@@ -1,0 +1,25 @@
+@*
+    Image Optimization Helper
+    Kullanım: <partial name="_ImageOptimizer" model='new { Src = "/path/to/image.jpg", Alt = "Alt text", Loading = "lazy", Classes = "img-class" }' />
+*@
+
+@{
+    var src = ViewData["Src"] as string ?? "";
+    var alt = ViewData["Alt"] as string ?? "Imperial VIP";
+    var loading = ViewData["Loading"] as string ?? "lazy";
+    var classes = ViewData["Classes"] as string ?? "";
+    var width = ViewData["Width"] as string;
+    var height = ViewData["Height"] as string;
+    var fetchPriority = ViewData["FetchPriority"] as string ?? "auto";
+}
+
+<img src="@src" 
+     alt="@alt" 
+     loading="@loading"
+     decoding="async"
+     fetchpriority="@fetchPriority"
+     @(width != null ? $"width=\"{width}\"" : "")
+     @(height != null ? $"height=\"{height}\"" : "")
+     class="@classes optimized-image"
+     onerror="this.onerror=null;this.src='/images/no-image.jpg';" />
+

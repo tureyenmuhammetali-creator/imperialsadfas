@@ -1,0 +1,43 @@
+@{
+    ViewData["Title"] = "Политика конфиденциальности";
+    var currentLang = "ru";
+}
+
+<section class="page-header">
+    <div class="container">
+        <h1>Политика конфиденциальности</h1>
+        <nav class="breadcrumb">
+            <a asp-controller="Home" asp-action="Index" asp-route-lang="@currentLang">Главная</a>
+            <span>/</span>
+            <span>Политика конфиденциальности</span>
+        </nav>
+    </div>
+</section>
+
+<section class="privacy section">
+    <div class="container">
+        <div class="privacy-content" style="max-width: 800px; margin: 0 auto;">
+            <h2 style="margin-bottom: 20px;">Защита персональных данных</h2>
+            <p style="color: #888; margin-bottom: 20px; line-height: 1.8;">
+                В Imperial VIP мы придаём большое значение защите персональных данных наших клиентов. 
+                Настоящая политика объясняет, как собираемая информация используется и защищается.
+            </p>
+            <h3 style="margin: 30px 0 15px; font-size: 20px;">Собираемая информация</h3>
+            <p style="color: #888; margin-bottom: 15px; line-height: 1.8;">
+                При бронировании собираются имя, номер телефона, адрес электронной почты и детали трансфера.
+            </p>
+            <h3 style="margin: 30px 0 15px; font-size: 20px;">Использование информации</h3>
+            <p style="color: #888; margin-bottom: 15px; line-height: 1.8;">
+                Собранные данные используются исключительно для оказания услуг, связи с клиентами и выполнения юридических обязательств.
+            </p>
+            <h3 style="margin: 30px 0 15px; font-size: 20px;">Безопасность данных</h3>
+            <p style="color: #888; margin-bottom: 15px; line-height: 1.8;">
+                Ваши персональные данные защищены от несанкционированного доступа с помощью стандартных отраслевых мер безопасности.
+            </p>
+            <h3 style="margin: 30px 0 15px; font-size: 20px;">Контакты</h3>
+            <p style="color: #888; line-height: 1.8;">
+                По вопросам политики конфиденциальности свяжитесь с нами: <a href="mailto:info@imperialvip.com" style="color: #c9a962;">info@imperialvip.com</a>.
+            </p>
+        </div>
+    </div>
+</section>

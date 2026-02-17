@@ -1,0 +1,172 @@
+@{
+    ViewData["Title"] = "Şoförlerimiz";
+}
+
+<style>
+    /* Sayfa yüklenirken dark bg */
+    body { background: #0f172a !important; }
+    
+    /* Smooth fade in animation */
+    @@keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
+
+<!-- Page Header -->
+<section class="page-header" style="opacity: 0; animation: fadeIn 0.3s ease-in forwards;">
+    <div class="container">
+        <h1>Şoförlerimiz</h1>
+        <nav class="breadcrumb">
+            <a asp-controller="Home" asp-action="Index">Ana Sayfa</a>
+            <span>/</span>
+            <span>Şoförlerimiz</span>
+        </nav>
+    </div>
+</section>
+
+<!-- Drivers Intro -->
+<section class="drivers-intro section" style="opacity: 0; animation: fadeIn 0.3s 0.1s ease-in forwards; content-visibility: auto;">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-subtitle">Profesyonel Ekip</span>
+            <h2 class="section-title">Şoförlerimiz Farkı Yaratır</h2>
+            <p class="section-description">
+                Imperial VIP'in en değerli varlığı, profesyonel şoför kadromuzdur. 
+                Her biri titizlikle seçilmiş, eğitilmiş ve deneyimli isimlerden oluşur.
+            </p>
+        </div>
+    </div>
+</section>
+
+<!-- Driver Features -->
+<section class="driver-features section section-dark" style="opacity: 0; animation: fadeIn 0.3s 0.2s ease-in forwards; content-visibility: auto;">
+    <div class="container">
+        <div class="driver-features-grid">
+            <div class="driver-feature" style="content-visibility: auto; contain-intrinsic-size: 300px;">
+                <div class="feature-icon">
+                    <i class="bi bi-mortarboard"></i>
+                </div>
+                <h3>Eğitimli Kadro</h3>
+                <p>
+                    Tüm şoförlerimiz VIP hizmet eğitimi almış, profesyonel sürüş teknikleri 
+                    konusunda sertifikalı kişilerdir.
+                </p>
+            </div>
+            <div class="driver-feature">
+                <div class="feature-icon">
+                    <i class="bi bi-translate"></i>
+                </div>
+                <h3>Yabancı Dil</h3>
+                <p>
+                    Uluslararası misafirlerimiz için İngilizce bilen şoförlerimiz hizmetinizdedir.
+                </p>
+            </div>
+            <div class="driver-feature">
+                <div class="feature-icon">
+                    <i class="bi bi-clock-history"></i>
+                </div>
+                <h3>Deneyim</h3>
+                <p>
+                    Yılların verdiği tecrübe ile şehir trafiğini en iyi şekilde yönetir, 
+                    Sizi zamanında hedefinize ulaştırırlar.
+                </p>
+            </div>
+            <div class="driver-feature">
+                <div class="feature-icon">
+                    <i class="bi bi-emoji-smile"></i>
+                </div>
+                <h3>Güler Yüzlü Hizmet</h3>
+                <p>
+                    Misafirperverlik bizim için bir yaşam biçimidir. Her zaman güler yüzlü 
+                    ve yardımsever bir tutum sergileriz.
+                </p>
+            </div>
+            <div class="driver-feature">
+                <div class="feature-icon">
+                    <i class="bi bi-geo-alt"></i>
+                </div>
+                <h3>Şehir Bilgisi</h3>
+                <p>
+                    İstanbul ve çevresini avuçları gibi bilirler. En hızlı ve güvenli 
+                    rotaları tercih ederler.
+                </p>
+            </div>
+            <div class="driver-feature">
+                <div class="feature-icon">
+                    <i class="bi bi-person-badge"></i>
+                </div>
+                <h3>Profesyonel Görünüm</h3>
+                <p>
+                    Şoförlerimiz her zaman temiz ve düzgün kıyafetler ile hizmet verir. 
+                    İlk izlenim bizim için önemlidir.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Driver Promise -->
+<section class="driver-promise section" style="opacity: 0; animation: fadeIn 0.3s 0.3s ease-in forwards; content-visibility: auto;">
+    <div class="container">
+        <div class="promise-content">
+            <div class="promise-text">
+                <span class="section-subtitle">Sözümüz</span>
+                <h2 class="section-title">Siz Aramak Zorunda Kalmayacaksınız</h2>
+                <p>
+                    Imperial VIP olarak en önemli taahhütümüz budur: <strong>Misafirlerimiz asla 
+                    şoförü aramak zorunda kalmaz.</strong>
+                </p>
+                <p>
+                    Şoförlerimiz, belirlenen saatte belirlenen noktada hazır bekler. Havalimanı 
+                    transferlerinde uçuş takibi yapılır, olası gecikmeler önceden bildirilir. 
+                    İsminizin yazılı olduğu karşılama tabelası ile sizi bekleriz.
+                </p>
+                
+                <ul class="promise-list">
+                    <li>
+                        <i class="bi bi-check-circle-fill"></i>
+                        <span>Transfer öncesi SMS/WhatsApp bilgilendirmesi</span>
+                    </li>
+                    <li>
+                        <i class="bi bi-check-circle-fill"></i>
+                        <span>Şoför iletişim bilgileri önceden paylaşılır</span>
+                    </li>
+                    <li>
+                        <i class="bi bi-check-circle-fill"></i>
+                        <span>Havalimanında isimli karşılama</span>
+                    </li>
+                    <li>
+                        <i class="bi bi-check-circle-fill"></i>
+                        <span>Uçuş takibi ve gecikme yönetimi</span>
+                    </li>
+                    <li>
+                        <i class="bi bi-check-circle-fill"></i>
+                        <span>Bagaj yardımı</span>
+                    </li>
+                </ul>
+            </div>
+            <div class="promise-image">
+                <img src="/images/driver.jpg" 
+                     alt="Imperial VIP Şoför" 
+                     loading="lazy" 
+                     decoding="async"
+                     onerror="this.style.display='none'" />
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA -->
+<section class="cta section" style="opacity: 0; animation: fadeIn 0.3s 0.4s ease-in forwards; content-visibility: auto;">
+    <div class="container">
+        <div class="cta-content">
+            <h2>Profesyonel Hizmeti Deneyimleyin</h2>
+            <p>Imperial VIP farkını yaşamak için hemen rezervasyon yapın.</p>
+            <a asp-controller="Reservation" asp-action="Index" class="btn btn-primary btn-lg">
+                <i class="bi bi-calendar-check"></i>
+                Rezervasyon Yap
+            </a>
+        </div>
+    </div>
+</section>

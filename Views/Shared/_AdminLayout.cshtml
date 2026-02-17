@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Imperial VIP Admin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" crossorigin="anonymous">
+    <link rel="stylesheet" href="~/css/admin.css" asp-append-version="true" />
+    <style>
+        /* Sayfa yüklenirken titreme (flicker) önleme */
+        .admin-body {
+            opacity: 0;
+            visibility: hidden;
+        }
+        .admin-body.loaded {
+            opacity: 1;
+            visibility: visible;
+        }
+    </style>
+</head>
+<body class="admin-body loaded">
+    <aside class="admin-sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <a href="/" class="sidebar-logo">
+                <img src="/images/imgs/core-img/logo.png" alt="Imperial VIP" class="sidebar-logo-img" width="160" height="42" />
+            </a>
+            <span class="sidebar-badge">Admin</span>
+        </div>
+
+        <nav class="sidebar-nav">
+            <ul>
+                <li>
+                    <a asp-controller="Admin" asp-action="Index" class="@(ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "active" : "")">
+                        <i class="bi bi-speedometer2"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                <li>
+                    <a asp-controller="Admin" asp-action="Reservations" class="@(ViewContext.RouteData.Values["action"]?.ToString()?.Contains("Reservation") == true ? "active" : "")">
+                        <i class="bi bi-calendar-check"></i>
+                        <span>Rezervasyonlar</span>
+                    </a>
+                </li>
+                <li>
+                    <a asp-controller="Admin" asp-action="Vehicles" class="@(ViewContext.RouteData.Values["action"]?.ToString()?.Contains("Vehicle") == true ? "active" : "")">
+                        <i class="bi bi-car-front"></i>
+                        <span>Araçlar</span>
+                    </a>
+                </li>
+                <li>
+                    <a asp-controller="Admin" asp-action="Regions" class="@(ViewContext.RouteData.Values["action"]?.ToString()?.Contains("Region") == true ? "active" : "")">
+                        <i class="bi bi-geo-alt"></i>
+                        <span>Bölgeler</span>
+                    </a>
+                </li>
+                <li>
+                    <a asp-controller="Admin" asp-action="CurrencyRates" class="@(ViewContext.RouteData.Values["action"]?.ToString() == "CurrencyRates" ? "active" : "")">
+                        <i class="bi bi-currency-exchange"></i>
+                        <span>Kur Ayarları</span>
+                    </a>
+                </li>
+                <li>
+                    <a asp-controller="Admin" asp-action="Messages" class="@(ViewContext.RouteData.Values["action"]?.ToString()?.Contains("Message") == true ? "active" : "")">
+                        <i class="bi bi-envelope"></i>
+                        <span>Mesajlar</span>
+                    </a>
+                </li>
+                <li>
+                    <a asp-controller="Admin" asp-action="HeroSlides" class="@(ViewContext.RouteData.Values["action"]?.ToString()?.Contains("HeroSlide") == true ? "active" : "")">
+                        <i class="bi bi-images"></i>
+                        <span>Slider Görselleri</span>
+                    </a>
+                </li>
+                <li>
+                    <a asp-controller="Admin" asp-action="Galeri" class="@(ViewContext.RouteData.Values["action"]?.ToString()?.Contains("Galeri") == true ? "active" : "")">
+                        <i class="bi bi-card-image"></i>
+                        <span>Galeri</span>
+                    </a>
+                </li>
+                <li>
+                    <a asp-controller="Admin" asp-action="DataMigration" class="@(ViewContext.RouteData.Values["action"]?.ToString() == "DataMigration" ? "active" : "")">
+                        <i class="bi bi-cloud-download"></i>
+                        <span>Veri Aktarımı</span>
+                    </a>
+                </li>
+                <li>
+                    <a asp-controller="Admin" asp-action="Settings" class="@(ViewContext.RouteData.Values["action"]?.ToString()?.Contains("Setting") == true ? "active" : "")">
+                        <i class="bi bi-gear"></i>
+                        <span>Site Ayarları</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <div class="sidebar-footer">
+            <form asp-controller="Account" asp-action="Logout" method="post">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="logout-btn">
+                    <i class="bi bi-box-arrow-left"></i>
+                    <span>Çıkış Yap</span>
+                </button>
+            </form>
+        </div>
+    </aside>
+
+    <div class="admin-main">
+        <header class="admin-header">
+            <button class="sidebar-toggle" id="sidebarToggle">
+                <i class="bi bi-list"></i>
+            </button>
+            <div class="header-title">
+                <h1>@ViewData["Title"]</h1>
+            </div>
+            <div class="header-user">
+                <span>@User.Identity?.Name</span>
+                <i class="bi bi-person-circle"></i>
+            </div>
+        </header>
+
+        <main class="admin-content">
+            @RenderBody()
+        </main>
+
+        <!-- Toast Popup Container -->
+        <div id="toastContainer" style="position:fixed;top:24px;right:24px;z-index:99999;display:flex;flex-direction:column;gap:12px;pointer-events:none;"></div>
+
+        @if (TempData["Success"] != null)
+        {
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    window.__showToast(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(TempData["Success"].ToString())), 'success');
+                });
+            </script>
+        }
+        @if (TempData["Error"] != null)
+        {
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    window.__showToast(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(TempData["Error"].ToString())), 'error');
+                });
+            </script>
+        }
+        @if (TempData["Warning"] != null)
+        {
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    window.__showToast(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(TempData["Warning"].ToString())), 'warning');
+                });
+            </script>
+        }
+    </div>
+
+    <style>
+        .admin-toast {
+            pointer-events: auto;
+            min-width: 340px;
+            max-width: 480px;
+            padding: 16px 20px 16px 18px;
+            border-radius: 12px;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            line-height: 1.5;
+            box-shadow: 0 8px 32px rgba(0,0,0,.18), 0 2px 8px rgba(0,0,0,.10);
+            backdrop-filter: blur(12px);
+            transform: translateX(120%);
+            opacity: 0;
+            transition: transform .4s cubic-bezier(.22,1,.36,1), opacity .4s ease;
+        }
+        .admin-toast.show {
+            transform: translateX(0);
+            opacity: 1;
+        }
+        .admin-toast.hide {
+            transform: translateX(120%);
+            opacity: 0;
+        }
+        .admin-toast .toast-icon {
+            font-size: 20px;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+        .admin-toast .toast-body {
+            flex: 1;
+        }
+        .admin-toast .toast-title {
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+        .admin-toast .toast-msg {
+            color: rgba(255,255,255,.85);
+            word-break: break-word;
+        }
+        .admin-toast .toast-close {
+            background: none;
+            border: none;
+            color: rgba(255,255,255,.6);
+            font-size: 18px;
+            cursor: pointer;
+            padding: 0 0 0 8px;
+            flex-shrink: 0;
+            transition: color .2s;
+        }
+        .admin-toast .toast-close:hover { color: #fff; }
+        .admin-toast .toast-progress {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 3px;
+            border-radius: 0 0 12px 12px;
+            animation: toastProgress linear forwards;
+        }
+        @@keyframes toastProgress {
+            from { width: 100%; }
+            to   { width: 0%; }
+        }
+        /* Tipler */
+        .admin-toast.toast-success {
+            background: linear-gradient(135deg, #1a7f37 0%, #238636 100%);
+            border-left: 4px solid #3fb950;
+            color: #fff;
+        }
+        .admin-toast.toast-success .toast-progress { background: #3fb950; }
+        .admin-toast.toast-error {
+            background: linear-gradient(135deg, #a1232b 0%, #da3633 100%);
+            border-left: 4px solid #f85149;
+            color: #fff;
+        }
+        .admin-toast.toast-error .toast-progress { background: #f85149; }
+        .admin-toast.toast-warning {
+            background: linear-gradient(135deg, #7a5a00 0%, #9e6a03 100%);
+            border-left: 4px solid #d29922;
+            color: #fff;
+        }
+        .admin-toast.toast-warning .toast-progress { background: #d29922; }
+    </style>
+
+    <script>
+        window.__showToast = function(message, type, duration) {
+            type = type || 'success';
+            duration = duration || (type === 'error' ? 8000 : 5000);
+            var icons = { success: 'bi-check-circle-fill', error: 'bi-exclamation-triangle-fill', warning: 'bi-exclamation-circle-fill' };
+            var titles = { success: 'Başarılı', error: 'Hata', warning: 'Uyarı' };
+
+            var container = document.getElementById('toastContainer');
+            var toast = document.createElement('div');
+            toast.className = 'admin-toast toast-' + type;
+            toast.innerHTML =
+                '<i class="bi ' + (icons[type] || icons.success) + ' toast-icon"></i>' +
+                '<div class="toast-body">' +
+                    '<div class="toast-title">' + (titles[type] || 'Bilgi') + '</div>' +
+                    '<div class="toast-msg">' + message + '</div>' +
+                '</div>' +
+                '<button class="toast-close" onclick="this.parentElement.classList.replace(\'show\',\'hide\');setTimeout(function(){toast.remove()},400)">&times;</button>' +
+                '<div class="toast-progress" style="animation-duration:' + duration + 'ms"></div>';
+            container.appendChild(toast);
+
+            requestAnimationFrame(function() {
+                requestAnimationFrame(function() { toast.classList.add('show'); });
+            });
+
+            var autoClose = setTimeout(function() {
+                toast.classList.replace('show', 'hide');
+                setTimeout(function() { toast.remove(); }, 400);
+            }, duration);
+
+            toast.querySelector('.toast-close').addEventListener('click', function() {
+                clearTimeout(autoClose);
+                toast.classList.replace('show', 'hide');
+                setTimeout(function() { toast.remove(); }, 400);
+            });
+        };
+
+        // Sayfa yüklendiğinde loaded class'ını ekle - titreme önleme
+        document.addEventListener('DOMContentLoaded', function () {
+            document.body.classList.add('loaded');
+        });
+
+        // Sidebar toggle - masaüstü ve mobil için uyumlu ve kararlı
+        (function () {
+            const sidebarToggle = document.getElementById('sidebarToggle');
+            const sidebar = document.getElementById('sidebar');
+            const adminMain = document.querySelector('.admin-main');
+
+            if (!sidebarToggle || !sidebar || !adminMain) return;
+
+            const isMobile = () => window.matchMedia('(max-width: 768px)').matches;
+
+            const syncInitialState = () => {
+                if (isMobile()) {
+                    // Mobilde: sidebar varsayılan kapalı, sadece .show ile açılır
+                    sidebar.classList.remove('collapsed');
+                    adminMain.classList.remove('expanded');
+                }
+                else {
+                    // Masaüstünde: sidebar açık, .show kullanılmaz
+                    sidebar.classList.remove('show');
+                }
+            };
+
+            const handleToggle = () => {
+                if (isMobile()) {
+                    // Mobil: sadece .show üzerinden yönet
+                    const isOpen = sidebar.classList.toggle('show');
+                    // Güvenlik için masaüstü class'larını temizle
+                    sidebar.classList.remove('collapsed');
+                    adminMain.classList.remove('expanded');
+                    return;
+                }
+
+                // Masaüstü: klasik collapsed / expanded
+                sidebar.classList.toggle('collapsed');
+                adminMain.classList.toggle('expanded');
+                // Masaüstünde .show hiç kullanılmasın
+                sidebar.classList.remove('show');
+            };
+
+            // İlk yüklemede durumları normalize et
+            syncInitialState();
+
+            // Toggle butonu
+            sidebarToggle.addEventListener('click', handleToggle);
+
+            // Ekran boyutu değişince class'ları senkronize et
+            window.addEventListener('resize', syncInitialState);
+        })();
+    </script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

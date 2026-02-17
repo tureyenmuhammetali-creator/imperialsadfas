@@ -1,0 +1,156 @@
+@model Vehicle
+@{
+    ViewData["Title"] = "Araç Düzenle";
+    Layout = "_AdminLayout";
+}
+
+<div class="admin-form-page">
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show mb-3" role="alert">
+            <i class="bi bi-exclamation-triangle me-2"></i>@TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Kapat"></button>
+        </div>
+    }
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show mb-3" role="alert">
+            <i class="bi bi-check-circle me-2"></i>@TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Kapat"></button>
+        </div>
+    }
+    <div class="form-header">
+        <a asp-action="Vehicles" class="btn btn-outline">
+            <i class="bi bi-arrow-left"></i> Geri
+        </a>
+    </div>
+
+    <div class="admin-card">
+        <div class="card-body">
+            <form asp-action="EditVehicle" asp-controller="Admin" asp-route-id="@Model.Id" method="post" class="admin-form" id="editVehicleForm">
+                <input type="hidden" name="Id" id="Id" value="@Model.Id" />
+                <input type="hidden" name="CreatedAt" value="@(Model.CreatedAt?.ToString("yyyy-MM-ddTHH:mm:ssZ", System.Globalization.CultureInfo.InvariantCulture) ?? "")" />
+
+                <div class="form-actions form-actions-top mb-4">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check"></i> Güncelle
+                    </button>
+                    <a asp-action="Vehicles" class="btn btn-outline">İptal</a>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label asp-for="Name">Araç Adı *</label>
+                        <input asp-for="Name" class="form-control" />
+                        <span asp-validation-for="Name" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="Type">Araç Tipi</label>
+                        <select asp-for="Type" class="form-control">
+                            <option value="Sedan">Sedan</option>
+                            <option value="SUV">SUV</option>
+                            <option value="VAN">VAN</option>
+                            <option value="Limuzin">Limuzin</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label asp-for="Brand">Marka</label>
+                        <input asp-for="Brand" class="form-control" />
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="Model">Model</label>
+                        <input asp-for="Model" class="form-control" />
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label asp-for="PassengerCapacity">Yolcu Kapasitesi</label>
+                        <input asp-for="PassengerCapacity" type="number" class="form-control" min="1" max="20" />
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="LuggageCapacity">Bagaj Kapasitesi</label>
+                        <input asp-for="LuggageCapacity" type="number" class="form-control" min="0" max="20" />
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Description">Açıklama</label>
+                    <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Features">Özellikler</label>
+                    <input asp-for="Features" class="form-control" />
+                    <small class="form-hint">Özellikleri virgülle ayırarak yazın</small>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="ImageUrl">Ana Görsel URL</label>
+                    <input asp-for="ImageUrl" class="form-control" />
+                    <small class="form-hint">Araç kartında büyük görünen ana fotoğraf</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="AlbumUrls">Albüm fotoğrafları (iç / dış)</label>
+                    <textarea name="AlbumUrls" id="AlbumUrls" class="form-control" rows="4" placeholder="Her satıra bir fotoğraf URL'si yazın. İç ve dış görünüm fotoğraflarını ekleyebilirsiniz.">@(Model.Images != null ? string.Join("\n", Model.Images.OrderBy(i => i.SortOrder).Select(i => i.ImageUrl)) : "")</textarea>
+                    <small class="form-hint">Her satıra bir URL. Sıralama yukarıdan aşağıya albümde görünür.</small>
+                </div>
+
+                <p class="form-hint text-muted mb-3">Her para birimi için aracın kullanım ücretini girin. Sitede seçilen paraya göre ilgili ücret gösterilir.</p>
+                <div class="form-group" style="border: 1px solid #30363d; border-radius: 8px; padding: 16px; margin-bottom: 16px; background: #161b22;">
+                    <label class="d-block mb-2" style="color: #58a6ff; font-weight: 600;">€ Euro (EUR)</label>
+                    <div class="form-group">
+                        <label asp-for="MinimumPrice">Aracın kullanım ücreti</label>
+                        <input asp-for="MinimumPrice" type="number" step="0.01" class="form-control" />
+                    </div>
+                </div>
+                <div class="form-group" style="border: 1px solid #30363d; border-radius: 8px; padding: 16px; margin-bottom: 16px; background: #161b22;">
+                    <label class="d-block mb-2" style="color: #58a6ff; font-weight: 600;">$ Amerikan Doları (USD)</label>
+                    <div class="form-group">
+                        <label asp-for="MinimumPriceUsd">Aracın kullanım ücreti</label>
+                        <input asp-for="MinimumPriceUsd" type="number" step="0.01" class="form-control" />
+                    </div>
+                </div>
+                <div class="form-group" style="border: 1px solid #30363d; border-radius: 8px; padding: 16px; margin-bottom: 16px; background: #161b22;">
+                    <label class="d-block mb-2" style="color: #58a6ff; font-weight: 600;">₺ Türk Lirası (TRY)</label>
+                    <div class="form-group">
+                        <label asp-for="MinimumPriceTry">Aracın kullanım ücreti</label>
+                        <input asp-for="MinimumPriceTry" type="number" step="0.01" class="form-control" />
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label asp-for="Currency">Varsayılan gösterim para birimi</label>
+                        <select asp-for="Currency" class="form-control" style="max-width: 220px;">
+                            @if (Model.Currency == "EUR") { <option value="EUR" selected>€ EUR (Euro)</option> } else { <option value="EUR">€ EUR (Euro)</option> }
+                            @if (Model.Currency == "USD") { <option value="USD" selected>$ USD (Dolar)</option> } else { <option value="USD">$ USD (Dolar)</option> }
+                            @if (Model.Currency == "TRY") { <option value="TRY" selected>₺ TRY (Türk Lirası)</option> } else { <option value="TRY">₺ TRY (Türk Lirası)</option> }
+                            @if (Model.Currency == "GBP") { <option value="GBP" selected>£ GBP (Sterlin)</option> } else { <option value="GBP">£ GBP (Sterlin)</option> }
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="SortOrder">Sıralama</label>
+                        <input asp-for="SortOrder" type="number" class="form-control" />
+                    </div>
+                </div>
+
+                <div class="form-group form-check">
+                    <input type="hidden" name="IsActive" value="0" />
+                    <input type="checkbox" name="IsActive" value="1" class="form-check-input" id="IsActive" @(Model.IsActive == 1 ? "checked" : "") />
+                    <label for="IsActive" class="form-check-label">Aktif</label>
+                </div>
+
+                <div class="form-actions form-actions-sticky">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check"></i> Güncelle
+                    </button>
+                    <a asp-action="Vehicles" class="btn btn-outline">İptal</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

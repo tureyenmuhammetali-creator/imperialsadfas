@@ -1,0 +1,118 @@
+@model IEnumerable<AdminReservationSummary>
+@{
+    ViewData["Title"] = "Dashboard";
+    Layout = "_AdminLayout";
+    var stats = ViewBag.Stats;
+}
+
+<!-- Stats Cards -->
+<div class="stats-cards">
+    <div class="stat-card">
+        <div class="stat-icon bg-primary">
+            <i class="bi bi-calendar-check"></i>
+        </div>
+        <div class="stat-info">
+            <span class="stat-value">@stats.TotalReservations</span>
+            <span class="stat-label">Toplam Rezervasyon</span>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon bg-warning">
+            <i class="bi bi-hourglass-split"></i>
+        </div>
+        <div class="stat-info">
+            <span class="stat-value">@stats.PendingReservations</span>
+            <span class="stat-label">Bekleyen</span>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon bg-success">
+            <i class="bi bi-calendar-event"></i>
+        </div>
+        <div class="stat-info">
+            <span class="stat-value">@stats.TodayReservations</span>
+            <span class="stat-label">Bugün</span>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon bg-info">
+            <i class="bi bi-envelope"></i>
+        </div>
+        <div class="stat-info">
+            <span class="stat-value">@stats.UnreadMessages</span>
+            <span class="stat-label">Okunmamış Mesaj</span>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Reservations -->
+<div class="admin-card">
+    <div class="card-header">
+        <h2>Son Rezervasyonlar</h2>
+        <a asp-action="Reservations" class="btn btn-sm btn-outline">Tümünü Gör</a>
+    </div>
+    <div class="card-body">
+        @if (Model.Any())
+        {
+            <div class="table-responsive">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Müşteri</th>
+                            <th>Tarih</th>
+                            <th>Güzergah</th>
+                            <th>Durum</th>
+                            <th>İşlem</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>@item.Id</td>
+                                <td>
+                                    <strong>@item.CustomerName</strong>
+                                    <br><small>@item.CustomerPhone</small>
+                                </td>
+                                <td>
+                                    @(item.TransferDate?.ToString("dd.MM.yyyy") ?? "-")
+                                    <br><small>@item.TransferTime</small>
+                                </td>
+                                <td>
+                                    <small>@item.PickupLocation → @item.DropoffLocation</small>
+                                </td>
+                                <td>
+                                    @switch (item.Status)
+                                    {
+                                        case ReservationStatus.Beklemede:
+                                            <span class="badge badge-warning">Beklemede</span>
+                                            break;
+                                        case ReservationStatus.Onaylandi:
+                                            <span class="badge badge-success">Onaylandı</span>
+                                            break;
+                                        case ReservationStatus.Tamamlandi:
+                                            <span class="badge badge-info">Tamamlandı</span>
+                                            break;
+                                        case ReservationStatus.IptalEdildi:
+                                            <span class="badge badge-danger">İptal</span>
+                                            break;
+                                    }
+                                </td>
+                                <td>
+                                    <a asp-action="ReservationDetails" asp-route-id="@item.Id" class="btn btn-sm btn-outline">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <p class="text-muted">Henüz rezervasyon bulunmuyor.</p>
+        }
+    </div>
+</div>

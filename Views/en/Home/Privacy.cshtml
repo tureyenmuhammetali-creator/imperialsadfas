@@ -1,0 +1,43 @@
+@{
+    ViewData["Title"] = "Privacy Policy";
+    var currentLang = "en";
+}
+
+<section class="page-header">
+    <div class="container">
+        <h1>Privacy Policy</h1>
+        <nav class="breadcrumb">
+            <a asp-controller="Home" asp-action="Index" asp-route-lang="@currentLang">Home</a>
+            <span>/</span>
+            <span>Privacy Policy</span>
+        </nav>
+    </div>
+</section>
+
+<section class="privacy section">
+    <div class="container">
+        <div class="privacy-content" style="max-width: 800px; margin: 0 auto;">
+            <h2 style="margin-bottom: 20px;">Personal Data Protection</h2>
+            <p style="color: #888; margin-bottom: 20px; line-height: 1.8;">
+                At Imperial VIP we attach great importance to the protection of our customers' personal data. 
+                This privacy policy explains how the collected information is used and protected.
+            </p>
+            <h3 style="margin: 30px 0 15px; font-size: 20px;">Information Collected</h3>
+            <p style="color: #888; margin-bottom: 15px; line-height: 1.8;">
+                During reservations, name, phone number, email address and transfer details are collected.
+            </p>
+            <h3 style="margin: 30px 0 15px; font-size: 20px;">Use of Information</h3>
+            <p style="color: #888; margin-bottom: 15px; line-height: 1.8;">
+                Collected data is used solely for service provision, customer communication and legal compliance.
+            </p>
+            <h3 style="margin: 30px 0 15px; font-size: 20px;">Data Security</h3>
+            <p style="color: #888; margin-bottom: 15px; line-height: 1.8;">
+                Your personal data is protected against unauthorised access using industry-standard security measures.
+            </p>
+            <h3 style="margin: 30px 0 15px; font-size: 20px;">Contact</h3>
+            <p style="color: #888; line-height: 1.8;">
+                For questions about our privacy policy, contact us at <a href="mailto:info@imperialvip.com" style="color: #c9a962;">info@imperialvip.com</a>.
+            </p>
+        </div>
+    </div>
+</section>

@@ -1,0 +1,118 @@
+@model IEnumerable<Region>
+@{
+    ViewData["Title"] = "Bölgeler";
+    Layout = "_AdminLayout";
+}
+
+<div class="admin-toolbar">
+    <a asp-action="CreateRegion" class="btn btn-primary">
+        <i class="bi bi-plus"></i> Yeni Bölge Ekle
+    </a>
+</div>
+
+<div class="admin-card">
+    <div class="card-body">
+        @if (Model.Any())
+        {
+            <div class="table-responsive">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Görsel</th>
+                            <th>Bölge</th>
+                            <th>Güzergah</th>
+                            <th>Mesafe</th>
+                            <th>Fiyat</th>
+                            <th>Sıra</th>
+                            <th>Durum</th>
+                            <th>İşlem</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(item.ImageUrl))
+                                    {
+                                        <img src="@item.ImageUrl" alt="@item.Name" class="table-image" style="width:80px;height:50px;object-fit:cover;border-radius:6px;" onerror="this.onerror=null; this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+                                        <div class="table-image-placeholder" style="display:none;width:80px;height:50px;"><i class="bi bi-geo-alt"></i></div>
+                                    }
+                                    else
+                                    {
+                                        <div class="table-image-placeholder" style="width:80px;height:50px;"><i class="bi bi-geo-alt"></i></div>
+                                    }
+                                </td>
+                                <td>
+                                    <strong>@item.Name</strong>
+                                    @if (!string.IsNullOrEmpty(item.NameEn))
+                                    {
+                                        <br><small class="text-muted">@item.NameEn</small>
+                                    }
+                                </td>
+                                <td>
+                                    <small>@item.StartPoint → @item.Name</small>
+                                </td>
+                                <td>
+                                    @if (item.DistanceKm > 0)
+                                    {
+                                        <span>@item.DistanceKm.ToString("N0") km</span>
+                                    }
+                                    @if (item.EstimatedDurationMinutes > 0)
+                                    {
+                                        <br><small class="text-muted">~@item.EstimatedDurationMinutes dk</small>
+                                    }
+                                </td>
+                                <td>
+                                    <strong class="text-primary">@item.Price.ToString("N0") @(item.Currency == "EUR" ? "€" : item.Currency == "USD" ? "$" : item.Currency == "GBP" ? "£" : "₺")</strong>
+                                </td>
+                                <td>@item.SortOrder</td>
+                                <td>
+                                    @if (item.IsActive == 1)
+                                    {
+                                        <span class="badge badge-success">Aktif</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge badge-danger">Pasif</span>
+                                    }
+                                </td>
+                                <td>
+                                    <div class="btn-group">
+                                        <a asp-action="EditRegion" asp-route-id="@item.Id" class="btn btn-sm btn-outline" title="Düzenle">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        <form asp-action="ToggleRegionStatus" method="post" style="display:inline;">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="id" value="@item.Id" />
+                                            <button type="submit" class="btn btn-sm btn-outline" title="@(item.IsActive == 1 ? "Pasif Yap" : "Aktif Yap")">
+                                                <i class="bi bi-@(item.IsActive == 1 ? "eye-slash" : "eye")"></i>
+                                            </button>
+                                        </form>
+                                        <form asp-action="DeleteRegion" method="post" style="display:inline;" onsubmit="return confirm('Bu bölgeyi silmek istediğinize emin misiniz?');">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="id" value="@item.Id" />
+                                            <button type="submit" class="btn btn-sm btn-danger" title="Sil">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="text-center py-5">
+                <i class="bi bi-geo-alt" style="font-size:48px;color:#ccc;"></i>
+                <p class="text-muted mt-3">Henüz bölge bulunmuyor.</p>
+                <a asp-action="CreateRegion" class="btn btn-primary mt-2">
+                    <i class="bi bi-plus"></i> İlk Bölgeyi Ekle
+                </a>
+            </div>
+        }
+    </div>
+</div>

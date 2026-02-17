@@ -1,0 +1,232 @@
+@model HeroSlide
+@{
+    ViewData["Title"] = "Slider Görseli Düzenle";
+    Layout = "_AdminLayout";
+}
+
+<div class="admin-form-page">
+    <div class="admin-card">
+        <div class="card-header">
+            <h3><i class="bi bi-pencil"></i> Slider Görseli Düzenle</h3>
+        </div>
+        <div class="card-body">
+            <form asp-action="EditHeroSlide" method="post" enctype="multipart/form-data" class="admin-form">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="id" value="@Model.Id" />
+
+                <div class="form-group">
+                    <label>Mevcut Görsel</label>
+                    <div class="current-image">
+                        <img src="@Model.ImageUrl" alt="Mevcut görsel" onerror="this.style.display='none'" />
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Yeni Görsel (Opsiyonel)</label>
+                    <div class="file-upload-area" id="dropZone">
+                        <input type="file" name="imageFile" id="imageFile" accept=".jpg,.jpeg,.png,.webp" />
+                        <div class="upload-content">
+                            <i class="bi bi-cloud-arrow-up"></i>
+                            <p>Değiştirmek için yeni görsel seçin</p>
+                            <span>JPG, PNG veya WebP - Max 10MB</span>
+                        </div>
+                        <div class="upload-preview" id="uploadPreview" style="display: none;">
+                            <img id="previewImage" src="" alt="Önizleme" />
+                            <button type="button" class="remove-btn" id="removeImage">
+                                <i class="bi bi-x"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Durum</label>
+                        <select name="isActive" class="form-control">
+                            @if (Model.IsActive == 1)
+                            {
+                                <option value="true" selected>Aktif</option>
+                                <option value="false">Pasif</option>
+                            }
+                            else
+                            {
+                                <option value="true">Aktif</option>
+                                <option value="false" selected>Pasif</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <a asp-action="HeroSlides" class="btn btn-outline">
+                        <i class="bi bi-arrow-left"></i> İptal
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check"></i> Güncelle
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+.current-image {
+    border-radius: 12px;
+    overflow: hidden;
+    max-width: 500px;
+    border: 1px solid #334155;
+    margin-bottom: 20px;
+}
+
+.current-image img {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+.file-upload-area {
+    position: relative;
+    border: 2px dashed #334155;
+    border-radius: 12px;
+    padding: 40px;
+    text-align: center;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    background: #1e293b;
+}
+
+.file-upload-area:hover,
+.file-upload-area.dragover {
+    border-color: #c9a962;
+    background: rgba(201, 169, 98, 0.05);
+}
+
+.file-upload-area input[type="file"] {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.upload-content i {
+    font-size: 48px;
+    color: #64748b;
+    margin-bottom: 15px;
+    display: block;
+}
+
+.upload-content p {
+    color: #f1f5f9;
+    font-size: 16px;
+    margin-bottom: 8px;
+}
+
+.upload-content span {
+    color: #64748b;
+    font-size: 13px;
+}
+
+.upload-preview {
+    position: relative;
+    display: inline-block;
+}
+
+.upload-preview img {
+    max-width: 100%;
+    max-height: 300px;
+    border-radius: 8px;
+}
+
+.remove-btn {
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: #ef4444;
+    color: white;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+}
+
+.remove-btn:hover {
+    background: #dc2626;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('imageFile');
+    const uploadContent = dropZone.querySelector('.upload-content');
+    const uploadPreview = document.getElementById('uploadPreview');
+    const previewImage = document.getElementById('previewImage');
+    const removeBtn = document.getElementById('removeImage');
+
+    // Drag & Drop
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        dropZone.addEventListener(eventName, preventDefaults, false);
+    });
+
+    function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+        dropZone.addEventListener(eventName, () => dropZone.classList.add('dragover'), false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+        dropZone.addEventListener(eventName, () => dropZone.classList.remove('dragover'), false);
+    });
+
+    dropZone.addEventListener('drop', handleDrop, false);
+
+    function handleDrop(e) {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        if (files.length) {
+            fileInput.files = files;
+            showPreview(files[0]);
+        }
+    }
+
+    // File Input Change
+    fileInput.addEventListener('change', function() {
+        if (this.files.length) {
+            showPreview(this.files[0]);
+        }
+    });
+
+    function showPreview(file) {
+        if (file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                previewImage.src = e.target.result;
+                uploadContent.style.display = 'none';
+                uploadPreview.style.display = 'inline-block';
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    // Remove Image
+    removeBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        fileInput.value = '';
+        uploadContent.style.display = 'block';
+        uploadPreview.style.display = 'none';
+        previewImage.src = '';
+    });
+});
+</script>

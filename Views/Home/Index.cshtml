@@ -1,0 +1,698 @@
+@model HomeViewModel
+@{
+    ViewData["Title"] = "VIP Transfer Hizmetleri";
+    var currentLang = ViewContext.RouteData.Values["lang"]?.ToString() ?? "tr";
+}
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success" style="position: fixed; top: 100px; left: 50%; transform: translateX(-50%); z-index: 9999; max-width: 500px;">
+        <i class="bi bi-check-circle-fill"></i>
+        @TempData["Success"]
+    </div>
+}
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger" style="position: fixed; top: 100px; left: 50%; transform: translateX(-50%); z-index: 9999; max-width: 500px;">
+        <i class="bi bi-exclamation-circle-fill"></i>
+        @TempData["Error"]
+    </div>
+}
+
+<!-- Hero Section -->
+<section class="hero">
+    <!-- Slider -->
+    <div class="hero-slider" id="heroSlider">
+        @if (Model.HeroSlides.Any())
+        {
+            var slideIndex = 0;
+            foreach (var slide in Model.HeroSlides)
+            {
+                <div class="hero-slide @(slideIndex == 0 ? "active" : "")" data-index="@slideIndex" @(slideIndex > 0 ? "style='display:none;'" : "")>
+                    @if (slideIndex == 0)
+                    {
+                        <img src="@slide.ImageUrl" 
+                             alt="Imperial VIP Transfer" 
+                             class="hero-slide-image" 
+                             fetchpriority="high"
+                             onerror="this.style.display='none'" />
+                    }
+                    else
+                    {
+                        <img data-src="@slide.ImageUrl" 
+                             alt="Imperial VIP Transfer" 
+                             class="hero-slide-image lazy-slide" 
+                             onerror="this.style.display='none'" />
+                    }
+                    <div class="hero-slide-overlay"></div>
+                </div>
+                slideIndex++;
+            }
+        }
+        else
+        {
+            <div class="hero-slide active">
+                <div class="hero-slide-overlay"></div>
+            </div>
+        }
+    </div>
+    
+    @if (Model.HeroSlides.Count() > 1)
+    {
+        <button class="hero-nav hero-nav-prev" id="heroPrev" aria-label="Önceki">
+            <i class="bi bi-chevron-left"></i>
+        </button>
+        <button class="hero-nav hero-nav-next" id="heroNext" aria-label="Sonraki">
+            <i class="bi bi-chevron-right"></i>
+        </button>
+        
+        <div class="hero-dots" id="heroDots">
+            @for (int i = 0; i < Model.HeroSlides.Count(); i++)
+            {
+                <button class="hero-dot @(i == 0 ? "active" : "")" data-index="@i" aria-label="Slide @(i + 1)"></button>
+            }
+        </div>
+        
+        <div class="hero-slide-counter">
+            <span class="current" id="slideCurrentNum">01</span>
+            <span class="separator">/</span>
+            <span class="total">@Model.HeroSlides.Count().ToString("D2")</span>
+        </div>
+    }
+    
+    <div class="hero-content container">
+        <div class="hero-text">
+            <span class="hero-badge">
+                <i class="bi bi-star-fill"></i>
+                @(Model.Settings.GetValueOrDefault("hero_badge", "Premium VIP Transfer Hizmetleri"))
+            </span>
+            <h1 class="hero-title">
+                @(Model.Settings.GetValueOrDefault("hero_title", "Lüks ve Konforlu"))<br/>
+                <span>@(Model.Settings.GetValueOrDefault("hero_subtitle", "Transfer Hizmetleri"))</span>
+            </h1>
+            <p class="hero-description">
+                @(Model.Settings.GetValueOrDefault("hero_description", "Havalimanı, otel ve şehirler arası VIP transfer hizmetleri. Üst segment araçlar, profesyonel şoförler ve kesintisiz iletişim."))
+            </p>
+            <div class="hero-buttons">
+                <a asp-controller="Reservation" asp-action="Index" asp-route-lang="@currentLang" class="btn btn-accent btn-lg">
+                    <i class="bi bi-calendar-check"></i>
+                    Rezervasyon Yap
+                </a>
+                <a asp-controller="Vehicle" asp-action="Index" asp-route-lang="@currentLang" class="btn btn-outline-light btn-lg">
+                    <i class="bi bi-car-front"></i>
+                    Araç Filomuz
+                </a>
+            </div>
+            
+            <!-- Hero Stats -->
+            <div class="hero-stats">
+                <div class="hero-stat">
+                    <span class="hero-stat-number">10+</span>
+                    <span class="hero-stat-label">Yıllık Deneyim</span>
+                </div>
+                <div class="hero-stat">
+                    <span class="hero-stat-number">5000+</span>
+                    <span class="hero-stat-label">Mutlu Müşteri</span>
+                </div>
+                <div class="hero-stat">
+                    <span class="hero-stat-number">15+</span>
+                    <span class="hero-stat-label">VIP Araç</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Quick Reservation Section -->
+<section class="quick-reservation-section" style="content-visibility: auto;">
+    <div class="container">
+        <div class="quick-reservation-header">
+            <h2>Imperial VIP Transfer</h2>
+            <p>Sorunsuz bir yolculuk için ideal rezervasyonunuzu erkenden yapın; konfor ve kolaylığı güvence altına alın!</p>
+        </div>
+        
+        @* Hızlı form: Sadece havalimanı ↔ bölge (otel) transferi. Biri seçilince diğer uç otomatik havalimanı/bölge olur. *@
+        @{
+            var allRegionsForm = Model.AllRegionsForForm ?? Model.Regions;
+            const string airportValue = "Antalya Havalimanı";
+        }
+        <form asp-controller="Reservation" asp-action="Index" asp-route-lang="@currentLang" method="get" class="quick-reservation-form" id="quickReservationForm">
+            <input type="hidden" name="regionId" id="quickFormRegionId" value="" />
+            <div class="quick-form-grid">
+                <div class="form-group">
+                    <label>Alınacak Nokta</label>
+                    <select name="pickupLocation" id="pickupLocation" class="form-control" required>
+                        <option value="">Bölge veya havalimanı seçin</option>
+                        <option value="@airportValue">@airportValue</option>
+                        @foreach (var region in allRegionsForm)
+                        {
+                            <option value="@region.Name" data-region-id="@region.Id">@region.Name</option>
+                        }
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Bırakılacak Nokta</label>
+                    <select name="dropoffLocation" id="dropoffLocation" class="form-control" required>
+                        <option value="">Önce alınacak noktayı seçin</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Yolcu Sayısı</label>
+                    <input type="number" name="passengers" class="form-control" placeholder="Yolcu: 1" min="1" max="20" value="1" />
+                </div>
+                <div class="form-group form-submit">
+                    <button type="submit" class="btn btn-accent btn-lg">
+                        Rezervasyon Formuna Git
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</section>
+
+<!-- Regions Section -->
+@if (Model.Regions.Any())
+{
+<section class="section regions-section-new" style="content-visibility: auto;">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-label-ghost">BÖLGELER</span>
+            <h2 class="section-title"><span class="text-accent">BÖLGELER</span></h2>
+        </div>
+
+        <div class="regions-grid-new">
+            @foreach (var region in Model.Regions)
+            {
+                <div class="region-card-new">
+                    <div class="region-image-new">
+                        @if (!string.IsNullOrEmpty(region.ImageUrl))
+                        {
+                            var rImg = Url.Content("~/" + region.ImageUrl.TrimStart('/')) + "?v=" + (region.UpdatedAt?.Ticks ?? region.Id);
+                            <img src="@rImg" 
+                                 alt="@region.Name VIP Transfer Bölgesi" 
+                                 loading="lazy"
+                                 decoding="async"
+                                 width="400"
+                                 height="300"
+                                 onerror="this.style.display='none'" />
+                        }
+                        else
+                        {
+                            <div class="region-placeholder"><i class="bi bi-geo-alt"></i></div>
+                        }
+                    </div>
+                    <div class="region-info-new">
+                        <h3 class="region-name-new">@region.Name</h3>
+                        <p class="region-route-new">@region.StartPoint → @region.Name</p>
+                        <p class="region-price-new"><strong><span class="region-price-value-new" data-amount-eur="@region.Price.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)">@region.Price.ToString("N0", System.Globalization.CultureInfo.GetCultureInfo("tr-TR"))</span> <span class="region-currency-symbol-new">€</span></strong> 'den başlayan fiyatlarla</p>
+                        <a asp-controller="Home" asp-action="RegionDetail" asp-route-id="@region.Id" asp-route-lang="@currentLang" class="btn btn-region">
+                            Şimdi Rezervasyon Yapın
+                        </a>
+                    </div>
+                </div>
+            }
+        </div>
+        
+        <div class="section-footer" style="text-align: center; margin-top: 48px;">
+            <a asp-controller="Home" asp-action="AllRegions" asp-route-lang="@currentLang" class="btn btn-outline">
+                Tüm Bölgeleri Gör
+                <i class="bi bi-arrow-right"></i>
+            </a>
+        </div>
+    </div>
+</section>
+}
+
+<!-- Hizmetlerimiz Detay Section -->
+<section class="services-detail-section" style="content-visibility: auto;">
+    <div class="services-detail-overlay"></div>
+    <div class="container">
+        <div class="services-detail-content">
+            <span class="services-detail-ghost">HİZMETLER</span>
+            <h2 class="services-detail-title">HİZMETLERİMİZ</h2>
+            
+            <div class="services-detail-text">
+                <p class="services-intro" style="color: #ffffff;">
+                    Değerli misafirlerimizi, özel olarak tasarlanmış VIP araçlarımızla havaalanından otelinize, evinize, villanıza veya belirttiğiniz herhangi bir adrese taşıyoruz. Ayrıca, istediğiniz tarih ve saatte, seçtiğiniz yere bırakıyoruz.
+                </p>
+                
+                <p class="services-desc" style="color: #ffffff;">
+                    Mercedes Vito ve Mercedes Sprinter marka araçlarımız, özel olarak tasarlanmış iç mekanlara sahip olup yetkili servisler tarafından düzenli olarak bakımı yapılmaktadır. Amacımız, varış noktanıza konforlu, rahat ve güvenli bir yolculuk sağlamaktır. Araçlarımızın temizliği ve hijyeni, her misafiri almadan önce titizlikle korunmaktadır. Şoförlerimiz, alanında uzman kişiler arasından seçilmiş, deneyimli, güvenilir ve nazik bireylerdir.
+                </p>
+                
+                <p class="services-desc" style="color: #ffffff;">
+                    Rezervasyonunuzu yaptıktan sonra, uçuş numaranızdan itibaren uçuşunuzu saniye saniye takip ediyoruz. Uçağınız havaalanına indiğinde şoförümüz, adınızın yazılı olduğu bir tabela ile sizi havaalanı çıkış kapısında karşılayacaktır. Sizi bekletmeden, otoparktaki araca kadar size eşlik edecek ve istediğiniz adrese güvenli bir şekilde götürecektir. Araçlarımızda internet erişimi, yiyecek ve içecekler ücretsizdir.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Trust Bar -->
+<section class="trust-bar" style="content-visibility: auto; background: #ffffff !important;">
+    <div class="container">
+        <div class="trust-grid">
+            <div class="trust-item">
+                <i class="bi bi-patch-check-fill"></i>
+                <span style="color: #0f172a; font-weight: 600;">Lisanslı Hizmet</span>
+            </div>
+            <div class="trust-item">
+                <i class="bi bi-shield-check"></i>
+                <span style="color: #0f172a; font-weight: 600;">Sigortalı Seyahat</span>
+            </div>
+            <div class="trust-item">
+                <i class="bi bi-clock-history"></i>
+                <span style="color: #0f172a; font-weight: 600;">7/24 Destek</span>
+            </div>
+            <div class="trust-item">
+                <i class="bi bi-credit-card"></i>
+                <span style="color: #0f172a; font-weight: 600;">Güvenli Ödeme</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Services Section -->
+<section class="section" style="content-visibility: auto;">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-label">Hizmetlerimiz</span>
+            <h2 class="section-title">Kapsamlı Transfer Çözümleri</h2>
+            <p class="section-description">
+                İhtiyacınıza özel kurumsal ulaşım hizmetleri
+            </p>
+        </div>
+
+        <div class="services-grid">
+            <div class="service-card">
+                <div class="service-icon">
+                    <i class="bi bi-airplane"></i>
+                </div>
+                <h3>Havalimanı Transferi</h3>
+                <p>İstanbul, Sabiha Gökçen ve tüm havalimanlarından VIP karşılama. Uçuş takibi ile gecikmeler dahil.</p>
+            </div>
+            <div class="service-card">
+                <div class="service-icon">
+                    <i class="bi bi-building"></i>
+                </div>
+                <h3>Otel Transferi</h3>
+                <p>Otelinizden havalimanına veya istediğiniz noktaya güvenli ve konforlu transfer.</p>
+            </div>
+            <div class="service-card">
+                <div class="service-icon">
+                    <i class="bi bi-briefcase"></i>
+                </div>
+                <h3>Kurumsal Çözümler</h3>
+                <p>İş seyahatleri, toplantılar ve kurumsal etkinlikler için özel filo hizmeti.</p>
+            </div>
+            <div class="service-card">
+                <div class="service-icon">
+                    <i class="bi bi-signpost-split"></i>
+                </div>
+                <h3>Şehirler Arası</h3>
+                <p>Uzun mesafe transferlerinde konfor ve güvenliği bir arada yaşayın.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Vehicles Section -->
+<section class="section section-gray vehicles-section" style="content-visibility: auto;">
+    <div class="container">
+        <div class="section-header vehicles-section-header">
+            <span class="section-label">Araç Filomuz</span>
+            <h2 class="section-title">VIP Araçlarımız</h2>
+            <p class="section-description">
+                Üst segment araçlarımız ile seyahatlerinizi ayrıcalıklı kılıyoruz
+            </p>
+        </div>
+
+        <div class="vehicles-grid">
+            @foreach (var vehicle in Model.Vehicles)
+            {
+                var vehicleImgUrl = !string.IsNullOrEmpty(vehicle.ImageUrl)
+                    ? vehicle.ImageUrl
+                    : vehicle.Images?.OrderBy(i => i.SortOrder).FirstOrDefault()?.ImageUrl;
+                var defaultImg = ViewBag.DefaultVehicleImage as string ?? "";
+                if (string.IsNullOrEmpty(vehicleImgUrl) && !string.IsNullOrEmpty(defaultImg)) { vehicleImgUrl = defaultImg; }
+                <div class="vehicle-card">
+                    <div class="vehicle-image">
+                        @if (!string.IsNullOrEmpty(vehicleImgUrl))
+                        {
+                            <img src="@vehicleImgUrl"
+                                 alt="@vehicle.Name VIP Transfer Aracı - @vehicle.Type"
+                                 loading="lazy"
+                                 decoding="async"
+                                 width="400"
+                                 height="300"
+                                 onerror="this.onerror=null; this.src='@(defaultImg)';" />
+                        }
+                        else if (!string.IsNullOrEmpty(defaultImg))
+                        {
+                            <img src="@defaultImg" alt="@vehicle.Name" loading="lazy" width="400" height="300" />
+                        }
+                        <span class="vehicle-type">@vehicle.Type</span>
+                    </div>
+                    <div class="vehicle-info">
+                        <h3>@vehicle.Name</h3>
+                        <p>@vehicle.Description</p>
+                        <div class="vehicle-specs">
+                            <span><i class="bi bi-people"></i> @vehicle.PassengerCapacity Yolcu</span>
+                            <span><i class="bi bi-briefcase"></i> @vehicle.LuggageCapacity Bagaj</span>
+                        </div>
+<a asp-controller="Reservation" asp-action="Index" asp-route-lang="@currentLang" asp-route-vehicleId="@vehicle.Id" class="btn btn-primary btn-sm">
+                                            Rezervasyon Yap
+                                        </a>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <div class="section-footer" style="text-align: center; margin-top: 48px;">
+            <a asp-controller="Vehicle" asp-action="Index" asp-route-lang="@currentLang" class="btn btn-outline">
+                Tüm Araçları İncele
+                <i class="bi bi-arrow-right"></i>
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Gallery Section -->
+@if (Model.GalleryImages.Any())
+{
+<section class="section section-gray" style="content-visibility: auto;">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-label">Galeri</span>
+            <h2 class="section-title">Mutlu Müşterilerimiz</h2>
+            <p class="section-description">
+                Hizmetlerimizden kareler ve müşteri deneyimleri
+            </p>
+        </div>
+        
+        <div class="gallery-grid">
+            @foreach (var image in Model.GalleryImages)
+            {
+                <div class="gallery-item-home">
+                    <img src="@image.ImageUrl" 
+                         alt="@image.Title - Imperial VIP Transfer Galeri" 
+                         loading="lazy"
+                         decoding="async"
+                         width="300"
+                         height="300" />
+                    <div class="gallery-item-overlay">
+                        <i class="bi bi-zoom-in"></i>
+                    </div>
+                </div>
+            }
+        </div>
+        
+        <div class="section-footer" style="text-align: center; margin-top: 48px;">
+            <a asp-controller="Home" asp-action="Galeri" asp-route-lang="@currentLang" class="btn btn-outline">
+                Tüm Galeriyi Gör
+                <i class="bi bi-arrow-right"></i>
+            </a>
+        </div>
+    </div>
+</section>
+}
+
+<!-- Google Reviews Section -->
+<section class="google-reviews-section" style="content-visibility: auto;">
+    <div class="container">
+        <div class="google-reviews-header">
+            <h2>Müşterilerimizden Gelen <span class="text-google">Google Yorumları</span></h2>
+            <div class="google-rating">
+                <span class="rating-score">5.0</span>
+                <div class="rating-stars">
+                    <i class="bi bi-star-fill"></i>
+                    <i class="bi bi-star-fill"></i>
+                    <i class="bi bi-star-fill"></i>
+                    <i class="bi bi-star-fill"></i>
+                    <i class="bi bi-star-fill"></i>
+                </div>
+                <span class="rating-count">22+ değerlendirme</span>
+            </div>
+            <a href="https://g.page/r/CbgXXXXXXXXXX" target="_blank" class="btn btn-google">
+                <i class="bi bi-star-fill"></i>
+                Bizi Google'da değerlendirin
+                <i class="bi bi-arrow-up-right"></i>
+            </a>
+        </div>
+        
+        <div class="reviews-carousel-wrapper">
+            <button class="reviews-nav reviews-nav-prev" id="reviewsPrev">
+                <i class="bi bi-chevron-left"></i>
+            </button>
+            
+            <div class="reviews-carousel" id="reviewsCarousel">
+                <div class="review-card">
+                    <div class="review-header">
+                        <div class="reviewer-avatar">LH</div>
+                        <div class="reviewer-info">
+                            <span class="reviewer-name">Linda H***</span>
+                            <span class="review-date">3 hafta önce</span>
+                        </div>
+                    </div>
+                    <div class="review-stars">
+                        <i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-fill"></i>
+                    </div>
+                    <p class="review-text">İyi hizmet ve iletişim. Onları tavsiye ederim.</p>
+                </div>
+                
+                <div class="review-card">
+                    <div class="review-header">
+                        <div class="reviewer-avatar">FM</div>
+                        <div class="reviewer-info">
+                            <span class="reviewer-name">Fulya M***</span>
+                            <span class="review-date">1 yıl önce</span>
+                        </div>
+                    </div>
+                    <div class="review-stars">
+                        <i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-fill"></i>
+                    </div>
+                    <p class="review-text">Uçusumdan 1 hafta önce Antalya havalimanından Olimposta'da ikamet edeceğim otelim için VIP araç kiraladım. Bunun içinde Imperial VIP Transfer hizmetini tercih ettim. Harika bir deneyimdi!</p>
+                </div>
+                
+                <div class="review-card">
+                    <div class="review-header">
+                        <div class="reviewer-avatar">MT</div>
+                        <div class="reviewer-info">
+                            <span class="reviewer-name">Merve T***</span>
+                            <span class="review-date">1 yıl önce</span>
+                        </div>
+                    </div>
+                    <div class="review-stars">
+                        <i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-fill"></i>
+                    </div>
+                    <p class="review-text">Merhabalar Antalya havaalanından Manavgat'ta bulunan otelimize gitmek için transfer Imperial VIP rezervasyonumuzu oluşturmuştuk. Kız kıza gittiğimiz için güvenilir bir firma aradık ve bulduk!</p>
+                </div>
+                
+                <div class="review-card">
+                    <div class="review-header">
+                        <div class="reviewer-avatar">AK</div>
+                        <div class="reviewer-info">
+                            <span class="reviewer-name">Ahmet K***</span>
+                            <span class="review-date">2 ay önce</span>
+                        </div>
+                    </div>
+                    <div class="review-stars">
+                        <i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-fill"></i>
+                    </div>
+                    <p class="review-text">Çok profesyonel ve zamanında hizmet. Şoför çok kibar ve yardımseverdi. Kesinlikle tekrar tercih edeceğim.</p>
+                </div>
+                
+                <div class="review-card">
+                    <div class="review-header">
+                        <div class="reviewer-avatar">EY</div>
+                        <div class="reviewer-info">
+                            <span class="reviewer-name">Elif Y***</span>
+                            <span class="review-date">6 ay önce</span>
+                        </div>
+                    </div>
+                    <div class="review-stars">
+                        <i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-fill"></i>
+                    </div>
+                    <p class="review-text">Ailece kullandık ve çok memnun kaldık. Araç tertemizdi, bebek koltuğu bile düşünülmüştü. Teşekkürler Imperial VIP!</p>
+                </div>
+            </div>
+            
+            <button class="reviews-nav reviews-nav-next" id="reviewsNext">
+                <i class="bi bi-chevron-right"></i>
+            </button>
+        </div>
+        
+        <div class="reviews-dots" id="reviewsDots">
+            <button class="reviews-dot active" data-index="0"></button>
+            <button class="reviews-dot" data-index="1"></button>
+            <button class="reviews-dot" data-index="2"></button>
+            <button class="reviews-dot" data-index="3"></button>
+            <button class="reviews-dot" data-index="4"></button>
+        </div>
+    </div>
+</section>
+
+<!-- Why Choose Us Section -->
+<section class="why-choose-section" style="content-visibility: auto;">
+    <div class="container">
+        <span class="why-choose-ghost">NEDEN BİZİ SEÇMELİSİNİZ?</span>
+        <h2 class="why-choose-title">NEDEN BİZİ SEÇMELİSİNİZ?</h2>
+        
+        <div class="why-choose-grid">
+            <div class="why-choose-card">
+                <div class="why-choose-icon">
+                    <i class="bi bi-hand-thumbs-up"></i>
+                </div>
+                <h3>Neden Bizi Seçmelisiniz?</h3>
+                <p>Eşsiz lüks, konfor ve güvenilirlik sunuyoruz. Deneyimli sürücülerimiz sorunsuz bir yolculuk sağlarken, olağanüstü hizmetimiz bizi diğerlerinden ayırıyor.</p>
+            </div>
+            
+            <div class="why-choose-card">
+                <div class="why-choose-icon">
+                    <i class="bi bi-star"></i>
+                </div>
+                <h3>Rezervasyonun Faydaları</h3>
+                <p>Konforlu bir yolculuk için lüks araçlar, profesyonel sürücüler ve ihtiyaçlarınıza göre uyarlanmış kişiselleştirilmiş hizmet ile birinci sınıf bir seyahat deneyimi yaşayın.</p>
+            </div>
+            
+            <div class="why-choose-card">
+                <div class="why-choose-icon">
+                    <i class="bi bi-calendar-check"></i>
+                </div>
+                <h3>Seyahatinizi Daha da Güzelleştirin</h3>
+                <p>Ulaşım işini bize bırakın, siz de seyahatinizin tadını çıkarın. Rahatlayın ve maceranıza dinlenmiş bir şekilde başlayın.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="cta section" style="content-visibility: auto;">
+    <div class="container">
+        <div class="cta-content">
+            <h2>Rezervasyon İçin Bize Ulaşın</h2>
+            <p>
+                VIP transfer deneyimi için hemen online rezervasyon oluşturun 
+                veya WhatsApp üzerinden anında iletişime geçin.
+            </p>
+            <div class="cta-buttons">
+                <a asp-controller="Reservation" asp-action="Index" asp-route-lang="@currentLang" class="btn btn-accent btn-lg">
+                    <i class="bi bi-calendar-check"></i>
+                    Online Rezervasyon
+                </a>
+                <a href="https://wa.me/905303471580" class="btn btn-whatsapp btn-lg" target="_blank">
+                    <i class="bi bi-whatsapp"></i>
+                    WhatsApp: +90 530 347 1580
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <script>
+        (function() {
+            // Havalimanı ↔ Bölge mantığı: Alınacak seçilince Bırakılacak otomatik tek seçenek (havalimanı veya bölgeler)
+            var AIRPORT = 'Antalya Havalimanı';
+            var regionsForForm = @Html.Raw(System.Text.Json.JsonSerializer.Serialize((Model.AllRegionsForForm ?? Model.Regions).Select(r => new { id = r.Id, name = r.Name }).ToList()));
+            var pickupEl = document.getElementById('pickupLocation');
+            var dropoffEl = document.getElementById('dropoffLocation');
+            var regionIdEl = document.getElementById('quickFormRegionId');
+            if (pickupEl && dropoffEl) {
+                function fillDropoff() {
+                    var pickupVal = pickupEl.value;
+                    dropoffEl.innerHTML = '';
+                    regionIdEl.value = '';
+                    if (!pickupVal) {
+                        var opt0 = document.createElement('option');
+                        opt0.value = '';
+                        opt0.textContent = 'Önce alınacak noktayı seçin';
+                        dropoffEl.appendChild(opt0);
+                        return;
+                    }
+                    if (pickupVal === AIRPORT) {
+                        var optPlaceholder = document.createElement('option');
+                        optPlaceholder.value = '';
+                        optPlaceholder.textContent = 'Bölge seçin';
+                        dropoffEl.appendChild(optPlaceholder);
+                        regionsForForm.forEach(function(r) {
+                            var opt = document.createElement('option');
+                            opt.value = r.name;
+                            opt.setAttribute('data-region-id', r.id);
+                            opt.textContent = r.name;
+                            dropoffEl.appendChild(opt);
+                        });
+                    } else {
+                        var regionOpt = pickupEl.options[pickupEl.selectedIndex];
+                        var rid = regionOpt && regionOpt.getAttribute('data-region-id');
+                        if (rid) regionIdEl.value = rid;
+                        var optAir = document.createElement('option');
+                        optAir.value = AIRPORT;
+                        optAir.textContent = AIRPORT;
+                        dropoffEl.appendChild(optAir);
+                    }
+                }
+                pickupEl.addEventListener('change', fillDropoff);
+                dropoffEl.addEventListener('change', function() {
+                    var opt = dropoffEl.options[dropoffEl.selectedIndex];
+                    var rid = opt && opt.getAttribute('data-region-id');
+                    if (regionIdEl) regionIdEl.value = rid || regionIdEl.value;
+                });
+                fillDropoff();
+            }
+        })();
+        // HERO SLIDER LAZY LOAD - Diğer slide'ları sadece gerektiğinde yükle
+        document.addEventListener('DOMContentLoaded', function() {
+            const lazySlides = document.querySelectorAll('.lazy-slide');
+            if (lazySlides.length > 0) {
+                setTimeout(function() {
+                    lazySlides.forEach(function(img) {
+                        if (img.dataset.src) {
+                            img.src = img.dataset.src;
+                            img.removeAttribute('data-src');
+                            img.classList.remove('lazy-slide');
+                            img.parentElement.style.display = '';
+                        }
+                    });
+                }, 1000);
+            }
+            // Bölge fiyatları para birimine göre
+            function updateRegionPricesNew() {
+                var cur = window.getImperialCurrency ? window.getImperialCurrency() : { symbol: '€', code: 'EUR' };
+                document.querySelectorAll('.region-price-value-new').forEach(function(el) {
+                    var eur = parseFloat(el.getAttribute('data-amount-eur'));
+                    if (isNaN(eur)) return;
+                    var amount = (cur.code === 'EUR') ? eur : (window.convertFromEur ? window.convertFromEur(eur) : eur);
+                    var formatted = (typeof amount === 'number' ? amount : 0).toLocaleString('tr-TR', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+                    el.textContent = formatted;
+                    var sym = el.parentElement && el.parentElement.querySelector('.region-currency-symbol-new');
+                    if (sym) sym.textContent = cur.symbol || '€';
+                });
+            }
+            updateRegionPricesNew();
+            window.addEventListener('imperialCurrencyChanged', updateRegionPricesNew);
+            window.addEventListener('imperialCurrencyRatesReady', updateRegionPricesNew);
+        });
+    </script>
+}

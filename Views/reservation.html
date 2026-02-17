@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Imperial VIP - Online rezervasyon yapın. Havalimanı transferi, otel transferi ve özel adres transferleri için hızlı ve kolay rezervasyon.">
+    <title>Rezervasyon | Imperial VIP</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/style.css">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect fill='%230a0a0a' width='100' height='100' rx='10'/%3E%3Ctext x='50' y='65' font-family='serif' font-size='50' fill='%23c9a962' text-anchor='middle'%3EI%3C/text%3E%3C/svg%3E">
+</head>
+<body>
+    <!-- Overlay for mobile menu -->
+    <div class="overlay"></div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <a href="index.html" class="logo">
+                <div class="logo-icon">
+                    <svg viewBox="0 0 50 50" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="50" height="50" rx="8" fill="#1a1a1a"/>
+                        <path d="M15 12H22V38H15V12Z" fill="#c9a962"/>
+                        <path d="M28 12H35V38H28V12Z" fill="#c9a962"/>
+                        <path d="M15 22H35V28H15V22Z" fill="#c9a962"/>
+                        <circle cx="25" cy="25" r="23" stroke="#c9a962" stroke-width="1.5" fill="none"/>
+                    </svg>
+                </div>
+                <span class="logo-text">IMPERIAL <span>VIP</span></span>
+            </a>
+
+            <nav class="nav-menu">
+                <a href="index.html" class="nav-link">Ana Sayfa</a>
+                <a href="vehicles.html" class="nav-link">Araçlarımız</a>
+                <a href="services.html" class="nav-link">Hizmetler</a>
+                <a href="about.html" class="nav-link">Hakkımızda</a>
+                <a href="contact.html" class="nav-link">İletişim</a>
+                <a href="reservation.html" class="nav-cta active">Rezervasyon</a>
+            </nav>
+
+            <button class="menu-toggle" aria-label="Menü">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Page Header -->
+    <section class="page-header">
+        <div class="container">
+            <nav class="breadcrumb">
+                <a href="index.html">Ana Sayfa</a>
+                <span>/</span>
+                <span>Rezervasyon</span>
+            </nav>
+            <h1 class="page-title">Online <span class="text-gold">Rezervasyon</span></h1>
+            <p class="page-subtitle">Birkaç adımda VIP transfer rezervasyonunuzu tamamlayın.</p>
+        </div>
+    </section>
+
+    <!-- Reservation Section -->
+    <section class="reservation section">
+        <div class="container">
+            <div class="reservation-container">
+                <div class="reservation-info">
+                    <h2>Hızlı ve <span class="text-gold">Kolay</span> Rezervasyon</h2>
+                    <p>Alınacak ve bırakılacak noktaları seçin, mesafe ve tahmini ücret otomatik hesaplansın. Profesyonel şoförlerimiz sizi zamanında karşılasın.</p>
+                    
+                    <div class="reservation-steps">
+                        <div class="step">
+                            <div class="step-number">1</div>
+                            <div class="step-content">
+                                <h4>Rotanızı Belirleyin</h4>
+                                <p>Nereden alınacağınızı ve nereye bırakılacağınızı seçin.</p>
+                            </div>
+                        </div>
+                        <div class="step">
+                            <div class="step-number">2</div>
+                            <div class="step-content">
+                                <h4>Tarih ve Saat</h4>
+                                <p>Transfer tarih ve saatini belirleyin.</p>
+                            </div>
+                        </div>
+                        <div class="step">
+                            <div class="step-number">3</div>
+                            <div class="step-content">
+                                <h4>Araç Seçimi</h4>
+                                <p>İhtiyacınıza uygun aracı seçin.</p>
+                            </div>
+                        </div>
+                        <div class="step">
+                            <div class="step-number">4</div>
+                            <div class="step-content">
+                                <h4>Onay</h4>
+                                <p>Bilgilerinizi girin ve rezervasyonu tamamlayın.</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Contact Info -->
+                    <div style="margin-top: var(--space-xl); padding: var(--space-lg); background: var(--color-medium-gray); border-radius: var(--radius-lg);">
+                        <h4 style="font-family: var(--font-primary); font-weight: 600; margin-bottom: var(--space-sm);">Yardıma mı ihtiyacınız var?</h4>
+                        <p style="color: var(--color-light-gray); font-size: 0.95rem; margin-bottom: var(--space-md);">Rezervasyon konusunda sorularınız için bize ulaşın.</p>
+                        <div style="display: flex; align-items: center; gap: var(--space-sm); color: var(--color-gold);">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+                            </svg>
+                            <span style="font-weight: 600;">+90 (212) 000 00 00</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Reservation Form -->
+                <div class="reservation-form-wrapper">
+                    <h3 class="form-title">Transfer Bilgileri</h3>
+                    
+                    <form id="reservationForm">
+                        <!-- Pickup Section -->
+                        <div style="margin-bottom: var(--space-lg); padding-bottom: var(--space-lg); border-bottom: 1px solid var(--color-medium-gray);">
+                            <h4 style="font-family: var(--font-primary); font-weight: 600; margin-bottom: var(--space-md); display: flex; align-items: center; gap: var(--space-sm);">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-gold)" stroke-width="2">
+                                    <circle cx="12" cy="10" r="3"/>
+                                    <path d="M12 21.7C17.3 17 20 13 20 10a8 8 0 1 0-16 0c0 3 2.7 7 8 11.7z"/>
+                                </svg>
+                                Alınacak Nokta
+                            </h4>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Konum Tipi *</label>
+                                <select id="pickupType" name="pickupType" class="form-select" required>
+                                    <option value="">Seçiniz...</option>
+                                    <option value="airport">Havalimanı</option>
+                                    <option value="hotel">Otel</option>
+                                    <option value="address">Açık Adres</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Konum *</label>
+                                <select id="pickupLocation" name="pickupLocation" class="form-select" required>
+                                    <option value="">Önce konum tipi seçin...</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group" id="pickupCustomAddress" style="display: none;">
+                                <label class="form-label">Adres Detayı</label>
+                                <input type="text" id="pickupAddress" name="pickupAddress" class="form-input" placeholder="Açık adresinizi yazın...">
+                            </div>
+                        </div>
+                        
+                        <!-- Dropoff Section -->
+                        <div style="margin-bottom: var(--space-lg); padding-bottom: var(--space-lg); border-bottom: 1px solid var(--color-medium-gray);">
+                            <h4 style="font-family: var(--font-primary); font-weight: 600; margin-bottom: var(--space-md); display: flex; align-items: center; gap: var(--space-sm);">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-gold)" stroke-width="2">
+                                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                                    <circle cx="12" cy="10" r="3"/>
+                                </svg>
+                                Bırakılacak Nokta
+                            </h4>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Konum Tipi *</label>
+                                <select id="dropoffType" name="dropoffType" class="form-select" required>
+                                    <option value="">Seçiniz...</option>
+                                    <option value="airport">Havalimanı</option>
+                                    <option value="hotel">Otel</option>
+                                    <option value="address">Açık Adres</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Konum *</label>
+                                <select id="dropoffLocation" name="dropoffLocation" class="form-select" required>
+                                    <option value="">Önce konum tipi seçin...</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group" id="dropoffCustomAddress" style="display: none;">
+                                <label class="form-label">Adres Detayı</label>
+                                <input type="text" id="dropoffAddress" name="dropoffAddress" class="form-input" placeholder="Açık adresinizi yazın...">
+                            </div>
+                        </div>
+                        
+                        <!-- Distance Display -->
+                        <div class="distance-display" id="distanceDisplay">
+                            <div class="distance-label">Tahmini Mesafe</div>
+                            <div class="distance-value" id="distanceValue">0 <span>KM</span></div>
+                            <div style="margin-top: var(--space-sm); padding-top: var(--space-sm); border-top: 1px solid rgba(201, 169, 98, 0.3);">
+                                <div class="distance-label">Tahmini Ücret</div>
+                                <div class="distance-value" id="estimatedPrice" style="font-size: 1.5rem;">₺0</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Date & Time -->
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Tarih *</label>
+                                <input type="date" id="date" name="date" class="form-input" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Saat *</label>
+                                <input type="time" id="time" name="time" class="form-input" required>
+                            </div>
+                        </div>
+                        
+                        <!-- Passengers & Vehicle -->
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Yolcu Sayısı *</label>
+                                <select id="passengers" name="passengers" class="form-select" required>
+                                    <option value="1">1 Yolcu</option>
+                                    <option value="2">2 Yolcu</option>
+                                    <option value="3">3 Yolcu</option>
+                                    <option value="4">4 Yolcu</option>
+                                    <option value="5">5 Yolcu</option>
+                                    <option value="6">6 Yolcu</option>
+                                    <option value="7">7 Yolcu</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Araç Tipi</label>
+                                <select id="vehicleType" name="vehicleType" class="form-select">
+                                    <option value="business">Business Class (E-Class)</option>
+                                    <option value="first">First Class (S-Class)</option>
+                                    <option value="vip">VIP Class (V-Class)</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <!-- Customer Info -->
+                        <div style="margin-top: var(--space-lg); padding-top: var(--space-lg); border-top: 1px solid var(--color-medium-gray);">
+                            <h4 style="font-family: var(--font-primary); font-weight: 600; margin-bottom: var(--space-md);">İletişim Bilgileri</h4>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Ad Soyad *</label>
+                                <input type="text" id="name" name="name" class="form-input" placeholder="Adınız ve soyadınız" required>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">Telefon *</label>
+                                    <input type="tel" id="phone" name="phone" class="form-input" placeholder="+90 5XX XXX XX XX" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">E-posta</label>
+                                    <input type="email" id="email" name="email" class="form-input" placeholder="ornek@email.com">
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Not (Opsiyonel)</label>
+                                <textarea id="notes" name="notes" class="form-textarea" rows="3" placeholder="Uçuş numarası, özel istekler vb."></textarea>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="form-submit">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 8px;">
+                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                                <polyline points="22 4 12 14.01 9 11.01"/>
+                            </svg>
+                            Rezervasyon Yap
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <a href="index.html" class="logo">
+                        <div class="logo-icon">
+                            <svg viewBox="0 0 50 50" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <rect width="50" height="50" rx="8" fill="#1a1a1a"/>
+                                <path d="M15 12H22V38H15V12Z" fill="#c9a962"/>
+                                <path d="M28 12H35V38H28V12Z" fill="#c9a962"/>
+                                <path d="M15 22H35V28H15V22Z" fill="#c9a962"/>
+                                <circle cx="25" cy="25" r="23" stroke="#c9a962" stroke-width="1.5" fill="none"/>
+                            </svg>
+                        </div>
+                        <span class="logo-text">IMPERIAL <span>VIP</span></span>
+                    </a>
+                    <p>Premium VIP transfer hizmetleri ile İstanbul'da konforlu ve güvenli ulaşım.</p>
+                </div>
+                
+                <div class="footer-links-col">
+                    <h4 class="footer-title">Hızlı Linkler</h4>
+                    <nav class="footer-links">
+                        <a href="index.html" class="footer-link">Ana Sayfa</a>
+                        <a href="vehicles.html" class="footer-link">Araçlarımız</a>
+                        <a href="services.html" class="footer-link">Hizmetler</a>
+                        <a href="reservation.html" class="footer-link">Rezervasyon</a>
+                    </nav>
+                </div>
+                
+                <div class="footer-links-col">
+                    <h4 class="footer-title">Hizmetler</h4>
+                    <nav class="footer-links">
+                        <a href="services.html" class="footer-link">Havalimanı Transfer</a>
+                        <a href="services.html" class="footer-link">Otel Transfer</a>
+                        <a href="services.html" class="footer-link">Şehir Turu</a>
+                        <a href="services.html" class="footer-link">Kurumsal</a>
+                    </nav>
+                </div>
+                
+                <div class="footer-contact">
+                    <h4 class="footer-title">İletişim</h4>
+                    <div class="footer-contact-item">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+                        </svg>
+                        <span>+90 (212) 000 00 00</span>
+                    </div>
+                    <div class="footer-contact-item">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                            <polyline points="22,6 12,13 2,6"/>
+                        </svg>
+                        <span>info@imperialvip.com</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p class="footer-copyright">&copy; 2024 Imperial VIP. Tüm hakları saklıdır.</p>
+                <div class="footer-legal">
+                    <a href="#">Gizlilik Politikası</a>
+                    <a href="#">Kullanım Şartları</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="js/main.js"></script>
+    <script src="js/reservation.js"></script>
+    
+    <script>
+        // Set minimum date to today
+        const dateInput = document.getElementById('date');
+        if (dateInput) {
+            const today = new Date().toISOString().split('T')[0];
+            dateInput.setAttribute('min', today);
+            dateInput.value = today;
+        }
+        
+        // Set default time
+        const timeInput = document.getElementById('time');
+        if (timeInput) {
+            const now = new Date();
+            now.setHours(now.getHours() + 2);
+            timeInput.value = now.toTimeString().slice(0, 5);
+        }
+    </script>
+</body>
+</html>

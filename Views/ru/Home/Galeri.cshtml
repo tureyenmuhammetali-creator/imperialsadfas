@@ -1,0 +1,78 @@
+@model List<ImperialVip.Models.GalleryImage>
+@{
+    ViewData["Title"] = "Галерея";
+    var currentLang = "ru";
+    var labels = new Dictionary<string, string> { ["All"] = "Все", ["Müşteri"] = "Клиент", ["Araç"] = "Авто", ["Lokasyon"] = "Локация", ["Genel"] = "Общее", ["Empty"] = "В галерее пока нет изображений.", ["Subtitle"] = "Опыт наших клиентов и впечатления от наших услуг" };
+}
+
+<style>
+    .gallery-page-section { padding: 120px 0 60px; background: #0f172a; min-height: 100vh; }
+    .gallery-filter { display: flex; justify-content: center; gap: 10px; margin-bottom: 40px; flex-wrap: wrap; }
+    .filter-btn { padding: 10px 24px; border: 2px solid #c9a962; background: transparent; color: #c9a962; border-radius: 30px; cursor: pointer; transition: all 0.3s; font-weight: 500; }
+    .filter-btn:hover, .filter-btn.active { background: #c9a962; color: #0f172a; }
+    .gallery-grid-page { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+    .gallery-grid-item { position: relative; border-radius: 12px; overflow: hidden; aspect-ratio: 1; }
+    .gallery-grid-item img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s; }
+    .gallery-grid-item:hover img { transform: scale(1.1); }
+    .gallery-grid-item .overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s; }
+    .gallery-grid-item:hover .overlay { opacity: 1; }
+    .overlay i { font-size: 32px; color: #fff; }
+    .page-title { text-align: center; margin-bottom: 40px; }
+    .page-title h1 { font-size: 42px; color: #fff; margin-bottom: 10px; }
+    .page-title p { color: #94a3b8; font-size: 18px; }
+    @@media (max-width: 991px) { .gallery-grid-page { grid-template-columns: repeat(3, 1fr); } }
+    @@media (max-width: 767px) { .gallery-grid-page { grid-template-columns: repeat(2, 1fr); } }
+</style>
+
+<section class="gallery-page-section">
+    <div class="container">
+        <div class="page-title">
+            <h1>Галерея</h1>
+            <p>@labels["Subtitle"]</p>
+        </div>
+        <div class="gallery-filter">
+            <button class="filter-btn active" data-filter="all">@labels["All"]</button>
+            <button class="filter-btn" data-filter="Müşteri">@labels["Müşteri"]</button>
+            <button class="filter-btn" data-filter="Araç">@labels["Araç"]</button>
+            <button class="filter-btn" data-filter="Lokasyon">@labels["Lokasyon"]</button>
+            <button class="filter-btn" data-filter="Genel">@labels["Genel"]</button>
+        </div>
+        <div class="gallery-grid-page" id="galleryGrid">
+            @{ var galleryImages = Model.Where(x => x.IsActive == 1).OrderBy(x => x.SortOrder).ToList(); var firstImage = galleryImages.FirstOrDefault(); }
+            @for (int i = 0; i < galleryImages.Count; i++)
+            {
+                var image = galleryImages[i]; var isFirst = i == 0;
+                <div class="gallery-grid-item" data-category="@image.Category">
+                    <a href="@image.ImageUrl" data-lightbox="gallery" data-title="@image.Title">
+                        <img src="@image.ImageUrl" alt="@image.Title" loading="@(isFirst ? "eager" : "lazy")" decoding="async" />
+                        <div class="overlay"><i class="bi bi-zoom-in"></i></div>
+                    </a>
+                </div>
+            }
+        </div>
+        @if (!Model.Any(x => x.IsActive == 1))
+        {
+            <div style="text-align: center; padding: 60px 0;">
+                <i class="bi bi-images" style="font-size: 64px; color: #334155;"></i>
+                <p style="color: #94a3b8; margin-top: 20px;">@labels["Empty"]</p>
+            </div>
+        }
+    </div>
+</section>
+
+@section Scripts {
+<link href="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.4/css/lightbox.min.css" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.4/js/lightbox.min.js"></script>
+<script>
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            const filter = this.dataset.filter;
+            document.querySelectorAll('.gallery-grid-item').forEach(item => {
+                item.style.display = (filter === 'all' || item.dataset.category === filter) ? 'block' : 'none';
+            });
+        });
+    });
+</script>
+}

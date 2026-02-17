@@ -1,0 +1,85 @@
+@model Reservation
+@{
+    ViewData["Title"] = "Rezervasyon Alındı";
+}
+
+<!-- Success Section -->
+<section class="success-page section">
+    <div class="container">
+        <div class="success-content">
+            <div class="success-icon">
+                <i class="bi bi-check-circle"></i>
+            </div>
+            
+            <h1>Rezervasyonunuz Alındı</h1>
+            <p class="success-message">
+                Teşekkür ederiz! Rezervasyon talebiniz başarıyla oluşturuldu. 
+                Ekibimiz en kısa sürede sizinle iletişime geçecektir.
+            </p>
+
+            <div class="reservation-summary">
+                <h3>Rezervasyon Özeti</h3>
+                
+                <div class="summary-grid">
+                    <div class="summary-item">
+                        <span class="summary-label">Rezervasyon No:</span>
+                        <span class="summary-value">#@Model.Id</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Ad Soyad:</span>
+                        <span class="summary-value">@Model.CustomerName</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Telefon:</span>
+                        <span class="summary-value">@Model.CustomerPhone</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Transfer Tarihi:</span>
+                        <span class="summary-value">@(Model.TransferDate?.ToString("dd.MM.yyyy") ?? "-") - @Model.TransferTime</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Alınacak Nokta:</span>
+                        <span class="summary-value">@Model.PickupLocation</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Bırakılacak Nokta:</span>
+                        <span class="summary-value">@Model.DropoffLocation</span>
+                    </div>
+                    @if (Model.Vehicle != null)
+                    {
+                        <div class="summary-item">
+                            <span class="summary-label">Araç:</span>
+                            <span class="summary-value">@Model.Vehicle.Name</span>
+                        </div>
+                    }
+                    <div class="summary-item">
+                        <span class="summary-label">Yolcu Sayısı:</span>
+                        <span class="summary-value">@(Model.PassengerCount ?? 0)</span>
+                    </div>
+                    @if ((Model.DistanceKm ?? 0) > 0)
+                    {
+                        <div class="summary-item">
+                            <span class="summary-label">Mesafe:</span>
+                            <span class="summary-value">@(Model.DistanceKm?.ToString("N0")) KM</span>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <div class="success-info">
+                <p><i class="bi bi-info-circle"></i> Rezervasyon detayları ve onay bilgisi telefon/WhatsApp ile tarafınıza iletilecektir.</p>
+            </div>
+
+            <div class="success-actions">
+                <a asp-controller="Home" asp-action="Index" class="btn btn-primary">
+                    <i class="bi bi-house"></i>
+                    Ana Sayfa
+                </a>
+                <a href="https://wa.me/905303471580" class="btn btn-whatsapp" target="_blank">
+                    <i class="bi bi-whatsapp"></i>
+                    WhatsApp ile İletişim
+                </a>
+            </div>
+        </div>
+    </div>
+</section>

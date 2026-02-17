@@ -1,0 +1,133 @@
+@{
+    ViewData["Title"] = "Über uns";
+    var currentLang = "de";
+}
+
+<style>
+    .about-page-wrap .about.section { background: #0f172a !important; }
+    .about-page-wrap .about-text,
+    .about-page-wrap .about-text .section-subtitle,
+    .about-page-wrap .about-text .section-title,
+    .about-page-wrap .about-text p,
+    .about-page-wrap .value-text h4,
+    .about-page-wrap .value-text p { color: #ffffff !important; }
+    .about-page-wrap .about-content { grid-template-columns: 1fr; max-width: 800px; margin: 0 auto; }
+    .about-page-wrap .about-text,
+    .about-page-wrap .about-text .section-subtitle,
+    .about-page-wrap .about-text .section-title,
+    .about-page-wrap .about-values { text-align: center !important; }
+    .about-page-wrap .value-icon { background: rgba(255,255,255,0.1) !important; color: #d4af37 !important; }
+    .about-page-wrap .about-values { justify-items: center; }
+    .about-page-wrap .value-item { flex-direction: column; }
+    .about-page-wrap .about-image { order: -1; max-width: 600px; margin: 0 auto 32px; }
+    @@keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
+
+<section class="page-header" style="opacity: 0; animation: fadeIn 0.3s ease-in forwards; content-visibility: auto;">
+    <div class="container">
+        <h1>Über uns</h1>
+        <nav class="breadcrumb">
+            <a asp-controller="Home" asp-action="Index" asp-route-lang="@currentLang">Startseite</a>
+            <span>/</span>
+            <span>Über uns</span>
+        </nav>
+    </div>
+</section>
+
+<div class="about-page-wrap">
+<section class="about section" style="opacity: 0; animation: fadeIn 0.3s 0.1s ease-in forwards; content-visibility: auto;">
+    <div class="container">
+        <div class="about-content">
+            <div class="about-text">
+                <span class="section-subtitle">Imperial VIP</span>
+                <h2 class="section-title">Zuverlässiger Partner für Premium-Transfer-Services</h2>
+                
+                <p>
+                    Imperial VIP ist eine der führenden Unternehmen im Bereich VIP-Transfer-Services. 
+                    Unsere Mission ist es, unseren Kunden nicht nur einen Transportservice, sondern ein 
+                    erstklassiges Reiseerlebnis zu bieten.
+                </p>
+                
+                <p>
+                    Mit unserem professionellen Fahrerteam, unserer Premium-Fahrzeugflotte und unserem 
+                    kundenorientierten Service garantieren wir bei jeder Fahrt dieselbe Qualität. 
+                    Von Flughafentransfers bis zu Überlandfahrten bieten wir ein breites Leistungsspektrum.
+                </p>
+
+                <p class="tursab-info" style="background: rgba(212,175,55,0.15); border-left: 4px solid #d4af37; padding: 16px; margin: 24px 0; border-radius: 4px; font-size: 0.95rem; line-height: 1.6; color: #ffffff !important;">
+                    Die auf dieser Website durchgeführten Tourverkäufe werden im Namen von<br />
+                    VİPANATOLİATRAVEL Taşımacılık Turizm İnşaat<br />
+                    Emlak San. ve Tic. Ltd. Şti.<br />
+                    (TÜRSAB – ADINDEN TURİZM) durchgeführt.
+                </p>
+
+                <div class="about-values">
+                    <div class="value-item">
+                        <div class="value-icon"><i class="bi bi-gem"></i></div>
+                        <div class="value-text">
+                            <h4>Qualität</h4>
+                            <p>Perfektion in jedem Detail</p>
+                        </div>
+                    </div>
+                    <div class="value-item">
+                        <div class="value-icon"><i class="bi bi-shield-check"></i></div>
+                        <div class="value-text">
+                            <h4>Zuverlässigkeit</h4>
+                            <p>Wir halten unser Wort</p>
+                        </div>
+                    </div>
+                    <div class="value-item">
+                        <div class="value-icon"><i class="bi bi-heart"></i></div>
+                        <div class="value-text">
+                            <h4>Kundenorientierung</h4>
+                            <p>Ihre Zufriedenheit hat Priorität</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="about-image">
+                <img src="/images/imgs/pages/hakkimizda-tr588.png" alt="Imperial VIP" loading="lazy" decoding="async" onerror="this.style.display='none'" />
+            </div>
+        </div>
+    </div>
+</section>
+</div>
+
+<section class="stats section section-dark" style="opacity: 0; animation: fadeIn 0.3s 0.2s ease-in forwards; content-visibility: auto;">
+    <div class="container">
+        <div class="stats-grid">
+            <div class="stat-item"><span class="stat-number">5000+</span><span class="stat-label">Zufriedene Kunden</span></div>
+            <div class="stat-item"><span class="stat-number">15+</span><span class="stat-label">VIP-Fahrzeuge</span></div>
+            <div class="stat-item"><span class="stat-number">10+</span><span class="stat-label">Professionelle Fahrer</span></div>
+            <div class="stat-item"><span class="stat-number">24/7</span><span class="stat-label">Service</span></div>
+        </div>
+    </div>
+</section>
+
+<section class="mission section" style="opacity: 0; animation: fadeIn 0.3s 0.3s ease-in forwards; content-visibility: auto;">
+    <div class="container">
+        <div class="mission-grid">
+            <div class="mission-card">
+                <div class="mission-icon"><i class="bi bi-bullseye"></i></div>
+                <h3>Unsere Mission</h3>
+                <p>
+                    Unsere Kunden mit höchstem Komfort, Sicherheit und Professionalität zu bedienen 
+                    und ihre Reisen zu einem unvergesslichen Erlebnis zu machen. Bei jedem Transfer 
+                    dieselbe Qualität und dasselbe Vertrauen zu gewährleisten.
+                </p>
+            </div>
+            <div class="mission-card">
+                <div class="mission-icon"><i class="bi bi-eye"></i></div>
+                <h3>Unsere Vision</h3>
+                <p>
+                    Die vertrauenswürdigste und bevorzugte VIP-Transfer-Marke der Türkei zu werden. 
+                    Unsere führende Position als innovatives Unternehmen, das Branchenstandards setzt, 
+                    zu festigen.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>

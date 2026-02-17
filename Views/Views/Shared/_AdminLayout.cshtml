@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Imperial VIP Admin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="~/css/admin.css" asp-append-version="true" />
+    <style>
+        /* Sayfa yüklenirken titreme (flicker) önleme */
+        .admin-body {
+            opacity: 0;
+            visibility: hidden;
+        }
+        .admin-body.loaded {
+            opacity: 1;
+            visibility: visible;
+        }
+    </style>
+</head>
+<body class="admin-body loaded">
+    <aside class="admin-sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <a href="/" class="sidebar-logo">
+                <span class="logo-text">IMPERIAL</span>
+                <span class="logo-vip">VIP</span>
+            </a>
+            <span class="sidebar-badge">Admin</span>
+        </div>
+
+        <nav class="sidebar-nav">
+            <ul>
+                <li>
+                    <a asp-controller="Admin" asp-action="Index" class="@(ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "active" : "")">
+                        <i class="bi bi-speedometer2"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                <li>
+                    <a asp-controller="Admin" asp-action="Reservations" class="@(ViewContext.RouteData.Values["action"]?.ToString()?.Contains("Reservation") == true ? "active" : "")">
+                        <i class="bi bi-calendar-check"></i>
+                        <span>Rezervasyonlar</span>
+                    </a>
+                </li>
+                <li>
+                    <a asp-controller="Admin" asp-action="Vehicles" class="@(ViewContext.RouteData.Values["action"]?.ToString()?.Contains("Vehicle") == true ? "active" : "")">
+                        <i class="bi bi-car-front"></i>
+                        <span>Araçlar</span>
+                    </a>
+                </li>
+                <li>
+                    <a asp-controller="Admin" asp-action="Regions" class="@(ViewContext.RouteData.Values["action"]?.ToString()?.Contains("Region") == true ? "active" : "")">
+                        <i class="bi bi-geo-alt"></i>
+                        <span>Bölgeler</span>
+                    </a>
+                </li>
+                <li>
+                    <a asp-controller="Admin" asp-action="Messages" class="@(ViewContext.RouteData.Values["action"]?.ToString()?.Contains("Message") == true ? "active" : "")">
+                        <i class="bi bi-envelope"></i>
+                        <span>Mesajlar</span>
+                    </a>
+                </li>
+                <li>
+                    <a asp-controller="Admin" asp-action="HeroSlides" class="@(ViewContext.RouteData.Values["action"]?.ToString()?.Contains("HeroSlide") == true ? "active" : "")">
+                        <i class="bi bi-images"></i>
+                        <span>Slider Görselleri</span>
+                    </a>
+                </li>
+                <li>
+                    <a asp-controller="Admin" asp-action="Galeri" class="@(ViewContext.RouteData.Values["action"]?.ToString()?.Contains("Galeri") == true ? "active" : "")">
+                        <i class="bi bi-card-image"></i>
+                        <span>Galeri</span>
+                    </a>
+                </li>
+                <li>
+                    <a asp-controller="Admin" asp-action="Settings" class="@(ViewContext.RouteData.Values["action"]?.ToString()?.Contains("Setting") == true ? "active" : "")">
+                        <i class="bi bi-gear"></i>
+                        <span>Site Ayarları</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <div class="sidebar-footer">
+            <form asp-controller="Account" asp-action="Logout" method="post">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="logout-btn">
+                    <i class="bi bi-box-arrow-left"></i>
+                    <span>Çıkış Yap</span>
+                </button>
+            </form>
+        </div>
+    </aside>
+
+    <div class="admin-main">
+        <header class="admin-header">
+            <button class="sidebar-toggle" id="sidebarToggle">
+                <i class="bi bi-list"></i>
+            </button>
+            <div class="header-title">
+                <h1>@ViewData["Title"]</h1>
+            </div>
+            <div class="header-user">
+                <span>@User.Identity?.Name</span>
+                <i class="bi bi-person-circle"></i>
+            </div>
+        </header>
+
+        <main class="admin-content">
+            @if (TempData["Success"] != null)
+            {
+                <div class="alert alert-success">
+                    <i class="bi bi-check-circle"></i>
+                    @TempData["Success"]
+                </div>
+            }
+            @if (TempData["Error"] != null)
+            {
+                <div class="alert alert-danger">
+                    <i class="bi bi-exclamation-circle"></i>
+                    @TempData["Error"]
+                </div>
+            }
+            
+            @RenderBody()
+        </main>
+    </div>
+
+    <script>
+        // Sayfa yüklendiğinde loaded class'ını ekle - titreme önleme
+        document.addEventListener('DOMContentLoaded', function() {
+            document.body.classList.add('loaded');
+        });
+        
+        // Sidebar toggle
+        document.getElementById('sidebarToggle')?.addEventListener('click', function() {
+            document.getElementById('sidebar').classList.toggle('collapsed');
+            document.querySelector('.admin-main').classList.toggle('expanded');
+        });
+    </script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

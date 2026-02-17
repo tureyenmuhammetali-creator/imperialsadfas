@@ -1,0 +1,29 @@
+REZERVASYON VE E-POSTA LOGLARI
+==============================
+
+1) Log dosyası nerede?
+   Proje klasörünüzün içinde:  Logs\email_log.txt
+   Örnek: c:\Users\EMRE\Desktop\ımperial06.02\Logs\email_log.txt
+
+2) Ne zaman oluşur?
+   Uygulamayı çalıştırıp bir rezervasyon talebi gönderdiğinizde
+   (Rezervasyon sayfasındaki formu doldurup "Rezervasyon Talebi Gönder"e tıkladığınızda).
+
+3) Logda ne yazar?
+   - [CREATE] Rezervasyon POST çağrıldı / ModelState geçerli mi
+   - [VALIDATION HATA] Varsa eksik veya hatalı alanlar
+   - [CREATE] Kayıt oluşturuldu, Id=...
+   - [MAIL] Müşteriye mail GÖNDERİLDİ / GÖNDERİLMEDİ
+   - [MAIL] Admin adreslerine mail GÖNDERİLDİ / GÖNDERİLMEDİ
+   - [MAIL HATA] SMTP veya başka bir hata mesajı
+
+4) Önemli: Hangi sayfadan rezervasyon yapmalı?
+   - DOĞRU: Menüden "Rezervasyon"a tıklayıp AÇILAN TAM FORMU kullanın
+     (Ad Soyad, Telefon, E-posta, Tarih, Saat hepsini doldurun).
+   - Ana sayfadaki kısa form artık sadece "Rezervasyon Formuna Git" butonu;
+     oraya tıklayınca tam forma yönlendirilirsiniz.
+   - reservation.html (statik sayfa) sunucuya veri GÖNDERMEZ; mail gitmez.
+
+5) Hâlâ mail gitmiyorsa:
+   - Logs\email_log.txt dosyasını açıp son satırlara bakın.
+   - [MAIL HATA] veya GÖNDERİLMEDİ yazıyorsa, yanındaki hata mesajı nedeni çoğu zaman gösterir.

@@ -1,0 +1,68 @@
+@model Contact
+@{
+    ViewData["Title"] = "Mesaj Detayı";
+    Layout = "_AdminLayout";
+}
+
+<div class="admin-detail-page">
+    <div class="detail-header">
+        <a asp-action="Messages" class="btn btn-outline">
+            <i class="bi bi-arrow-left"></i> Geri
+        </a>
+    </div>
+
+    <div class="admin-card">
+        <div class="card-header">
+            <h3>@Model.Subject</h3>
+        </div>
+        <div class="card-body">
+            <div class="message-meta">
+                <div class="meta-item">
+                    <i class="bi bi-person"></i>
+                    <span>@Model.FullName</span>
+                </div>
+                <div class="meta-item">
+                    <i class="bi bi-envelope"></i>
+                    <a href="mailto:@Model.Email">@Model.Email</a>
+                </div>
+                @if (!string.IsNullOrEmpty(Model.Phone))
+                {
+                    <div class="meta-item">
+                        <i class="bi bi-telephone"></i>
+                        <a href="tel:@Model.Phone">@Model.Phone</a>
+                    </div>
+                }
+                <div class="meta-item">
+                    <i class="bi bi-clock"></i>
+                    <span>@Model.CreatedAt.ToString("dd MMMM yyyy HH:mm")</span>
+                </div>
+            </div>
+
+            <div class="message-content">
+                <p>@Model.Message</p>
+            </div>
+
+            <div class="message-actions">
+                <a href="mailto:@Model.Email?subject=RE: @Model.Subject" class="btn btn-primary">
+                    <i class="bi bi-reply"></i> E-posta ile Yanıtla
+                </a>
+                @if (!string.IsNullOrEmpty(Model.Phone))
+                {
+                    <a href="https://wa.me/@Model.Phone.Replace("+", "").Replace(" ", "")" target="_blank" class="btn btn-whatsapp">
+                        <i class="bi bi-whatsapp"></i> WhatsApp
+                    </a>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="danger-zone">
+        <form asp-action="DeleteMessage" method="post" onsubmit="return confirm('Bu mesajı silmek istediğinize emin misiniz?');">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="id" value="@Model.Id" />
+            <button type="submit" class="btn btn-danger">
+                <i class="bi bi-trash"></i> Mesajı Sil
+            </button>
+        </form>
+    </div>
+</div>

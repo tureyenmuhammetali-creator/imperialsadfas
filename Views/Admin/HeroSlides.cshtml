@@ -1,0 +1,183 @@
+@model IEnumerable<HeroSlide>
+@{
+    ViewData["Title"] = "Slider Görselleri";
+    Layout = "_AdminLayout";
+}
+
+<div class="admin-page">
+    <div class="page-header-actions">
+        <a asp-action="CreateHeroSlide" class="btn btn-primary">
+            <i class="bi bi-upload"></i> Görsel Yükle
+        </a>
+    </div>
+
+    <div class="admin-card">
+        <div class="card-header">
+            <h3><i class="bi bi-images"></i> Slider Görselleri</h3>
+            <span class="badge">@Model.Count() görsel</span>
+        </div>
+        <div class="card-body">
+            @if (!Model.Any())
+            {
+                <div class="empty-state">
+                    <i class="bi bi-images"></i>
+                    <p>Henüz slider görseli eklenmemiş.</p>
+                    <a asp-action="CreateHeroSlide" class="btn btn-primary btn-sm">
+                        <i class="bi bi-upload"></i> İlk Görseli Yükle
+                    </a>
+                </div>
+            }
+            else
+            {
+                <div class="slides-grid">
+                    @foreach (var slide in Model)
+                    {
+                        <div class="slide-card @(slide.IsActive != 1 ? "inactive" : "")">
+                            <div class="slide-image">
+                                <img src="@slide.ImageUrl" alt="Slider Görseli" onerror="this.style.display='none'" />
+                                @if (slide.IsActive != 1)
+                                {
+                                    <div class="slide-inactive-badge">Pasif</div>
+                                }
+                            </div>
+                            <div class="slide-actions">
+                                <a asp-action="EditHeroSlide" asp-route-id="@slide.Id" class="btn btn-sm btn-outline">
+                                    <i class="bi bi-pencil"></i> Düzenle
+                                </a>
+                                <form asp-action="DeleteHeroSlide" asp-route-id="@slide.Id" method="post" style="display:inline;" onsubmit="return confirm('Bu görseli silmek istediğinize emin misiniz?');">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-sm btn-danger">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="admin-info-box">
+        <h4><i class="bi bi-info-circle"></i> Bilgi</h4>
+        <p>Slider görselleri ana sayfanın üst kısmında dönen resimlerdir.</p>
+        <ul>
+            <li><strong>Önerilen Boyut:</strong> 1920x1080 piksel (16:9 oranında)</li>
+            <li><strong>Desteklenen Formatlar:</strong> JPG, PNG, WebP</li>
+            <li><strong>Sıralama:</strong> Eklenme sırasına göre otomatik sıralanır</li>
+        </ul>
+    </div>
+</div>
+
+<style>
+.slides-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.slide-card {
+    background: #1e293b;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid #334155;
+    transition: all 0.3s ease;
+}
+
+.slide-card:hover {
+    border-color: #c9a962;
+}
+
+.slide-card.inactive {
+    opacity: 0.6;
+}
+
+.slide-image {
+    position: relative;
+    height: 180px;
+    overflow: hidden;
+}
+
+.slide-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.slide-inactive-badge {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: rgba(239, 68, 68, 0.9);
+    color: white;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.slide-actions {
+    padding: 15px;
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+.admin-info-box {
+    margin-top: 30px;
+    background: rgba(201, 169, 98, 0.1);
+    border: 1px solid rgba(201, 169, 98, 0.3);
+    border-radius: 12px;
+    padding: 25px;
+}
+
+.admin-info-box h4 {
+    color: #c9a962;
+    font-size: 16px;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.admin-info-box p {
+    color: #94a3b8;
+    font-size: 14px;
+    margin-bottom: 15px;
+}
+
+.admin-info-box ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.admin-info-box ul li {
+    color: #94a3b8;
+    font-size: 13px;
+    padding: 5px 0;
+}
+
+.admin-info-box ul li strong {
+    color: #f1f5f9;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+}
+
+.empty-state i {
+    font-size: 64px;
+    color: #334155;
+    margin-bottom: 20px;
+    display: block;
+}
+
+.empty-state p {
+    color: #94a3b8;
+    font-size: 16px;
+    margin-bottom: 20px;
+}
+</style>

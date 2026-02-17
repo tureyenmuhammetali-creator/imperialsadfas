@@ -1,0 +1,116 @@
+@model Reservation
+@{
+    var currentLang = ViewContext.RouteData.Values["lang"]?.ToString() ?? "tr";
+    var t = new Dictionary<string, Dictionary<string, string>> {
+        ["tr"] = new Dictionary<string, string> {
+            ["Title"] = "Rezervasyon Alındı", ["Received"] = "Rezervasyonunuz Alındı", ["ThankYou"] = "Teşekkür ederiz! Rezervasyon talebiniz başarıyla oluşturuldu. Ekibimiz en kısa sürede sizinle iletişime geçecektir.",
+            ["Summary"] = "Rezervasyon Özeti", ["ResNo"] = "Rezervasyon No:", ["FullName"] = "Ad Soyad:", ["Phone"] = "Telefon:", ["TransferDate"] = "Transfer Tarihi:",
+            ["Pickup"] = "Alınacak Nokta:", ["Dropoff"] = "Bırakılacak Nokta:", ["Vehicle"] = "Araç:", ["PassengerCount"] = "Yolcu Sayısı:", ["Distance"] = "Mesafe:",
+            ["Info"] = "Rezervasyon detayları ve onay bilgisi telefon/WhatsApp ile tarafınıza iletilecektir.",
+            ["Home"] = "Ana Sayfa", ["WhatsApp"] = "WhatsApp ile İletişim"
+        },
+        ["de"] = new Dictionary<string, string> {
+            ["Title"] = "Reservierung erhalten", ["Received"] = "Ihre Reservierung wurde erhalten", ["ThankYou"] = "Vielen Dank! Ihre Reservierung wurde erfolgreich erstellt. Unser Team wird sich schnellstmöglich mit Ihnen in Verbindung setzen.",
+            ["Summary"] = "Reservierungsübersicht", ["ResNo"] = "Reservierungsnr.:", ["FullName"] = "Name:", ["Phone"] = "Telefon:", ["TransferDate"] = "Transferdatum:",
+            ["Pickup"] = "Abholort:", ["Dropoff"] = "Ablieferort:", ["Vehicle"] = "Fahrzeug:", ["PassengerCount"] = "Passagiere:", ["Distance"] = "Entfernung:",
+            ["Info"] = "Reservierungsdetails und Bestätigung werden per Telefon/WhatsApp mitgeteilt.",
+            ["Home"] = "Startseite", ["WhatsApp"] = "WhatsApp Kontakt"
+        },
+        ["ru"] = new Dictionary<string, string> {
+            ["Title"] = "Бронирование получено", ["Received"] = "Ваше бронирование принято", ["ThankYou"] = "Спасибо! Ваш запрос на бронирование успешно создан. Наша команда свяжется с вами в ближайшее время.",
+            ["Summary"] = "Итог бронирования", ["ResNo"] = "Номер:", ["FullName"] = "Имя:", ["Phone"] = "Телефон:", ["TransferDate"] = "Дата трансфера:",
+            ["Pickup"] = "Место посадки:", ["Dropoff"] = "Место высадки:", ["Vehicle"] = "Автомобиль:", ["PassengerCount"] = "Пассажиров:", ["Distance"] = "Расстояние:",
+            ["Info"] = "Детали и подтверждение будут отправлены по телефону/WhatsApp.",
+            ["Home"] = "Главная", ["WhatsApp"] = "Связаться через WhatsApp"
+        },
+        ["en"] = new Dictionary<string, string> {
+            ["Title"] = "Reservation Received", ["Received"] = "Your Reservation Has Been Received", ["ThankYou"] = "Thank you! Your reservation request has been successfully created. Our team will contact you shortly.",
+            ["Summary"] = "Reservation Summary", ["ResNo"] = "Reservation No:", ["FullName"] = "Full Name:", ["Phone"] = "Phone:", ["TransferDate"] = "Transfer Date:",
+            ["Pickup"] = "Pick-up Point:", ["Dropoff"] = "Drop-off Point:", ["Vehicle"] = "Vehicle:", ["PassengerCount"] = "Passenger Count:", ["Distance"] = "Distance:",
+            ["Info"] = "Reservation details and confirmation will be sent via phone/WhatsApp.",
+            ["Home"] = "Home", ["WhatsApp"] = "Contact via WhatsApp"
+        }
+    };
+    var txt = t.ContainsKey(currentLang) ? t[currentLang] : t["tr"];
+    ViewData["Title"] = txt["Title"];
+}
+
+<!-- Success Section -->
+<section class="success-page section">
+    <div class="container">
+        <div class="success-content">
+            <div class="success-icon">
+                <i class="bi bi-check-circle"></i>
+            </div>
+            
+            <h1>@txt["Received"]</h1>
+            <p class="success-message">
+                @txt["ThankYou"]
+            </p>
+
+            <div class="reservation-summary">
+                <h3>@txt["Summary"]</h3>
+                
+                <div class="summary-grid">
+                    <div class="summary-item">
+                        <span class="summary-label">@txt["ResNo"]</span>
+                        <span class="summary-value">#@Model.Id</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">@txt["FullName"]</span>
+                        <span class="summary-value">@Model.CustomerName</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">@txt["Phone"]</span>
+                        <span class="summary-value">@Model.CustomerPhone</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">@txt["TransferDate"]</span>
+                        <span class="summary-value">@(Model.TransferDate?.ToString("dd.MM.yyyy") ?? "-") - @Model.TransferTime</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">@txt["Pickup"]</span>
+                        <span class="summary-value">@Model.PickupLocation</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">@txt["Dropoff"]</span>
+                        <span class="summary-value">@Model.DropoffLocation</span>
+                    </div>
+                    @if (Model.Vehicle != null)
+                    {
+                        <div class="summary-item">
+                            <span class="summary-label">@txt["Vehicle"]</span>
+                            <span class="summary-value">@Model.Vehicle.Name</span>
+                        </div>
+                    }
+                    <div class="summary-item">
+                        <span class="summary-label">@txt["PassengerCount"]</span>
+                        <span class="summary-value">@(Model.PassengerCount ?? 0)</span>
+                    </div>
+                    @if ((Model.DistanceKm ?? 0) > 0)
+                    {
+                        <div class="summary-item">
+                            <span class="summary-label">@txt["Distance"]</span>
+                            <span class="summary-value">@(Model.DistanceKm?.ToString("N0")) KM</span>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <div class="success-info">
+                <p><i class="bi bi-info-circle"></i> @txt["Info"]</p>
+            </div>
+
+            <div class="success-actions">
+                <a asp-controller="Home" asp-action="Index" asp-route-lang="@currentLang" class="btn btn-primary">
+                    <i class="bi bi-house"></i>
+                    @txt["Home"]
+                </a>
+                <a href="https://wa.me/905303471580" class="btn btn-whatsapp" target="_blank">
+                    <i class="bi bi-whatsapp"></i>
+                    @txt["WhatsApp"]
+                </a>
+            </div>
+        </div>
+    </div>
+</section>

@@ -1,0 +1,231 @@
+@model Reservation
+@{
+    ViewData["Title"] = "Rezervasyon #" + Model.Id;
+    Layout = "_AdminLayout";
+}
+
+<div class="admin-detail-page">
+    <div class="detail-header">
+        <a asp-action="Reservations" class="btn btn-outline">
+            <i class="bi bi-arrow-left"></i> Geri
+        </a>
+        <div class="detail-status">
+            @switch (Model.Status ?? ReservationStatus.Beklemede)
+            {
+                case ReservationStatus.Beklemede:
+                    <span class="badge badge-warning badge-lg">Beklemede</span>
+                    break;
+                case ReservationStatus.Onaylandi:
+                    <span class="badge badge-success badge-lg">Onaylandı</span>
+                    break;
+                case ReservationStatus.Tamamlandi:
+                    <span class="badge badge-info badge-lg">Tamamlandı</span>
+                    break;
+                case ReservationStatus.IptalEdildi:
+                    <span class="badge badge-danger badge-lg">İptal Edildi</span>
+                    break;
+            }
+        </div>
+    </div>
+
+    <div class="detail-grid">
+        <!-- Müşteri Bilgileri -->
+        <div class="admin-card">
+            <div class="card-header">
+                <h3><i class="bi bi-person"></i> Müşteri Bilgileri</h3>
+            </div>
+            <div class="card-body">
+                <div class="info-list">
+                    <div class="info-item">
+                        <span class="info-label">Ad Soyad:</span>
+                        <span class="info-value">@Model.CustomerName</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Telefon:</span>
+                        <span class="info-value">
+                            <a href="tel:@Model.CustomerPhone">@Model.CustomerPhone</a>
+                        </span>
+                    </div>
+                    @if (!string.IsNullOrEmpty(Model.CustomerEmail))
+                    {
+                        <div class="info-item">
+                            <span class="info-label">E-posta:</span>
+                            <span class="info-value">
+                                <a href="mailto:@Model.CustomerEmail">@Model.CustomerEmail</a>
+                            </span>
+                        </div>
+                    }
+                </div>
+                <div class="quick-actions">
+                    <a href="tel:@Model.CustomerPhone" class="btn btn-sm btn-outline">
+                        <i class="bi bi-telephone"></i> Ara
+                    </a>
+                    <a href="https://wa.me/@Model.CustomerPhone.Replace("+", "").Replace(" ", "")" target="_blank" class="btn btn-sm btn-whatsapp">
+                        <i class="bi bi-whatsapp"></i> WhatsApp
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Transfer Bilgileri -->
+        <div class="admin-card">
+            <div class="card-header">
+                <h3><i class="bi bi-geo-alt"></i> Transfer Bilgileri</h3>
+            </div>
+            <div class="card-body">
+                <div class="info-list">
+                    <div class="info-item">
+                        <span class="info-label">Tarih:</span>
+                        <span class="info-value">@(Model.TransferDate?.ToString("dd MMMM yyyy") ?? "Belirtilmemiş")</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Saat:</span>
+                        <span class="info-value">@Model.TransferTime</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Alış Noktası:</span>
+                        <span class="info-value">@Model.PickupLocation</span>
+                    </div>
+                    @if (!string.IsNullOrEmpty(Model.PickupLocationDetail))
+                    {
+                        <div class="info-item">
+                            <span class="info-label">Alış Detay:</span>
+                            <span class="info-value">@Model.PickupLocationDetail</span>
+                        </div>
+                    }
+                    <div class="info-item">
+                        <span class="info-label">Bırakış Noktası:</span>
+                        <span class="info-value">@Model.DropoffLocation</span>
+                    </div>
+                    @if (!string.IsNullOrEmpty(Model.DropoffLocationDetail))
+                    {
+                        <div class="info-item">
+                            <span class="info-label">Bırakış Detay:</span>
+                            <span class="info-value">@Model.DropoffLocationDetail</span>
+                        </div>
+                    }
+                    @if (!string.IsNullOrEmpty(Model.FlightNumber))
+                    {
+                        <div class="info-item">
+                            <span class="info-label">Uçuş Kodu:</span>
+                            <span class="info-value">@Model.FlightNumber</span>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Araç ve Yolcu -->
+        <div class="admin-card">
+            <div class="card-header">
+                <h3><i class="bi bi-car-front"></i> Araç ve Yolcu</h3>
+            </div>
+            <div class="card-body">
+                <div class="info-list">
+                    <div class="info-item">
+                        <span class="info-label">Yolcu Sayısı:</span>
+                        <span class="info-value">@(Model.PassengerCount ?? 0)</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Bagaj Sayısı:</span>
+                        <span class="info-value">@(Model.LuggageCount ?? 0)</span>
+                    </div>
+                    @if (Model.Vehicle != null)
+                    {
+                        <div class="info-item">
+                            <span class="info-label">Araç:</span>
+                            <span class="info-value">@Model.Vehicle.Name</span>
+                        </div>
+                    }
+                    @if ((Model.DistanceKm ?? 0) > 0)
+                    {
+                        <div class="info-item">
+                            <span class="info-label">Mesafe:</span>
+                            <span class="info-value">@(Model.DistanceKm?.ToString("N0")) KM</span>
+                        </div>
+                    }
+                    @if ((Model.EstimatedPrice ?? 0) > 0)
+                    {
+                        <div class="info-item">
+                            <span class="info-label">Tahmini Fiyat:</span>
+                            <span class="info-value price">@((Model.EstimatedPrice ?? 0).ToString("N2")) ₺</span>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Notlar -->
+        <div class="admin-card">
+            <div class="card-header">
+                <h3><i class="bi bi-chat-text"></i> Notlar</h3>
+            </div>
+            <div class="card-body">
+                @if (!string.IsNullOrEmpty(Model.Notes))
+                {
+                    <div class="note-box">
+                        <strong>Müşteri Notu:</strong>
+                        <p>@Model.Notes</p>
+                    </div>
+                }
+                @if (!string.IsNullOrEmpty(Model.AdminNotes))
+                {
+                    <div class="note-box admin-note">
+                        <strong>Admin Notu:</strong>
+                        <p>@Model.AdminNotes</p>
+                    </div>
+                }
+                @if (string.IsNullOrEmpty(Model.Notes) && string.IsNullOrEmpty(Model.AdminNotes))
+                {
+                    <p class="text-muted">Not bulunmuyor.</p>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Durum Güncelleme -->
+    <div class="admin-card">
+        <div class="card-header">
+            <h3><i class="bi bi-gear"></i> Durum Güncelle</h3>
+        </div>
+        <div class="card-body">
+            <form asp-action="UpdateReservationStatus" method="post" class="status-form">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="id" value="@Model.Id" />
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Durum</label>
+                        <select name="status" class="form-control">
+                            <option value="0" selected="@((Model.Status ?? ReservationStatus.Beklemede) == ReservationStatus.Beklemede)">Beklemede</option>
+                            <option value="1" selected="@((Model.Status ?? ReservationStatus.Beklemede) == ReservationStatus.Onaylandi)">Onaylandı</option>
+                            <option value="2" selected="@((Model.Status ?? ReservationStatus.Beklemede) == ReservationStatus.Tamamlandi)">Tamamlandı</option>
+                            <option value="3" selected="@((Model.Status ?? ReservationStatus.Beklemede) == ReservationStatus.IptalEdildi)">İptal Edildi</option>
+                        </select>
+                    </div>
+                    <div class="form-group flex-grow">
+                        <label>Admin Notu</label>
+                        <input type="text" name="adminNotes" class="form-control" value="@Model.AdminNotes" placeholder="Opsiyonel not..." />
+                    </div>
+                    <div class="form-group">
+                        <label>&nbsp;</label>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check"></i> Güncelle
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Silme -->
+    <div class="danger-zone">
+        <form asp-action="DeleteReservation" method="post" onsubmit="return confirm('Bu rezervasyonu silmek istediğinize emin misiniz?');">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="id" value="@Model.Id" />
+            <button type="submit" class="btn btn-danger">
+                <i class="bi bi-trash"></i> Rezervasyonu Sil
+            </button>
+        </form>
+    </div>
+</div>

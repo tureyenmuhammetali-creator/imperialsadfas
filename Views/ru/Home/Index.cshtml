@@ -1,0 +1,676 @@
+@model HomeViewModel
+@{
+    ViewData["Title"] = "VIP Трансферные услуги";
+    var currentLang = "ru";
+}
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success" style="position: fixed; top: 100px; left: 50%; transform: translateX(-50%); z-index: 9999; max-width: 500px;">
+        <i class="bi bi-check-circle-fill"></i>
+        @TempData["Success"]
+    </div>
+}
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger" style="position: fixed; top: 100px; left: 50%; transform: translateX(-50%); z-index: 9999; max-width: 500px;">
+        <i class="bi bi-exclamation-circle-fill"></i>
+        @TempData["Error"]
+    </div>
+}
+
+<!-- Hero Section -->
+<section class="hero">
+    <div class="hero-slider" id="heroSlider">
+        @if (Model.HeroSlides.Any())
+        {
+            var slideIndex = 0;
+            foreach (var slide in Model.HeroSlides)
+            {
+                <div class="hero-slide @(slideIndex == 0 ? "active" : "")" data-index="@slideIndex" @(slideIndex > 0 ? "style='display:none;'" : "")>
+                    @if (slideIndex == 0)
+                    {
+                        <img src="@slide.ImageUrl" 
+                             alt="Imperial VIP Трансфер" 
+                             class="hero-slide-image" 
+                             fetchpriority="high"
+                             onerror="this.style.display='none'" />
+                    }
+                    else
+                    {
+                        <img data-src="@slide.ImageUrl" 
+                             alt="Imperial VIP Трансфер" 
+                             class="hero-slide-image lazy-slide" 
+                             onerror="this.style.display='none'" />
+                    }
+                    <div class="hero-slide-overlay"></div>
+                </div>
+                slideIndex++;
+            }
+        }
+        else
+        {
+            <div class="hero-slide active">
+                <div class="hero-slide-overlay"></div>
+            </div>
+        }
+    </div>
+    
+    @if (Model.HeroSlides.Count() > 1)
+    {
+        <button class="hero-nav hero-nav-prev" id="heroPrev" aria-label="Назад">
+            <i class="bi bi-chevron-left"></i>
+        </button>
+        <button class="hero-nav hero-nav-next" id="heroNext" aria-label="Вперёд">
+            <i class="bi bi-chevron-right"></i>
+        </button>
+        
+        <div class="hero-dots" id="heroDots">
+            @for (int i = 0; i < Model.HeroSlides.Count(); i++)
+            {
+                <button class="hero-dot @(i == 0 ? "active" : "")" data-index="@i" aria-label="Слайд @(i + 1)"></button>
+            }
+        </div>
+        
+        <div class="hero-slide-counter">
+            <span class="current" id="slideCurrentNum">01</span>
+            <span class="separator">/</span>
+            <span class="total">@Model.HeroSlides.Count().ToString("D2")</span>
+        </div>
+    }
+    
+    <div class="hero-content container">
+        <div class="hero-text">
+            <span class="hero-badge">
+                <i class="bi bi-star-fill"></i>
+                @(Model.Settings.GetValueOrDefault("hero_badge", "Премиум VIP Трансферные услуги"))
+            </span>
+            <h1 class="hero-title">
+                @(Model.Settings.GetValueOrDefault("hero_title", "Роскошь и комфорт"))<br/>
+                <span>@(Model.Settings.GetValueOrDefault("hero_subtitle", "Трансферные услуги"))</span>
+            </h1>
+            <p class="hero-description">
+                @(Model.Settings.GetValueOrDefault("hero_description", "VIP трансфер из аэропорта, отеля и между городами. Автомобили премиум-класса, профессиональные водители и бесперебойная связь."))
+            </p>
+            <div class="hero-buttons">
+                <a asp-controller="Reservation" asp-action="Index" asp-route-lang="@currentLang" class="btn btn-accent btn-lg">
+                    <i class="bi bi-calendar-check"></i>
+                    Забронировать
+                </a>
+                <a asp-controller="Vehicle" asp-action="Index" asp-route-lang="@currentLang" class="btn btn-outline-light btn-lg">
+                    <i class="bi bi-car-front"></i>
+                    Наш автопарк
+                </a>
+            </div>
+            
+            <div class="hero-stats">
+                <div class="hero-stat">
+                    <span class="hero-stat-number">10+</span>
+                    <span class="hero-stat-label">Лет опыта</span>
+                </div>
+                <div class="hero-stat">
+                    <span class="hero-stat-number">5000+</span>
+                    <span class="hero-stat-label">Довольных клиентов</span>
+                </div>
+                <div class="hero-stat">
+                    <span class="hero-stat-number">15+</span>
+                    <span class="hero-stat-label">VIP автомобилей</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Quick Reservation Section - Airport ↔ Region only (same logic as TR) -->
+@{
+    var allRegionsFormRu = Model.AllRegionsForForm ?? Model.Regions;
+    const string airportValueRu = "Antalya Havalimanı";
+}
+<section class="quick-reservation-section" style="content-visibility: auto;">
+    <div class="container">
+        <div class="quick-reservation-header">
+            <h2>Imperial VIP Трансфер</h2>
+            <p>Забронируйте заранее для беспроблемной поездки и обеспечьте себе комфорт и удобство!</p>
+        </div>
+        
+        <form asp-controller="Reservation" asp-action="Index" asp-route-lang="@currentLang" method="get" class="quick-reservation-form" id="quickReservationForm">
+            <input type="hidden" name="regionId" id="quickFormRegionId" value="" />
+            <div class="quick-form-grid">
+                <div class="form-group">
+                    <label>Место посадки</label>
+                    <select name="pickupLocation" id="pickupLocation" class="form-control" required>
+                        <option value="">Выберите регион или аэропорт</option>
+                        <option value="@airportValueRu">Аэропорт Анталии</option>
+                        @foreach (var region in allRegionsFormRu)
+                        {
+                            <option value="@region.Name" data-region-id="@region.Id">@region.Name</option>
+                        }
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Место высадки</label>
+                    <select name="dropoffLocation" id="dropoffLocation" class="form-control" required>
+                        <option value="">Сначала выберите место посадки</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Количество пассажиров</label>
+                    <input type="number" name="passengers" class="form-control" placeholder="Пассажиров: 1" min="1" max="20" value="1" />
+                </div>
+                <div class="form-group form-submit">
+                    <button type="submit" class="btn btn-accent btn-lg">
+                        Перейти к форме бронирования
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</section>
+
+<!-- Regions Section -->
+@if (Model.Regions.Any())
+{
+<section class="section regions-section-new" style="content-visibility: auto;">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-label-ghost">РЕГИОНЫ</span>
+            <h2 class="section-title"><span class="text-accent">РЕГИОНЫ</span></h2>
+        </div>
+
+        <div class="regions-grid-new">
+            @foreach (var region in Model.Regions)
+            {
+                <div class="region-card-new">
+                    <div class="region-image-new">
+                        @if (!string.IsNullOrEmpty(region.ImageUrl))
+                        {
+                            <img src="@region.ImageUrl" 
+                                 alt="@region.Name VIP Трансфер регион" 
+                                 loading="lazy"
+                                 decoding="async"
+                                 width="400"
+                                 height="300"
+                                 onerror="this.style.display='none'" />
+                        }
+                        else
+                        {
+                            <div class="region-placeholder"><i class="bi bi-geo-alt"></i></div>
+                        }
+                    </div>
+                    <div class="region-info-new">
+                        <h3 class="region-name-new">@region.Name</h3>
+                        <p class="region-route-new">@region.StartPoint → @region.Name</p>
+                        <p class="region-price-new"><strong>@region.Price.ToString("N0") €</strong> цены от</p>
+                        <a asp-controller="Home" asp-action="RegionDetail" asp-route-id="@region.Id" asp-route-lang="@currentLang" class="btn btn-region">
+                            Забронировать сейчас
+                        </a>
+                    </div>
+                </div>
+            }
+        </div>
+        
+        <div class="section-footer" style="text-align: center; margin-top: 48px;">
+            <a asp-controller="Home" asp-action="AllRegions" asp-route-lang="@currentLang" class="btn btn-outline">
+                Все регионы
+                <i class="bi bi-arrow-right"></i>
+            </a>
+        </div>
+    </div>
+</section>
+}
+
+<!-- Services Detail Section -->
+<section class="services-detail-section" style="content-visibility: auto;">
+    <div class="services-detail-overlay"></div>
+    <div class="container">
+        <div class="services-detail-content">
+            <span class="services-detail-ghost">УСЛУГИ</span>
+            <h2 class="services-detail-title">НАШИ УСЛУГИ</h2>
+            
+            <div class="services-detail-text">
+                <p class="services-intro" style="color: #ffffff;">
+                    Мы доставляем наших дорогих гостей на специально разработанных VIP автомобилях из аэропорта в ваш отель, дом, виллу или по любому указанному вами адресу. Кроме того, мы доставим вас в выбранное место в удобные для вас дату и время.
+                </p>
+                
+                <p class="services-desc" style="color: #ffffff;">
+                    Наши автомобили Mercedes Vito и Mercedes Sprinter имеют специально разработанные салоны и регулярно обслуживаются авторизованными сервисами. Наша цель — обеспечить вам комфортную, приятную и безопасную поездку до места назначения. Чистота и гигиена наших автомобилей тщательно поддерживаются перед каждой поездкой. Наши водители — опытные, надёжные и вежливые профессионалы.
+                </p>
+                
+                <p class="services-desc" style="color: #ffffff;">
+                    После бронирования мы отслеживаем ваш рейс по номеру рейса в режиме реального времени. Когда самолёт приземлится, наш водитель встретит вас с табличкой с вашим именем у выхода из аэропорта. Он сопроводит вас до парковки без задержек и безопасно доставит по указанному адресу. В наших автомобилях бесплатно предоставляются интернет, еда и напитки.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Trust Bar -->
+<section class="trust-bar" style="content-visibility: auto; background: #ffffff !important;">
+    <div class="container">
+        <div class="trust-grid">
+            <div class="trust-item">
+                <i class="bi bi-patch-check-fill"></i>
+                <span style="color: #0f172a; font-weight: 600;">Лицензированный сервис</span>
+            </div>
+            <div class="trust-item">
+                <i class="bi bi-shield-check"></i>
+                <span style="color: #0f172a; font-weight: 600;">Застрахованная поездка</span>
+            </div>
+            <div class="trust-item">
+                <i class="bi bi-clock-history"></i>
+                <span style="color: #0f172a; font-weight: 600;">Поддержка 24/7</span>
+            </div>
+            <div class="trust-item">
+                <i class="bi bi-credit-card"></i>
+                <span style="color: #0f172a; font-weight: 600;">Безопасная оплата</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Services Section -->
+<section class="section" style="content-visibility: auto;">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-label">Наши услуги</span>
+            <h2 class="section-title">Комплексные трансферные решения</h2>
+            <p class="section-description">
+                Корпоративный транспорт по вашим потребностям
+            </p>
+        </div>
+
+        <div class="services-grid">
+            <div class="service-card">
+                <div class="service-icon">
+                    <i class="bi bi-airplane"></i>
+                </div>
+                <h3>Трансфер из аэропорта</h3>
+                <p>VIP встреча в Стамбуле, Сабиха Гёкчен и во всех аэропортах. Отслеживание рейсов с учётом задержек.</p>
+            </div>
+            <div class="service-card">
+                <div class="service-icon">
+                    <i class="bi bi-building"></i>
+                </div>
+                <h3>Трансфер из отеля</h3>
+                <p>Безопасный и комфортный трансфер из отеля в аэропорт или в любое нужное место.</p>
+            </div>
+            <div class="service-card">
+                <div class="service-icon">
+                    <i class="bi bi-briefcase"></i>
+                </div>
+                <h3>Корпоративные решения</h3>
+                <p>Специальный автопарк для деловых поездок, встреч и корпоративных мероприятий.</p>
+            </div>
+            <div class="service-card">
+                <div class="service-icon">
+                    <i class="bi bi-signpost-split"></i>
+                </div>
+                <h3>Межгородские перевозки</h3>
+                <p>Комфорт и безопасность при трансферах на дальние расстояния.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Vehicles Section -->
+<section class="section section-gray" style="content-visibility: auto;">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-label">Наш автопарк</span>
+            <h2 class="section-title">Наши VIP автомобили</h2>
+            <p class="section-description">
+                Делаем ваши поездки эксклюзивными с нашими автомобилями премиум-класса
+            </p>
+        </div>
+
+        <div class="vehicles-grid">
+            @foreach (var vehicle in Model.Vehicles)
+            {
+                var vehicleImgUrl = !string.IsNullOrEmpty(vehicle.ImageUrl)
+                    ? vehicle.ImageUrl
+                    : vehicle.Images?.OrderBy(i => i.SortOrder).FirstOrDefault()?.ImageUrl;
+                var defaultImg = ViewBag.DefaultVehicleImage as string ?? "";
+                if (string.IsNullOrEmpty(vehicleImgUrl) && !string.IsNullOrEmpty(defaultImg)) { vehicleImgUrl = defaultImg; }
+                <div class="vehicle-card">
+                    <div class="vehicle-image">
+                        @if (!string.IsNullOrEmpty(vehicleImgUrl))
+                        {
+                            <img src="@vehicleImgUrl"
+                                 alt="@vehicle.Name VIP Трансфер - @vehicle.Type"
+                                 loading="lazy"
+                                 decoding="async"
+                                 width="400"
+                                 height="300"
+                                 onerror="this.onerror=null; this.src='@(defaultImg)';" />
+                        }
+                        else if (!string.IsNullOrEmpty(defaultImg))
+                        {
+                            <img src="@defaultImg" alt="@vehicle.Name" loading="lazy" width="400" height="300" />
+                        }
+                        <span class="vehicle-type">@vehicle.Type</span>
+                    </div>
+                    <div class="vehicle-info">
+                        <h3>@vehicle.Name</h3>
+                        <p>@vehicle.Description</p>
+                        <div class="vehicle-specs">
+                            <span><i class="bi bi-people"></i> @vehicle.PassengerCapacity пассажиров</span>
+                            <span><i class="bi bi-briefcase"></i> @vehicle.LuggageCapacity багажа</span>
+                        </div>
+                        <a asp-controller="Reservation" asp-action="Index" asp-route-lang="@currentLang" class="btn btn-primary btn-sm">
+                            Забронировать
+                        </a>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <div class="section-footer" style="text-align: center; margin-top: 48px;">
+            <a asp-controller="Vehicle" asp-action="Index" asp-route-lang="@currentLang" class="btn btn-outline">
+                Все автомобили
+                <i class="bi bi-arrow-right"></i>
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Gallery Section -->
+@if (Model.GalleryImages.Any())
+{
+<section class="section section-gray" style="content-visibility: auto;">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-label">Галерея</span>
+            <h2 class="section-title">Довольные клиенты</h2>
+            <p class="section-description">
+                Фотографии наших услуг и впечатления клиентов
+            </p>
+        </div>
+        
+        <div class="gallery-grid">
+            @foreach (var image in Model.GalleryImages)
+            {
+                <div class="gallery-item-home">
+                    <img src="@image.ImageUrl" 
+                         alt="@image.Title - Imperial VIP Трансфер Галерея" 
+                         loading="lazy"
+                         decoding="async"
+                         width="300"
+                         height="300" />
+                    <div class="gallery-item-overlay">
+                        <i class="bi bi-zoom-in"></i>
+                    </div>
+                </div>
+            }
+        </div>
+        
+        <div class="section-footer" style="text-align: center; margin-top: 48px;">
+            <a asp-controller="Home" asp-action="Galeri" asp-route-lang="@currentLang" class="btn btn-outline">
+                Вся галерея
+                <i class="bi bi-arrow-right"></i>
+            </a>
+        </div>
+    </div>
+</section>
+}
+
+<!-- Google Reviews Section -->
+<section class="google-reviews-section" style="content-visibility: auto;">
+    <div class="container">
+        <div class="google-reviews-header">
+            <h2><span class="text-google">Отзывы Google</span> от наших клиентов</h2>
+            <div class="google-rating">
+                <span class="rating-score">5.0</span>
+                <div class="rating-stars">
+                    <i class="bi bi-star-fill"></i>
+                    <i class="bi bi-star-fill"></i>
+                    <i class="bi bi-star-fill"></i>
+                    <i class="bi bi-star-fill"></i>
+                    <i class="bi bi-star-fill"></i>
+                </div>
+                <span class="rating-count">22+ отзывов</span>
+            </div>
+            <a href="https://g.page/r/CbgXXXXXXXXXX" target="_blank" class="btn btn-google">
+                <i class="bi bi-star-fill"></i>
+                Оцените нас в Google
+                <i class="bi bi-arrow-up-right"></i>
+            </a>
+        </div>
+        
+        <div class="reviews-carousel-wrapper">
+            <button class="reviews-nav reviews-nav-prev" id="reviewsPrev">
+                <i class="bi bi-chevron-left"></i>
+            </button>
+            
+            <div class="reviews-carousel" id="reviewsCarousel">
+                <div class="review-card">
+                    <div class="review-header">
+                        <div class="reviewer-avatar">LH</div>
+                        <div class="reviewer-info">
+                            <span class="reviewer-name">Linda H***</span>
+                            <span class="review-date">3 недели назад</span>
+                        </div>
+                    </div>
+                    <div class="review-stars">
+                        <i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-fill"></i>
+                    </div>
+                    <p class="review-text">Хороший сервис и общение. Рекомендую.</p>
+                </div>
+                
+                <div class="review-card">
+                    <div class="review-header">
+                        <div class="reviewer-avatar">FM</div>
+                        <div class="reviewer-info">
+                            <span class="reviewer-name">Fulya M***</span>
+                            <span class="review-date">1 год назад</span>
+                        </div>
+                    </div>
+                    <div class="review-stars">
+                        <i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-fill"></i>
+                    </div>
+                    <p class="review-text">За неделю до рейса заказала VIP трансфер из аэропорта Анталии в отель в Олимпосе. Выбрала Imperial VIP Transfer. Замечательный опыт!</p>
+                </div>
+                
+                <div class="review-card">
+                    <div class="review-header">
+                        <div class="reviewer-avatar">MT</div>
+                        <div class="reviewer-info">
+                            <span class="reviewer-name">Merve T***</span>
+                            <span class="review-date">1 год назад</span>
+                        </div>
+                    </div>
+                    <div class="review-stars">
+                        <i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-fill"></i>
+                    </div>
+                    <p class="review-text">Забронировали Imperial VIP для трансфера из аэропорта Анталии в отель в Манавгате. Искали надёжную компанию для девичника — и нашли!</p>
+                </div>
+                
+                <div class="review-card">
+                    <div class="review-header">
+                        <div class="reviewer-avatar">AK</div>
+                        <div class="reviewer-info">
+                            <span class="reviewer-name">Ahmet K***</span>
+                            <span class="review-date">2 месяца назад</span>
+                        </div>
+                    </div>
+                    <div class="review-stars">
+                        <i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-fill"></i>
+                    </div>
+                    <p class="review-text">Очень профессионально и вовремя. Водитель был вежлив и готов помочь. Обязательно закажу снова.</p>
+                </div>
+                
+                <div class="review-card">
+                    <div class="review-header">
+                        <div class="reviewer-avatar">EY</div>
+                        <div class="reviewer-info">
+                            <span class="reviewer-name">Elif Y***</span>
+                            <span class="review-date">6 месяцев назад</span>
+                        </div>
+                    </div>
+                    <div class="review-stars">
+                        <i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-fill"></i>
+                    </div>
+                    <p class="review-text">Пользовались всей семьёй, очень довольны. Машина была идеально чистая, даже детское кресло было. Спасибо Imperial VIP!</p>
+                </div>
+            </div>
+            
+            <button class="reviews-nav reviews-nav-next" id="reviewsNext">
+                <i class="bi bi-chevron-right"></i>
+            </button>
+        </div>
+        
+        <div class="reviews-dots" id="reviewsDots">
+            <button class="reviews-dot active" data-index="0"></button>
+            <button class="reviews-dot" data-index="1"></button>
+            <button class="reviews-dot" data-index="2"></button>
+            <button class="reviews-dot" data-index="3"></button>
+            <button class="reviews-dot" data-index="4"></button>
+        </div>
+    </div>
+</section>
+
+<!-- Why Choose Us Section -->
+<section class="why-choose-section" style="content-visibility: auto;">
+    <div class="container">
+        <span class="why-choose-ghost">ПОЧЕМУ МЫ?</span>
+        <h2 class="why-choose-title">ПОЧЕМУ ВЫБИРАЮТ НАС?</h2>
+        
+        <div class="why-choose-grid">
+            <div class="why-choose-card">
+                <div class="why-choose-icon">
+                    <i class="bi bi-hand-thumbs-up"></i>
+                </div>
+                <h3>Почему выбирают нас?</h3>
+                <p>Мы предлагаем непревзойдённую роскошь, комфорт и надёжность. Наши опытные водители обеспечивают беспроблемную поездку, а наш превосходный сервис выделяет нас среди других.</p>
+            </div>
+            
+            <div class="why-choose-card">
+                <div class="why-choose-icon">
+                    <i class="bi bi-star"></i>
+                </div>
+                <h3>Преимущества бронирования</h3>
+                <p>Наслаждайтесь первоклассным путешествием с роскошными автомобилями, профессиональными водителями и персонализированным сервисом под ваши потребности.</p>
+            </div>
+            
+            <div class="why-choose-card">
+                <div class="why-choose-icon">
+                    <i class="bi bi-calendar-check"></i>
+                </div>
+                <h3>Сделайте поездку ещё приятнее</h3>
+                <p>Доверьте транспорт нам и наслаждайтесь путешествием. Расслабьтесь и начните приключение отдохнувшими.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="cta section" style="content-visibility: auto;">
+    <div class="container">
+        <div class="cta-content">
+            <h2>Свяжитесь с нами для бронирования</h2>
+            <p>
+                Создайте онлайн-бронирование для VIP трансфера 
+                или свяжитесь с нами мгновенно через WhatsApp.
+            </p>
+            <div class="cta-buttons">
+                <a asp-controller="Reservation" asp-action="Index" asp-route-lang="@currentLang" class="btn btn-accent btn-lg">
+                    <i class="bi bi-calendar-check"></i>
+                    Онлайн бронирование
+                </a>
+                <a href="https://wa.me/905303471580" class="btn btn-whatsapp btn-lg" target="_blank">
+                    <i class="bi bi-whatsapp"></i>
+                    WhatsApp: +90 530 347 1580
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <script>
+        (function() {
+            var AIRPORT = 'Antalya Havalimanı';
+            var regionsForForm = @Html.Raw(System.Text.Json.JsonSerializer.Serialize((Model.AllRegionsForForm ?? Model.Regions).Select(r => new { id = r.Id, name = r.Name }).ToList()));
+            var pickupEl = document.getElementById('pickupLocation');
+            var dropoffEl = document.getElementById('dropoffLocation');
+            var regionIdEl = document.getElementById('quickFormRegionId');
+            if (pickupEl && dropoffEl) {
+                function fillDropoff() {
+                    var pickupVal = pickupEl.value;
+                    dropoffEl.innerHTML = '';
+                    if (regionIdEl) regionIdEl.value = '';
+                    if (!pickupVal) {
+                        var opt0 = document.createElement('option');
+                        opt0.value = '';
+                        opt0.textContent = 'Сначала выберите место посадки';
+                        dropoffEl.appendChild(opt0);
+                        return;
+                    }
+                    if (pickupVal === AIRPORT) {
+                        var optPlaceholder = document.createElement('option');
+                        optPlaceholder.value = '';
+                        optPlaceholder.textContent = 'Выберите регион';
+                        dropoffEl.appendChild(optPlaceholder);
+                        regionsForForm.forEach(function(r) {
+                            var opt = document.createElement('option');
+                            opt.value = r.name;
+                            opt.setAttribute('data-region-id', r.id);
+                            opt.textContent = r.name;
+                            dropoffEl.appendChild(opt);
+                        });
+                    } else {
+                        var regionOpt = pickupEl.options[pickupEl.selectedIndex];
+                        var rid = regionOpt && regionOpt.getAttribute('data-region-id');
+                        if (regionIdEl && rid) regionIdEl.value = rid;
+                        var optAir = document.createElement('option');
+                        optAir.value = AIRPORT;
+                        optAir.textContent = 'Аэропорт Анталии';
+                        dropoffEl.appendChild(optAir);
+                    }
+                }
+                pickupEl.addEventListener('change', fillDropoff);
+                dropoffEl.addEventListener('change', function() {
+                    var opt = dropoffEl.options[dropoffEl.selectedIndex];
+                    var rid = opt && opt.getAttribute('data-region-id');
+                    if (regionIdEl) regionIdEl.value = rid || regionIdEl.value;
+                });
+                fillDropoff();
+            }
+        })();
+        document.addEventListener('DOMContentLoaded', function() {
+            const lazySlides = document.querySelectorAll('.lazy-slide');
+            if (lazySlides.length > 0) {
+                setTimeout(function() {
+                    lazySlides.forEach(function(img) {
+                        if (img.dataset.src) {
+                            img.src = img.dataset.src;
+                            img.removeAttribute('data-src');
+                            img.classList.remove('lazy-slide');
+                            img.parentElement.style.display = '';
+                        }
+                    });
+                }, 1000);
+            }
+        });
+    </script>
+}

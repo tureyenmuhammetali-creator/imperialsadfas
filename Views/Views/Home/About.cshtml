@@ -1,0 +1,149 @@
+@{
+    ViewData["Title"] = "Hakkımızda";
+}
+
+<style>
+    /* Sayfa yüklenirken dark bg */
+    body { background: #0f172a !important; }
+    
+    /* Smooth fade in animation */
+    @@keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
+
+<!-- Page Header -->
+<section class="page-header" style="opacity: 0; animation: fadeIn 0.3s ease-in forwards; content-visibility: auto;">
+    <div class="container">
+        <h1>Hakkımızda</h1>
+        <nav class="breadcrumb">
+            <a asp-controller="Home" asp-action="Index">Ana Sayfa</a>
+            <span>/</span>
+            <span>Hakkımızda</span>
+        </nav>
+    </div>
+</section>
+
+<!-- About Content -->
+<section class="about section" style="opacity: 0; animation: fadeIn 0.3s 0.1s ease-in forwards; content-visibility: auto;">
+    <div class="container">
+        <div class="about-content">
+            <div class="about-text">
+                <span class="section-subtitle">Imperial VIP</span>
+                <h2 class="section-title">Premium Transfer Hizmetlerinde Güvenilir Adres</h2>
+                
+                <p>
+                    Imperial VIP olarak, VIP transfer hizmetlerinde sektörün öncü firmalarından biriyiz. 
+                    Misyonumuz, müşterilerimize sadece bir ulaşım hizmeti değil, kusursuz bir seyahat 
+                    deneyimi sunmaktır.
+                </p>
+                
+                <p>
+                    Profesyonel şoför kadromuz, üst segment araç filomuz ve müşteri odaklı hizmet 
+                    anlayışımız ile her transferde aynı kaliteyi garanti ediyoruz. Havalimanı 
+                    transferlerinden şehirler arası seyahatlere kadar geniş bir hizmet yelpazesi sunuyoruz.
+                </p>
+
+                <p class="tursab-info" style="background: rgba(212,175,55,0.15); border-left: 4px solid #d4af37; padding: 16px; margin: 24px 0; border-radius: 4px; font-size: 0.95rem; line-height: 1.6; color: #ffffff;">
+                    Bu site üzerinden yapılan tur satışları,<br />
+                    VİPANATOLİATRAVEL Taşımacılık Turizm İnşaat<br />
+                    Emlak San. ve Tic. Ltd. Şti.<br />
+                    (TÜRSAB – ADINDEN TURİZM) adına yapılmaktadır.
+                </p>
+
+                <div class="about-values">
+                    <div class="value-item">
+                        <div class="value-icon">
+                            <i class="bi bi-gem"></i>
+                        </div>
+                        <div class="value-text">
+                            <h4>Kalite</h4>
+                            <p>Her detayda mükemmellik</p>
+                        </div>
+                    </div>
+                    <div class="value-item">
+                        <div class="value-icon">
+                            <i class="bi bi-shield-check"></i>
+                        </div>
+                        <div class="value-text">
+                            <h4>Güvenilirlik</h4>
+                            <p>Söz verdiğimizi yaparız</p>
+                        </div>
+                    </div>
+                    <div class="value-item">
+                        <div class="value-icon">
+                            <i class="bi bi-heart"></i>
+                        </div>
+                        <div class="value-text">
+                            <h4>Müşteri Odaklılık</h4>
+                            <p>Memnuniyetiniz önceliğimiz</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="about-image">
+                <img src="/images/about.jpg" 
+                     alt="Imperial VIP" 
+                     loading="lazy" 
+                     decoding="async"
+                     onerror="this.style.display='none'" />
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Stats -->
+<section class="stats section section-dark" style="opacity: 0; animation: fadeIn 0.3s 0.2s ease-in forwards; content-visibility: auto;">
+    <div class="container">
+        <div class="stats-grid">
+            <div class="stat-item">
+                <span class="stat-number">5000+</span>
+                <span class="stat-label">Mutlu Müşteri</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number">15+</span>
+                <span class="stat-label">VIP Araç</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number">10+</span>
+                <span class="stat-label">Profesyonel Şoför</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number">7/24</span>
+                <span class="stat-label">Hizmet</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Mission Vision -->
+<section class="mission section" style="opacity: 0; animation: fadeIn 0.3s 0.3s ease-in forwards; content-visibility: auto;">
+    <div class="container">
+        <div class="mission-grid">
+            <div class="mission-card">
+                <div class="mission-icon">
+                    <i class="bi bi-bullseye"></i>
+                </div>
+                <h3>Misyonumuz</h3>
+                <p>
+                    Müşterilerimize en üst düzeyde konfor, güvenlik ve profesyonellik sunarak, 
+                    seyahatlerini unutulmaz bir deneyime dönüştürmek. Her transferde aynı kaliteyi 
+                    ve güveni sağlamak.
+                </p>
+            </div>
+            <div class="mission-card">
+                <div class="mission-icon">
+                    <i class="bi bi-eye"></i>
+                </div>
+                <h3>Vizyonumuz</h3>
+                <p>
+                    Türkiye'nin en güvenilir ve tercih edilen VIP transfer markası olmak. 
+                    Sektörde standartları belirleyen, yenilikçi hizmetler sunan öncü bir firma 
+                    olarak konumumuzu sürdürmek.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>

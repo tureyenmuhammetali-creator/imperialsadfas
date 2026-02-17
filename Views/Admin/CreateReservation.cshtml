@@ -1,0 +1,338 @@
+@model Reservation
+@{
+    ViewData["Title"] = "Manuel Rezervasyon Kaydı";
+    Layout = "_AdminLayout";
+    var vehicles = ViewBag.Vehicles as List<Vehicle> ?? new List<Vehicle>();
+    var regions = ViewBag.Regions as List<Region> ?? new List<Region>();
+}
+
+<div class="admin-form-page">
+    <div class="form-header d-flex justify-content-between align-items-center mb-3">
+        <a asp-action="Reservations" class="btn btn-outline">
+            <i class="bi bi-arrow-left"></i> Rezervasyonlara Dön
+        </a>
+        <span class="badge" style="background:#238636; color:#fff;">Site Dışı / Manuel Kayıt</span>
+    </div>
+
+    <div class="admin-card">
+        <div class="card-body">
+            <p class="text-muted mb-4">
+                <i class="bi bi-info-circle"></i> Telefon, WhatsApp veya başka kanallardan alınan rezervasyonları sisteme manuel olarak ekleyebilirsiniz.
+            </p>
+
+            <form asp-action="CreateReservation" method="post" class="admin-form" id="createReservationForm">
+                @Html.AntiForgeryToken()
+
+                <input type="hidden" asp-for="PickupLocationType" value="@LocationType.Havalimani" />
+                <input type="hidden" asp-for="DropoffLocationType" value="@LocationType.Otel" />
+
+                <!-- Transfer Yönü -->
+                <div class="form-group mb-4">
+                    <label class="control-label">Transfer Yönü</label>
+                    <div class="d-flex gap-3">
+                        <label class="d-flex align-items-center gap-2">
+                            <input type="radio" name="transferDirection" value="airportToHotel" checked />
+                            Havalimanından Alınacak (Havalimanı → Otel)
+                        </label>
+                        <label class="d-flex align-items-center gap-2">
+                            <input type="radio" name="transferDirection" value="hotelToAirport" />
+                            Havalimanına Gidilecek (Otel → Havalimanı)
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Bölge ve Güzergah -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label asp-for="RegionId">Bölge *</label>
+                        <select asp-for="RegionId" class="form-control" id="regionSelect" required>
+                            <option value="">— Bölge seçiniz —</option>
+                            @foreach (var r in regions)
+                            {
+                                <option value="@r.Id" data-start="@r.StartPoint" data-name="@r.Name">@r.Name</option>
+                            }
+                        </select>
+                        <span asp-validation-for="RegionId" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label asp-for="PickupLocation">Alınacak Nokta *</label>
+                        <input asp-for="PickupLocation" class="form-control" id="pickupLocation" placeholder="Bölge seçince dolacak" required />
+                        <span asp-validation-for="PickupLocation" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="DropoffLocation">Bırakılacak Nokta *</label>
+                        <input asp-for="DropoffLocation" class="form-control" id="dropoffLocation" placeholder="Bölge seçince dolacak" required />
+                        <span asp-validation-for="DropoffLocation" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <!-- Araç -->
+                <div class="form-group">
+                    <label asp-for="VehicleId">Araç *</label>
+                    <select asp-for="VehicleId" class="form-control" required>
+                        <option value="">— Araç seçiniz —</option>
+                        @foreach (var v in vehicles)
+                        {
+                            <option value="@v.Id">@v.Name</option>
+                        }
+                    </select>
+                    <span asp-validation-for="VehicleId" class="text-danger"></span>
+                </div>
+
+                <!-- Tarih ve Saat -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label asp-for="TransferDate">Transfer Tarihi *</label>
+                        <input asp-for="TransferDate" type="date" class="form-control" required id="transferDate" />
+                        <span asp-validation-for="TransferDate" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="TransferTime">Transfer Saati *</label>
+                        <input asp-for="TransferTime" type="time" class="form-control" required id="transferTime" />
+                        <span asp-validation-for="TransferTime" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <!-- Otel, Uçuş -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label asp-for="HotelName">Otel Adı</label>
+                        <input asp-for="HotelName" class="form-control" placeholder="Otel adı" maxlength="200" />
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="FlightNumber">Uçuş Numarası</label>
+                        <input asp-for="FlightNumber" class="form-control" placeholder="Örn: TK1234" maxlength="20" />
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="AirlineCompany">Havayolu</label>
+                        <input asp-for="AirlineCompany" class="form-control" placeholder="Havayolu şirketi" maxlength="100" />
+                    </div>
+                </div>
+
+                <!-- Dönüş Transferi -->
+                <div class="form-group">
+                    <label class="d-flex align-items-center gap-2">
+                        <input type="checkbox" name="IsReturnTransfer" value="true" id="isReturnTransfer" />
+                        Dönüş transferi var
+                    </label>
+                </div>
+
+                <div id="returnFields" class="form-row" style="display:none;">
+                    <div class="form-group">
+                        <label asp-for="ReturnTransferDate">Dönüş Tarihi</label>
+                        <input asp-for="ReturnTransferDate" type="date" class="form-control" />
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="ReturnTransferTime">Dönüş Saati</label>
+                        <input asp-for="ReturnTransferTime" type="time" class="form-control" />
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="ReturnFlightNumber">Dönüş Uçuş Numarası</label>
+                        <input asp-for="ReturnFlightNumber" class="form-control" placeholder="Örn: TK5678" maxlength="20" />
+                    </div>
+                </div>
+
+                <!-- Yolcu Bilgileri -->
+                <h5 class="mt-4 mb-2">Yolcu Bilgileri</h5>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label asp-for="NumberOfAdults">Yetişkin Sayısı</label>
+                        <input asp-for="NumberOfAdults" type="number" class="form-control" min="1" max="20" value="1" id="numberOfAdults" />
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="NumberOfChildren">Çocuk Sayısı</label>
+                        <input asp-for="NumberOfChildren" type="number" class="form-control" min="0" max="20" value="0" id="numberOfChildren" />
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="ChildSeatCount">Çocuk Koltuğu</label>
+                        <input asp-for="ChildSeatCount" type="number" class="form-control" min="0" max="10" value="0" />
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="LuggageCount">Bagaj Sayısı</label>
+                        <input asp-for="LuggageCount" type="number" class="form-control" min="0" max="20" value="0" />
+                    </div>
+                </div>
+                <input type="hidden" asp-for="PassengerCount" id="passengerCountHidden" value="1" />
+
+                <!-- 1. Yolcu (Ana müşteri) - Yukarıda -->
+                <h5 class="mt-4 mb-2">Müşteri Bilgileri (1. Yolcu)</h5>
+                <p class="form-hint mb-2 text-muted">Ana iletişim bilgileri.</p>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label asp-for="CustomerName">Ad Soyad *</label>
+                        <input asp-for="CustomerName" class="form-control" placeholder="Ad Soyad" required />
+                        <span asp-validation-for="CustomerName" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="CustomerPhone">Telefon *</label>
+                        <input asp-for="CustomerPhone" type="tel" class="form-control" placeholder="+90 5XX XXX XX XX" required maxlength="30" />
+                        <span asp-validation-for="CustomerPhone" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="CustomerEmail">E-posta</label>
+                        <input asp-for="CustomerEmail" type="email" class="form-control" placeholder="ornek@email.com" />
+                    </div>
+                </div>
+
+                <!-- 2. Yolcu, 3. Yetişkin, 1. Çocuk, 2. Çocuk - Aşağıda -->
+                <div class="form-group mt-4" id="additionalPassengersGroup" style="display:none;">
+                    <label class="control-label">2. yetişkin, 3. yetişkin... / 1. çocuk, 2. çocuk... (sadece Ad Soyad)</label>
+                    <div id="additionalPassengerInputs"></div>
+                    <input type="hidden" name="AdditionalPassengerNames" id="additionalPassengerNamesHidden" />
+                </div>
+
+                <!-- Notlar ve Durum -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label asp-for="Notes">Müşteri Notları</label>
+                        <textarea asp-for="Notes" class="form-control" rows="2" placeholder="Müşterinin özel istekleri"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="AdminNotes">Admin Notu</label>
+                        <textarea asp-for="AdminNotes" class="form-control" rows="2" placeholder="İç not (müşteriye görünmez)"></textarea>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Status">Rezervasyon Durumu</label>
+                    <select asp-for="Status" class="form-control">
+                        <option value="@ReservationStatus.Beklemede">Beklemede</option>
+                        <option value="@ReservationStatus.Onaylandi" selected>Onaylandı</option>
+                        <option value="@ReservationStatus.Tamamlandi">Tamamlandı</option>
+                        <option value="@ReservationStatus.IptalEdildi">İptal Edildi</option>
+                    </select>
+                    <small class="form-hint">Manuel kayıtlarda genelde "Onaylandı" seçilir (telefonla teyit edilmiş)</small>
+                </div>
+
+                <hr class="my-4" />
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-lg"></i> Rezervasyonu Kaydet
+                    </button>
+                    <a asp-action="Reservations" class="btn btn-outline">İptal</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var regionSelect = document.getElementById('regionSelect');
+    var pickupInput = document.getElementById('pickupLocation');
+    var dropoffInput = document.getElementById('dropoffLocation');
+    var dirAirport = document.querySelector('input[name="transferDirection"][value="airportToHotel"]');
+    var dirHotel = document.querySelector('input[name="transferDirection"][value="hotelToAirport"]');
+    var isReturn = document.getElementById('isReturnTransfer');
+    var returnFields = document.getElementById('returnFields');
+
+    function applyDirection() {
+        var opt = regionSelect && regionSelect.options[regionSelect.selectedIndex];
+        if (!opt || !opt.value) return;
+        var start = opt.getAttribute('data-start') || '';
+        var name = opt.getAttribute('data-name') || '';
+        var isAirportToHotel = dirAirport && dirAirport.checked;
+        if (isAirportToHotel) {
+            if (pickupInput) pickupInput.value = start;
+            if (dropoffInput) dropoffInput.value = name;
+        } else {
+            if (pickupInput) pickupInput.value = name;
+            if (dropoffInput) dropoffInput.value = start;
+        }
+    }
+
+    if (regionSelect) {
+        regionSelect.addEventListener('change', applyDirection);
+    }
+    if (dirAirport) dirAirport.addEventListener('change', applyDirection);
+    if (dirHotel) dirHotel.addEventListener('change', applyDirection);
+
+    if (isReturn && returnFields) {
+        isReturn.addEventListener('change', function() {
+            returnFields.style.display = this.checked ? 'flex' : 'none';
+        });
+        returnFields.style.display = isReturn.checked ? 'flex' : 'none';
+    }
+
+    // Yolcu sayısı mantığı - sitedeki ile aynı: 2. Yetişkin, 3. Yetişkin... / 1. Çocuk, 2. Çocuk...
+    function renderAdditionalPassengerInputs() {
+        var adults = parseInt(document.getElementById('numberOfAdults')?.value || document.querySelector('input[name="NumberOfAdults"]')?.value, 10) || 1;
+        var children = parseInt(document.getElementById('numberOfChildren')?.value || document.querySelector('input[name="NumberOfChildren"]')?.value, 10) || 0;
+        var total = adults + children;
+        var container = document.getElementById('additionalPassengerInputs');
+        var group = document.getElementById('additionalPassengersGroup');
+        var hiddenCount = document.getElementById('passengerCountHidden');
+        if (!container || !group) return;
+        container.innerHTML = '';
+        var idx = 0;
+        for (var i = 0; i < adults - 1; i++) {
+            var label = document.createElement('label');
+            label.className = 'control-label';
+            label.textContent = (i + 2) + '. Yetişkin';
+            var input = document.createElement('input');
+            input.type = 'text';
+            input.className = 'form-control';
+            input.placeholder = 'Ad Soyad';
+            input.name = 'additionalPassenger_' + (++idx);
+            var div = document.createElement('div');
+            div.className = 'form-group form-group-sm';
+            div.style.marginBottom = '12px';
+            div.appendChild(label);
+            div.appendChild(input);
+            container.appendChild(div);
+        }
+        for (var j = 0; j < children; j++) {
+            var label = document.createElement('label');
+            label.className = 'control-label';
+            label.textContent = (j + 1) + '. Çocuk';
+            var input = document.createElement('input');
+            input.type = 'text';
+            input.className = 'form-control';
+            input.placeholder = 'Ad Soyad';
+            input.name = 'additionalPassenger_' + (++idx);
+            var div = document.createElement('div');
+            div.className = 'form-group form-group-sm';
+            div.style.marginBottom = '12px';
+            div.appendChild(label);
+            div.appendChild(input);
+            container.appendChild(div);
+        }
+        group.style.display = (adults > 1 || children > 0) ? 'block' : 'none';
+        if (hiddenCount) hiddenCount.value = total.toString();
+    }
+    function collectAdditionalPassengerNames() {
+        var inputs = document.querySelectorAll('#additionalPassengerInputs input[type="text"]');
+        var names = [];
+        for (var i = 0; i < inputs.length; i++) {
+            var v = (inputs[i].value || '').trim();
+            if (v) names.push(v);
+        }
+        var hidden = document.getElementById('additionalPassengerNamesHidden');
+        if (hidden) hidden.value = names.join('; ');
+    }
+    var adultsInput = document.getElementById('numberOfAdults') || document.querySelector('input[name="NumberOfAdults"]');
+    var childrenInput = document.getElementById('numberOfChildren') || document.querySelector('input[name="NumberOfChildren"]');
+    if (adultsInput) { adultsInput.addEventListener('change', renderAdditionalPassengerInputs); adultsInput.addEventListener('input', renderAdditionalPassengerInputs); }
+    if (childrenInput) { childrenInput.addEventListener('change', renderAdditionalPassengerInputs); childrenInput.addEventListener('input', renderAdditionalPassengerInputs); }
+    renderAdditionalPassengerInputs();
+
+    var form = document.getElementById('createReservationForm');
+    if (form) {
+        form.addEventListener('submit', function() {
+            var adults = parseInt(adultsInput?.value || '1', 10) || 1;
+            var children = parseInt(childrenInput?.value || '0', 10) || 0;
+            var pc = document.getElementById('passengerCountHidden');
+            if (pc) pc.value = (adults + children).toString();
+            collectAdditionalPassengerNames();
+        });
+    }
+
+    // Sayfa yüklendiğinde bölge seçiliyse güncelle
+    if (regionSelect && regionSelect.value) applyDirection();
+});
+</script>
+}

@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Imperial VIP - VIP transfer hizmetleri. Havalimanı transferi, otel transferi, şehir turu ve kurumsal transfer çözümleri.">
+    <title>Hizmetlerimiz | Imperial VIP</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/style.css">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect fill='%230a0a0a' width='100' height='100' rx='10'/%3E%3Ctext x='50' y='65' font-family='serif' font-size='50' fill='%23c9a962' text-anchor='middle'%3EI%3C/text%3E%3C/svg%3E">
+</head>
+<body>
+    <!-- Overlay for mobile menu -->
+    <div class="overlay"></div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <a href="index.html" class="logo">
+                <div class="logo-icon">
+                    <svg viewBox="0 0 50 50" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="50" height="50" rx="8" fill="#1a1a1a"/>
+                        <path d="M15 12H22V38H15V12Z" fill="#c9a962"/>
+                        <path d="M28 12H35V38H28V12Z" fill="#c9a962"/>
+                        <path d="M15 22H35V28H15V22Z" fill="#c9a962"/>
+                        <circle cx="25" cy="25" r="23" stroke="#c9a962" stroke-width="1.5" fill="none"/>
+                    </svg>
+                </div>
+                <span class="logo-text">IMPERIAL <span>VIP</span></span>
+            </a>
+
+            <nav class="nav-menu">
+                <a href="index.html" class="nav-link">Ana Sayfa</a>
+                <a href="vehicles.html" class="nav-link">Araçlarımız</a>
+                <a href="services.html" class="nav-link active">Hizmetler</a>
+                <a href="about.html" class="nav-link">Hakkımızda</a>
+                <a href="contact.html" class="nav-link">İletişim</a>
+                <a href="reservation.html" class="nav-cta">Rezervasyon</a>
+            </nav>
+
+            <button class="menu-toggle" aria-label="Menü">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Page Header -->
+    <section class="page-header">
+        <div class="container">
+            <nav class="breadcrumb">
+                <a href="index.html">Ana Sayfa</a>
+                <span>/</span>
+                <span>Hizmetlerimiz</span>
+            </nav>
+            <h1 class="page-title">VIP Transfer <span class="text-gold">Hizmetleri</span></h1>
+            <p class="page-subtitle">Her türlü ulaşım ihtiyacınız için özel çözümler sunuyoruz.</p>
+        </div>
+    </section>
+
+    <!-- Services Detail Section -->
+    <section class="section">
+        <div class="container">
+            <!-- Airport Transfer -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-2xl); align-items: center; margin-bottom: var(--space-3xl);">
+                <div>
+                    <div style="background: rgba(201, 169, 98, 0.1); border: 1px solid var(--color-gold); padding: var(--space-xs) var(--space-md); border-radius: 50px; display: inline-block; margin-bottom: var(--space-md);">
+                        <span style="color: var(--color-gold); font-size: 0.85rem; font-weight: 600; letter-spacing: 0.05em;">01</span>
+                    </div>
+                    <h2 style="margin-bottom: var(--space-md);">Havalimanı <span class="text-gold">Transferi</span></h2>
+                    <p style="color: var(--color-light-gray); font-size: 1.1rem; margin-bottom: var(--space-lg);">
+                        İstanbul Havalimanı (IST) ve Sabiha Gökçen Havalimanı'ndan (SAW) tüm noktalara VIP transfer hizmeti. 
+                        Uçuş takibi, kapıda karşılama ve bagaj yardımı dahil.
+                    </p>
+                    
+                    <ul style="display: flex; flex-direction: column; gap: var(--space-sm); margin-bottom: var(--space-lg);">
+                        <li style="display: flex; align-items: center; gap: var(--space-sm);">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-gold)" stroke-width="2">
+                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                                <polyline points="22 4 12 14.01 9 11.01"/>
+                            </svg>
+                            <span>Uçuş takibi ve gecikme toleransı</span>
+                        </li>
+                        <li style="display: flex; align-items: center; gap: var(--space-sm);">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-gold)" stroke-width="2">
+                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                                <polyline points="22 4 12 14.01 9 11.01"/>
+                            </svg>
+                            <span>İsim tabelası ile karşılama</span>
+                        </li>
+                        <li style="display: flex; align-items: center; gap: var(--space-sm);">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-gold)" stroke-width="2">
+                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                                <polyline points="22 4 12 14.01 9 11.01"/>
+                            </svg>
+                            <span>Bagaj taşıma yardımı</span>
+                        </li>
+                        <li style="display: flex; align-items: center; gap: var(--space-sm);">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-gold)" stroke-width="2">
+                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                                <polyline points="22 4 12 14.01 9 11.01"/>
+                            </svg>
+                            <span>7/24 hizmet</span>
+                        </li>
+                    </ul>
+                    
+                    <a href="reservation.html?type=airport" class="btn btn-primary">Havalimanı Transferi Rezervasyonu</a>
+                </div>
+                <div style="background: var(--color-dark); padding: var(--space-2xl); border-radius: var(--radius-lg); text-align: center;">
+                    <svg viewBox="0 0 200 150" fill="none" xmlns="http://www.w3.org/2000/svg" style="width: 80%; max-width: 300px; margin: 0 auto;">
+                        <!-- Airplane -->
+                        <path d="M160 60 L140 55 L100 70 L60 50 L55 55 L85 75 L50 85 L35 80 L30 85 L50 95 L60 92 L160 70 Z" fill="#c9a962" opacity="0.8"/>
+                        <!-- Runway -->
+                        <rect x="20" y="110" width="160" height="8" rx="2" fill="#2a2a2a"/>
+                        <rect x="40" y="112" width="20" height="4" fill="#c9a962" opacity="0.5"/>
+                        <rect x="80" y="112" width="20" height="4" fill="#c9a962" opacity="0.5"/>
+                        <rect x="120" y="112" width="20" height="4" fill="#c9a962" opacity="0.5"/>
+                        <!-- Car -->
+                        <rect x="130" y="125" width="40" height="15" rx="4" fill="#c9a962"/>
+                        <circle cx="140" cy="140" r="6" fill="#1a1a1a" stroke="#c9a962" stroke-width="1.5"/>
+                        <circle cx="160" cy="140" r="6" fill="#1a1a1a" stroke="#c9a962" stroke-width="1.5"/>
+                    </svg>
+                </div>
+            </div>
+
+            <!-- Hotel Transfer -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-2xl); align-items: center; margin-bottom: var(--space-3xl);">
+                <div style="background: var(--color-dark); padding: var(--space-2xl); border-radius: var(--radius-lg); text-align: center; order: -1;">
+                    <svg viewBox="0 0 200 150" fill="none" xmlns="http://www.w3.org/2000/svg" style="width: 80%; max-width: 300px; margin: 0 auto;">
+                        <!-- Hotel Building -->
+                        <rect x="50" y="30" width="100" height="100" rx="4" fill="#2a2a2a"/>
+                        <rect x="60" y="40" width="20" height="15" rx="2" fill="#c9a962" opacity="0.5"/>
+                        <rect x="90" y="40" width="20" height="15" rx="2" fill="#c9a962" opacity="0.5"/>
+                        <rect x="120" y="40" width="20" height="15" rx="2" fill="#c9a962" opacity="0.5"/>
+                        <rect x="60" y="65" width="20" height="15" rx="2" fill="#c9a962" opacity="0.5"/>
+                        <rect x="90" y="65" width="20" height="15" rx="2" fill="#c9a962" opacity="0.5"/>
+                        <rect x="120" y="65" width="20" height="15" rx="2" fill="#c9a962" opacity="0.5"/>
+                        <rect x="60" y="90" width="20" height="15" rx="2" fill="#c9a962" opacity="0.5"/>
+                        <rect x="90" y="90" width="20" height="15" rx="2" fill="#c9a962" opacity="0.3"/>
+                        <rect x="120" y="90" width="20" height="15" rx="2" fill="#c9a962" opacity="0.5"/>
+                        <!-- Entrance -->
+                        <rect x="85" y="110" width="30" height="20" rx="2" fill="#c9a962"/>
+                        <!-- Stars -->
+                        <circle cx="100" cy="20" r="3" fill="#c9a962"/>
+                        <circle cx="90" cy="22" r="2" fill="#c9a962" opacity="0.7"/>
+                        <circle cx="110" cy="22" r="2" fill="#c9a962" opacity="0.7"/>
+                    </svg>
+                </div>
+                <div>
+                    <div style="background: rgba(201, 169, 98, 0.1); border: 1px solid var(--color-gold); padding: var(--space-xs) var(--space-md); border-radius: 50px; display: inline-block; margin-bottom: var(--space-md);">
+                        <span style="color: var(--color-gold); font-size: 0.85rem; font-weight: 600; letter-spacing: 0.05em;">02</span>
+                    </div>
+                    <h2 style="margin-bottom: var(--space-md);">Otel <span class="text-gold">Transferi</span></h2>
+                    <p style="color: var(--color-light-gray); font-size: 1.1rem; margin-bottom: var(--space-lg);">
+                        İstanbul'un lüks otellerine ve konaklama noktalarına konforlu transfer. 
+                        Four Seasons, Çırağan Palace, Raffles ve daha fazlası için özel hizmet.
+                    </p>
+                    
+                    <ul style="display: flex; flex-direction: column; gap: var(--space-sm); margin-bottom: var(--space-lg);">
+                        <li style="display: flex; align-items: center; gap: var(--space-sm);">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-gold)" stroke-width="2">
+                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                                <polyline points="22 4 12 14.01 9 11.01"/>
+                            </svg>
+                            <span>Tüm 5 yıldızlı otellere hizmet</span>
+                        </li>
+                        <li style="display: flex; align-items: center; gap: var(--space-sm);">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-gold)" stroke-width="2">
+                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                                <polyline points="22 4 12 14.01 9 11.01"/>
+                            </svg>
+                            <span>Lobi veya oda kapısında buluşma</span>
+                        </li>
+                        <li style="display: flex; align-items: center; gap: var(--space-sm);">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-gold)" stroke-width="2">
+                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                                <polyline points="22 4 12 14.01 9 11.01"/>
+                            </svg>
+                            <span>Otel → Otel transfer seçeneği</span>
+                        </li>
+                        <li style="display: flex; align-items: center; gap: var(--space-sm);">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-gold)" stroke-width="2">
+                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                                <polyline points="22 4 12 14.01 9 11.01"/>
+                            </svg>
+                            <span>Concierge koordinasyonu</span>
+                        </li>
+                    </ul>
+                    
+                    <a href="reservation.html" class="btn btn-primary">Otel Transferi Rezervasyonu</a>
+                </div>
+            </div>
+
+            <!-- City Tour -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-2xl); align-items: center; margin-bottom: var(--space-3xl);">
+                <div>
+                    <div style="background: rgba(201, 169, 98, 0.1); border: 1px solid var(--color-gold); padding: var(--space-xs) var(--space-md); border-radius: 50px; display: inline-block; margin-bottom: var(--space-md);">
+                        <span style="color: var(--color-gold); font-size: 0.85rem; font-weight: 600; letter-spacing: 0.05em;">03</span>
+                    </div>
+                    <h2 style="margin-bottom: var(--space-md);">Şehir <span class="text-gold">Turu</span></h2>
+                    <p style="color: var(--color-light-gray); font-size: 1.1rem; margin-bottom: var(--space-lg);">
+                        Özel şoförlü araçlarla İstanbul'u keşfedin. Tarihi yarımada, Boğaz turu, alışveriş 
+                        merkezleri ve daha fazlası için kişiye özel tur programları.
+                    </p>
+                    
+                    <ul style="display: flex; flex-direction: column; gap: var(--space-sm); margin-bottom: var(--space-lg);">
+                        <li style="display: flex; align-items: center; gap: var(--space-sm);">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-gold)" stroke-width="2">
+                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                                <polyline points="22 4 12 14.01 9 11.01"/>
+                            </svg>
+                            <span>Esnek saat ve rota planlaması</span>
+                        </li>
+                        <li style="display: flex; align-items: center; gap: var(--space-sm);">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-gold)" stroke-width="2">
+                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                                <polyline points="22 4 12 14.01 9 11.01"/>
+                            </svg>
+                            <span>Tarihi ve turistik noktalara ulaşım</span>
+                        </li>
+                        <li style="display: flex; align-items: center; gap: var(--space-sm);">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-gold)" stroke-width="2">
+                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                                <polyline points="22 4 12 14.01 9 11.01"/>
+                            </svg>
+                            <span>Saatlik veya günlük kiralama</span>
+                        </li>
+                        <li style="display: flex; align-items: center; gap: var(--space-sm);">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-gold)" stroke-width="2">
+                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                                <polyline points="22 4 12 14.01 9 11.01"/>
+                            </svg>
+                            <span>Şehir bilgisi olan şoförler</span>
+                        </li>
+                    </ul>
+                    
+                    <a href="reservation.html" class="btn btn-primary">Şehir Turu Rezervasyonu</a>
+                </div>
+                <div style="background: var(--color-dark); padding: var(--space-2xl); border-radius: var(--radius-lg); text-align: center;">
+                    <svg viewBox="0 0 200 150" fill="none" xmlns="http://www.w3.org/2000/svg" style="width: 80%; max-width: 300px; margin: 0 auto;">
+                        <!-- Istanbul Silhouette - Mosque -->
+                        <path d="M70 90 L70 60 L75 55 L80 60 L80 90" fill="#c9a962" opacity="0.6"/>
+                        <circle cx="75" cy="50" r="15" fill="#c9a962" opacity="0.4"/>
+                        <rect x="73" y="35" width="4" height="15" fill="#c9a962"/>
+                        <!-- Minaret -->
+                        <rect x="55" y="50" width="6" height="40" fill="#c9a962" opacity="0.5"/>
+                        <rect x="89" y="50" width="6" height="40" fill="#c9a962" opacity="0.5"/>
+                        <!-- Bosphorus Bridge hint -->
+                        <path d="M20 100 Q100 80 180 100" stroke="#c9a962" stroke-width="3" fill="none" opacity="0.4"/>
+                        <!-- Waves -->
+                        <path d="M10 120 Q30 115 50 120 Q70 125 90 120 Q110 115 130 120 Q150 125 170 120 Q190 115 200 120" stroke="#c9a962" stroke-width="2" fill="none" opacity="0.3"/>
+                    </svg>
+                </div>
+            </div>
+
+            <!-- Corporate Services -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-2xl); align-items: center;">
+                <div style="background: var(--color-dark); padding: var(--space-2xl); border-radius: var(--radius-lg); text-align: center; order: -1;">
+                    <svg viewBox="0 0 200 150" fill="none" xmlns="http://www.w3.org/2000/svg" style="width: 80%; max-width: 300px; margin: 0 auto;">
+                        <!-- Office Building -->
+                        <rect x="60" y="20" width="80" height="110" rx="4" fill="#2a2a2a"/>
+                        <!-- Windows grid -->
+                        <rect x="70" y="30" width="15" height="12" rx="2" fill="#c9a962" opacity="0.4"/>
+                        <rect x="92" y="30" width="15" height="12" rx="2" fill="#c9a962" opacity="0.6"/>
+                        <rect x="115" y="30" width="15" height="12" rx="2" fill="#c9a962" opacity="0.4"/>
+                        <rect x="70" y="50" width="15" height="12" rx="2" fill="#c9a962" opacity="0.5"/>
+                        <rect x="92" y="50" width="15" height="12" rx="2" fill="#c9a962" opacity="0.4"/>
+                        <rect x="115" y="50" width="15" height="12" rx="2" fill="#c9a962" opacity="0.6"/>
+                        <rect x="70" y="70" width="15" height="12" rx="2" fill="#c9a962" opacity="0.6"/>
+                        <rect x="92" y="70" width="15" height="12" rx="2" fill="#c9a962" opacity="0.5"/>
+                        <rect x="115" y="70" width="15" height="12" rx="2" fill="#c9a962" opacity="0.4"/>
+                        <rect x="70" y="90" width="15" height="12" rx="2" fill="#c9a962" opacity="0.4"/>
+                        <rect x="92" y="90" width="15" height="12" rx="2" fill="#c9a962" opacity="0.6"/>
+                        <rect x="115" y="90" width="15" height="12" rx="2" fill="#c9a962" opacity="0.5"/>
+                        <!-- Entrance -->
+                        <rect x="88" y="110" width="24" height="20" rx="2" fill="#c9a962"/>
+                        <!-- Briefcase icon -->
+                        <rect x="85" y="5" width="30" height="12" rx="3" fill="#c9a962"/>
+                    </svg>
+                </div>
+                <div>
+                    <div style="background: rgba(201, 169, 98, 0.1); border: 1px solid var(--color-gold); padding: var(--space-xs) var(--space-md); border-radius: 50px; display: inline-block; margin-bottom: var(--space-md);">
+                        <span style="color: var(--color-gold); font-size: 0.85rem; font-weight: 600; letter-spacing: 0.05em;">04</span>
+                    </div>
+                    <h2 style="margin-bottom: var(--space-md);">Kurumsal <span class="text-gold">Hizmetler</span></h2>
+                    <p style="color: var(--color-light-gray); font-size: 1.1rem; margin-bottom: var(--space-lg);">
+                        Şirketler için özel anlaşmalar ve toplu transfer çözümleri. Kongre, toplantı, 
+                        etkinlik ve düzenli personel transferleri için kurumsal paketler.
+                    </p>
+                    
+                    <ul style="display: flex; flex-direction: column; gap: var(--space-sm); margin-bottom: var(--space-lg);">
+                        <li style="display: flex; align-items: center; gap: var(--space-sm);">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-gold)" stroke-width="2">
+                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                                <polyline points="22 4 12 14.01 9 11.01"/>
+                            </svg>
+                            <span>Özel kurumsal anlaşmalar</span>
+                        </li>
+                        <li style="display: flex; align-items: center; gap: var(--space-sm);">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-gold)" stroke-width="2">
+                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                                <polyline points="22 4 12 14.01 9 11.01"/>
+                            </svg>
+                            <span>Aylık fatura seçeneği</span>
+                        </li>
+                        <li style="display: flex; align-items: center; gap: var(--space-sm);">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-gold)" stroke-width="2">
+                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                                <polyline points="22 4 12 14.01 9 11.01"/>
+                            </svg>
+                            <span>Toplu transfer koordinasyonu</span>
+                        </li>
+                        <li style="display: flex; align-items: center; gap: var(--space-sm);">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-gold)" stroke-width="2">
+                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                                <polyline points="22 4 12 14.01 9 11.01"/>
+                            </svg>
+                            <span>Özel müşteri temsilcisi</span>
+                        </li>
+                    </ul>
+                    
+                    <a href="contact.html" class="btn btn-primary">Kurumsal Teklif Alın</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Professional Chauffeurs Section -->
+    <section class="section" style="background: var(--color-dark);">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-badge">Profesyonel Ekip</span>
+                <h2 class="section-title">Deneyimli <span class="text-gold">Şoförlerimiz</span></h2>
+                <p class="section-desc">
+                    Sizi aramak zorunda kalmazsınız. Şoförlerimiz tam zamanında kapınızda olur.
+                </p>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--space-lg);">
+                <div style="background: var(--color-dark-gray); padding: var(--space-xl); border-radius: var(--radius-lg); text-align: center;">
+                    <div style="width: 80px; height: 80px; background: rgba(201, 169, 98, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto var(--space-md);">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--color-gold)" stroke-width="1.5">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                            <circle cx="9" cy="7" r="4"/>
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                        </svg>
+                    </div>
+                    <h4 style="font-family: var(--font-primary); font-weight: 600; margin-bottom: var(--space-sm);">Profesyonel Ekip</h4>
+                    <p style="color: var(--color-light-gray); font-size: 0.95rem;">
+                        Tüm şoförlerimiz lisanslı, deneyimli ve profesyonel eğitim almış kişilerden oluşur.
+                    </p>
+                </div>
+                
+                <div style="background: var(--color-dark-gray); padding: var(--space-xl); border-radius: var(--radius-lg); text-align: center;">
+                    <div style="width: 80px; height: 80px; background: rgba(201, 169, 98, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto var(--space-md);">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--color-gold)" stroke-width="1.5">
+                            <circle cx="12" cy="12" r="10"/>
+                            <polyline points="12 6 12 12 16 14"/>
+                        </svg>
+                    </div>
+                    <h4 style="font-family: var(--font-primary); font-weight: 600; margin-bottom: var(--space-sm);">Dakiklik Garantisi</h4>
+                    <p style="color: var(--color-light-gray); font-size: 0.95rem;">
+                        Randevu saatinden önce hazır oluruz. Sizi bekletmek bizim için kabul edilemez.
+                    </p>
+                </div>
+                
+                <div style="background: var(--color-dark-gray); padding: var(--space-xl); border-radius: var(--radius-lg); text-align: center;">
+                    <div style="width: 80px; height: 80px; background: rgba(201, 169, 98, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto var(--space-md);">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--color-gold)" stroke-width="1.5">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                        </svg>
+                    </div>
+                    <h4 style="font-family: var(--font-primary); font-weight: 600; margin-bottom: var(--space-sm);">Saygılı İletişim</h4>
+                    <p style="color: var(--color-light-gray); font-size: 0.95rem;">
+                        Misafirlerimizle kibar, saygılı ve profesyonel bir iletişim kurarız.
+                    </p>
+                </div>
+                
+                <div style="background: var(--color-dark-gray); padding: var(--space-xl); border-radius: var(--radius-lg); text-align: center;">
+                    <div style="width: 80px; height: 80px; background: rgba(201, 169, 98, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto var(--space-md);">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--color-gold)" stroke-width="1.5">
+                            <circle cx="12" cy="12" r="10"/>
+                            <path d="M2 12h20"/>
+                            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                        </svg>
+                    </div>
+                    <h4 style="font-family: var(--font-primary); font-weight: 600; margin-bottom: var(--space-sm);">Dil Desteği</h4>
+                    <p style="color: var(--color-light-gray); font-size: 0.95rem;">
+                        İngilizce ve diğer dillerde iletişim kurabilecek şoför seçenekleri mevcuttur.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta">
+        <div class="container">
+            <h2>Hemen Rezervasyon Yapın</h2>
+            <p>VIP transfer deneyimini yaşamak için tek adım kaldı.</p>
+            <a href="reservation.html" class="btn">Rezervasyon Yap</a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <a href="index.html" class="logo">
+                        <div class="logo-icon">
+                            <svg viewBox="0 0 50 50" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <rect width="50" height="50" rx="8" fill="#1a1a1a"/>
+                                <path d="M15 12H22V38H15V12Z" fill="#c9a962"/>
+                                <path d="M28 12H35V38H28V12Z" fill="#c9a962"/>
+                                <path d="M15 22H35V28H15V22Z" fill="#c9a962"/>
+                                <circle cx="25" cy="25" r="23" stroke="#c9a962" stroke-width="1.5" fill="none"/>
+                            </svg>
+                        </div>
+                        <span class="logo-text">IMPERIAL <span>VIP</span></span>
+                    </a>
+                    <p>Premium VIP transfer hizmetleri ile İstanbul'da konforlu ve güvenli ulaşım.</p>
+                </div>
+                
+                <div class="footer-links-col">
+                    <h4 class="footer-title">Hızlı Linkler</h4>
+                    <nav class="footer-links">
+                        <a href="index.html" class="footer-link">Ana Sayfa</a>
+                        <a href="vehicles.html" class="footer-link">Araçlarımız</a>
+                        <a href="services.html" class="footer-link">Hizmetler</a>
+                        <a href="reservation.html" class="footer-link">Rezervasyon</a>
+                    </nav>
+                </div>
+                
+                <div class="footer-links-col">
+                    <h4 class="footer-title">Hizmetler</h4>
+                    <nav class="footer-links">
+                        <a href="services.html" class="footer-link">Havalimanı Transfer</a>
+                        <a href="services.html" class="footer-link">Otel Transfer</a>
+                        <a href="services.html" class="footer-link">Şehir Turu</a>
+                        <a href="services.html" class="footer-link">Kurumsal</a>
+                    </nav>
+                </div>
+                
+                <div class="footer-contact">
+                    <h4 class="footer-title">İletişim</h4>
+                    <div class="footer-contact-item">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+                        </svg>
+                        <span>+90 (212) 000 00 00</span>
+                    </div>
+                    <div class="footer-contact-item">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                            <polyline points="22,6 12,13 2,6"/>
+                        </svg>
+                        <span>info@imperialvip.com</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p class="footer-copyright">&copy; 2024 Imperial VIP. Tüm hakları saklıdır.</p>
+                <div class="footer-legal">
+                    <a href="#">Gizlilik Politikası</a>
+                    <a href="#">Kullanım Şartları</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="js/main.js"></script>
+    
+    <style>
+        @media (max-width: 900px) {
+            .section > .container > div[style*="grid-template-columns: 1fr 1fr"] {
+                grid-template-columns: 1fr !important;
+            }
+            .section > .container > div[style*="grid-template-columns: 1fr 1fr"] > div[style*="order: -1"] {
+                order: 0 !important;
+            }
+        }
+    </style>
+</body>
+</html>

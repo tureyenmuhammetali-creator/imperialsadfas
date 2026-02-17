@@ -1,0 +1,109 @@
+@model Contact
+@{
+    ViewData["Title"] = "Contact";
+    var currentLang = "en";
+}
+
+<section class="page-header">
+    <div class="container">
+        <h1>Contact</h1>
+        <nav class="breadcrumb">
+            <a asp-controller="Home" asp-action="Index" asp-route-lang="@currentLang">Home</a>
+            <span>/</span>
+            <span>Contact</span>
+        </nav>
+    </div>
+</section>
+
+<section class="contact section">
+    <div class="container">
+        <div class="contact-content">
+            <div class="contact-info">
+                <span class="section-subtitle">Get in Touch</span>
+                <h2 class="section-title">Our Contact Information</h2>
+                <p>
+                    For questions, suggestions or reservation requests, please contact us. 
+                    We will get back to you as soon as possible.
+                </p>
+                <div class="contact-items">
+                    <div class="contact-item contact-item-action">
+                        <div class="contact-icon"><i class="bi bi-telephone"></i></div>
+                        <div class="contact-text">
+                            <h4>Phone</h4>
+                            <span class="contact-value">+90 530 347 1580</span>
+                            <a href="tel:+905303471580" class="btn-contact-ara" title="Call now"><i class="bi bi-telephone-fill"></i> Call</a>
+                        </div>
+                    </div>
+                    <div class="contact-item contact-item-action">
+                        <div class="contact-icon"><i class="bi bi-whatsapp"></i></div>
+                        <div class="contact-text">
+                            <h4>WhatsApp</h4>
+                            <span class="contact-value">+90 530 347 1580</span>
+                            <a href="https://wa.me/905303471580" target="_blank" rel="noopener" class="btn-contact-ara btn-whatsapp" title="WhatsApp"><i class="bi bi-whatsapp"></i> Call / Message</a>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <div class="contact-icon"><i class="bi bi-envelope"></i></div>
+                        <div class="contact-text">
+                            <h4>Email</h4>
+                            <a href="mailto:info@imperialvip.com" class="contact-link">info@imperialvip.com</a>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <div class="contact-icon"><i class="bi bi-geo-alt"></i></div>
+                        <div class="contact-text">
+                            <h4>Address</h4>
+                            <span class="contact-value">Istanbul, Turkey</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="contact-social">
+                    <h4>Social Media</h4>
+                    <div class="social-links">
+                        <a href="#" target="_blank"><i class="bi bi-instagram"></i></a>
+                        <a href="#" target="_blank"><i class="bi bi-facebook"></i></a>
+                        <a href="#" target="_blank"><i class="bi bi-twitter-x"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="contact-form-wrapper">
+                <h3>Send Message</h3>
+                @if (TempData["Success"] != null)
+                {
+                    <div class="alert alert-success"><i class="bi bi-check-circle"></i> @TempData["Success"]</div>
+                }
+                <form asp-action="Contact" asp-route-lang="@currentLang" method="post" class="contact-form">
+                    @Html.AntiForgeryToken()
+                    <div class="form-group">
+                        <label asp-for="FullName">Full Name *</label>
+                        <input asp-for="FullName" class="form-control" placeholder="Your name" />
+                        <span asp-validation-for="FullName" class="text-danger"></span>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label asp-for="Email">Email *</label>
+                            <input asp-for="Email" class="form-control" placeholder="example@email.com" />
+                            <span asp-validation-for="Email" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="Phone">Phone</label>
+                            <input asp-for="Phone" type="tel" class="form-control" placeholder="e.g. +90 532 123 45 67" maxlength="30" />
+                            <span asp-validation-for="Phone" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="Subject">Subject *</label>
+                        <input asp-for="Subject" class="form-control" placeholder="Message subject" />
+                        <span asp-validation-for="Subject" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="Message">Message *</label>
+                        <textarea asp-for="Message" class="form-control" rows="5" placeholder="Your message..."></textarea>
+                        <span asp-validation-for="Message" class="text-danger"></span>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-lg"><i class="bi bi-send"></i> Send</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>

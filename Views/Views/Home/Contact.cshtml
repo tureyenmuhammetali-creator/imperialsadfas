@@ -1,0 +1,137 @@
+@model Contact
+@{
+    ViewData["Title"] = "İletişim";
+}
+
+<!-- Page Header -->
+<section class="page-header">
+    <div class="container">
+        <h1>İletişim</h1>
+        <nav class="breadcrumb">
+            <a asp-controller="Home" asp-action="Index">Ana Sayfa</a>
+            <span>/</span>
+            <span>İletişim</span>
+        </nav>
+    </div>
+</section>
+
+<!-- Contact Content -->
+<section class="contact section">
+    <div class="container">
+        <div class="contact-content">
+            <!-- Contact Info -->
+            <div class="contact-info">
+                <span class="section-subtitle">Bize Ulaşın</span>
+                <h2 class="section-title">İletişim Bilgilerimiz</h2>
+                <p>
+                    Sorularınız, önerileriniz veya rezervasyon talepleriniz için 
+                    bizimle iletişime geçebilirsiniz. Size en kısa sürede dönüş yapacağız.
+                </p>
+
+                <div class="contact-items">
+                    <div class="contact-item">
+                        <div class="contact-icon">
+                            <i class="bi bi-telephone"></i>
+                        </div>
+                        <div class="contact-text">
+                            <h4>Telefon</h4>
+                            <a href="tel:+905303471580">+90 530 347 1580</a>
+                        </div>
+                    </div>
+                    
+                    <div class="contact-item">
+                        <div class="contact-icon">
+                            <i class="bi bi-whatsapp"></i>
+                        </div>
+                        <div class="contact-text">
+                            <h4>WhatsApp</h4>
+                            <a href="https://wa.me/905303471580" target="_blank">+90 530 347 1580</a>
+                        </div>
+                    </div>
+                    
+                    <div class="contact-item">
+                        <div class="contact-icon">
+                            <i class="bi bi-envelope"></i>
+                        </div>
+                        <div class="contact-text">
+                            <h4>E-posta</h4>
+                            <a href="mailto:info@imperialvip.com">info@imperialvip.com</a>
+                        </div>
+                    </div>
+                    
+                    <div class="contact-item">
+                        <div class="contact-icon">
+                            <i class="bi bi-geo-alt"></i>
+                        </div>
+                        <div class="contact-text">
+                            <h4>Adres</h4>
+                            <span>İstanbul, Türkiye</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="contact-social">
+                    <h4>Sosyal Medya</h4>
+                    <div class="social-links">
+                        <a href="#" target="_blank"><i class="bi bi-instagram"></i></a>
+                        <a href="#" target="_blank"><i class="bi bi-facebook"></i></a>
+                        <a href="#" target="_blank"><i class="bi bi-twitter-x"></i></a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contact Form -->
+            <div class="contact-form-wrapper">
+                <h3>Mesaj Gönderin</h3>
+                
+                @if (TempData["Success"] != null)
+                {
+                    <div class="alert alert-success">
+                        <i class="bi bi-check-circle"></i>
+                        @TempData["Success"]
+                    </div>
+                }
+
+                <form asp-action="Contact" method="post" class="contact-form">
+                    @Html.AntiForgeryToken()
+                    
+                    <div class="form-group">
+                        <label asp-for="FullName">Ad Soyad *</label>
+                        <input asp-for="FullName" class="form-control" placeholder="Adınız Soyadınız" />
+                        <span asp-validation-for="FullName" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label asp-for="Email">E-posta *</label>
+                            <input asp-for="Email" class="form-control" placeholder="ornek@email.com" />
+                            <span asp-validation-for="Email" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="Phone">Telefon</label>
+                            <input asp-for="Phone" class="form-control" placeholder="+90 5XX XXX XX XX" />
+                            <span asp-validation-for="Phone" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="Subject">Konu *</label>
+                        <input asp-for="Subject" class="form-control" placeholder="Mesajınızın konusu" />
+                        <span asp-validation-for="Subject" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="Message">Mesaj *</label>
+                        <textarea asp-for="Message" class="form-control" rows="5" placeholder="Mesajınızı yazın..."></textarea>
+                        <span asp-validation-for="Message" class="text-danger"></span>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="bi bi-send"></i>
+                        Gönder
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>

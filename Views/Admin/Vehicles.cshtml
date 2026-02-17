@@ -1,0 +1,88 @@
+@model IEnumerable<Vehicle>
+@{
+    ViewData["Title"] = "Araçlar";
+    Layout = "_AdminLayout";
+}
+
+<div class="admin-toolbar">
+    <a asp-controller="Admin" asp-action="CreateVehicle" class="btn btn-primary">
+        <i class="bi bi-plus"></i> Yeni Araç Ekle
+    </a>
+</div>
+
+<div class="admin-card">
+    <div class="card-body">
+        @if (Model.Any())
+        {
+            <div class="table-responsive">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Görsel</th>
+                            <th>Araç</th>
+                            <th>Tip</th>
+                            <th>Kapasite</th>
+                            <th>Kullanım ücreti</th>
+                            <th>Durum</th>
+                            <th>İşlem</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(item.ImageUrl))
+                                    {
+                                        <img src="@item.ImageUrl" alt="@item.Name" class="table-image" onerror="this.onerror=null; this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+                                        <div class="table-image-placeholder" style="display:none;"><i class="bi bi-car-front"></i></div>
+                                    }
+                                    else
+                                    {
+                                        <div class="table-image-placeholder"><i class="bi bi-car-front"></i></div>
+                                    }
+                                </td>
+                                <td>
+                                    <strong>@item.Name</strong>
+                                    <br><small>@item.Brand @item.Model</small>
+                                </td>
+                                <td>@item.Type</td>
+                                <td>
+                                    <i class="bi bi-people"></i> @item.PassengerCapacity
+                                    <i class="bi bi-briefcase ms-2"></i> @item.LuggageCapacity
+                                </td>
+                                <td>@item.MinimumPrice.ToString("N2") € / @item.MinimumPriceUsd.ToString("N2") $ / @item.MinimumPriceTry.ToString("N0") ₺</td>
+                                <td>
+                                    @if (item.IsActive == 1)
+                                    {
+                                        <span class="badge badge-success">Aktif</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge badge-danger">Pasif</span>
+                                    }
+                                </td>
+                                <td>
+                                    <a asp-action="EditVehicle" asp-route-id="@item.Id" class="btn btn-sm btn-outline">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <form asp-action="DeleteVehicle" method="post" style="display:inline;" onsubmit="return confirm('Bu aracı silmek istediğinize emin misiniz?');">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@item.Id" />
+                                        <button type="submit" class="btn btn-sm btn-danger">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <p class="text-muted text-center">Henüz araç bulunmuyor.</p>
+        }
+    </div>
+</div>

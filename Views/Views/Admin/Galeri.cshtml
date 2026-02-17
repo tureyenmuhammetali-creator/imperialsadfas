@@ -1,0 +1,245 @@
+@model List<ImperialVip.Models.GalleryImage>
+@{
+    ViewData["Title"] = "Galeri Yönetimi";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<style>
+    .gallery-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 12px;
+    }
+    .gallery-item {
+        position: relative;
+        aspect-ratio: 1;
+        overflow: hidden;
+        border-radius: 10px;
+        cursor: pointer;
+        border: 3px solid transparent;
+        transition: border-color 0.3s;
+    }
+    .gallery-item.selected {
+        border-color: #c9a962;
+    }
+    .gallery-item img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.3s;
+    }
+    .gallery-item:hover img {
+        transform: scale(1.05);
+    }
+    .gallery-item .checkbox-wrapper {
+        position: absolute;
+        top: 8px;
+        left: 8px;
+        z-index: 10;
+    }
+    .gallery-item .checkbox-wrapper input {
+        width: 22px;
+        height: 22px;
+        cursor: pointer;
+        accent-color: #c9a962;
+    }
+    .gallery-item .delete-btn {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        opacity: 0;
+        transition: opacity 0.3s;
+    }
+    .gallery-item:hover .delete-btn {
+        opacity: 1;
+    }
+    .bulk-actions {
+        display: none;
+        background: #1e293b;
+        padding: 15px 20px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        align-items: center;
+        gap: 15px;
+    }
+    .bulk-actions.show {
+        display: flex;
+    }
+    .selected-count {
+        color: #c9a962;
+        font-weight: 600;
+    }
+</style>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-0">Galeri Yönetimi</h1>
+        <small class="text-success">@Model.Count görsel</small>
+    </div>
+    <div class="d-flex gap-2">
+        <button type="button" class="btn btn-outline-warning" id="selectAllBtn">
+            <i class="bi bi-check2-square me-1"></i>Tümünü Seç
+        </button>
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addImageModal">
+            <i class="bi bi-plus-lg me-1"></i>Yeni Görsel Ekle
+        </button>
+    </div>
+</div>
+
+<!-- Bulk Actions Bar -->
+<div class="bulk-actions" id="bulkActions">
+    <span class="selected-count"><span id="selectedCount">0</span> görsel seçildi</span>
+    <form asp-action="GaleriTopluSil" method="post" id="bulkDeleteForm" style="display: inline;">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="ids" id="selectedIds" value="">
+        <button type="submit" class="btn btn-danger" onclick="return confirm('Seçili görselleri silmek istediğinize emin misiniz?');">
+            <i class="bi bi-trash me-1"></i>Seçilenleri Sil
+        </button>
+    </form>
+    <button type="button" class="btn btn-secondary" id="clearSelection">
+        <i class="bi bi-x-lg me-1"></i>Seçimi Temizle
+    </button>
+</div>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle me-2"></i>@TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-circle me-2"></i>@TempData["Error"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<div class="gallery-grid">
+    @foreach (var image in Model.OrderBy(x => x.SortOrder))
+    {
+        <div class="gallery-item" data-id="@image.Id">
+            <div class="checkbox-wrapper">
+                <input type="checkbox" class="image-checkbox" data-id="@image.Id">
+            </div>
+            <img src="@image.ImageUrl" alt="@image.Title">
+            <form asp-action="GaleriSil" asp-route-id="@image.Id" method="post" class="delete-btn"
+                  onsubmit="return confirm('Bu görseli silmek istediğinize emin misiniz?');">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="btn btn-sm btn-danger">
+                    <i class="bi bi-trash"></i>
+                </button>
+            </form>
+        </div>
+    }
+</div>
+
+@if (!Model.Any())
+{
+    <div class="text-center py-5">
+        <i class="bi bi-images text-muted" style="font-size: 4rem;"></i>
+        <p class="text-muted mt-3">Henüz galeri görseli bulunmuyor.</p>
+    </div>
+}
+
+<!-- Add Image Modal -->
+<div class="modal fade" id="addImageModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content bg-dark">
+            <div class="modal-header border-secondary">
+                <h5 class="modal-title">Yeni Görsel Ekle</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form asp-action="GaleriEkle" method="post" enctype="multipart/form-data">
+                @Html.AntiForgeryToken()
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Görsel</label>
+                        <input type="file" name="imageFile" class="form-control bg-dark text-light border-secondary" accept="image/*" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Başlık</label>
+                        <input type="text" name="title" class="form-control bg-dark text-light border-secondary" placeholder="Görsel başlığı">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Kategori</label>
+                        <select name="category" class="form-select bg-dark text-light border-secondary">
+                            <option value="Genel">Genel</option>
+                            <option value="Müşteri">Müşteri</option>
+                            <option value="Araç">Araç</option>
+                            <option value="Lokasyon">Lokasyon</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer border-secondary">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                    <button type="submit" class="btn btn-primary">Ekle</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    const checkboxes = document.querySelectorAll('.image-checkbox');
+    const bulkActions = document.getElementById('bulkActions');
+    const selectedCountEl = document.getElementById('selectedCount');
+    const selectedIdsInput = document.getElementById('selectedIds');
+    const selectAllBtn = document.getElementById('selectAllBtn');
+    const clearSelectionBtn = document.getElementById('clearSelection');
+    
+    function updateSelection() {
+        const checked = document.querySelectorAll('.image-checkbox:checked');
+        const count = checked.length;
+        
+        selectedCountEl.textContent = count;
+        selectedIdsInput.value = Array.from(checked).map(cb => cb.dataset.id).join(',');
+        
+        if (count > 0) {
+            bulkActions.classList.add('show');
+        } else {
+            bulkActions.classList.remove('show');
+        }
+        
+        // Update gallery item selected state
+        document.querySelectorAll('.gallery-item').forEach(item => {
+            const cb = item.querySelector('.image-checkbox');
+            if (cb.checked) {
+                item.classList.add('selected');
+            } else {
+                item.classList.remove('selected');
+            }
+        });
+    }
+    
+    checkboxes.forEach(cb => {
+        cb.addEventListener('change', updateSelection);
+    });
+    
+    // Click on image to toggle checkbox
+    document.querySelectorAll('.gallery-item').forEach(item => {
+        item.addEventListener('click', function(e) {
+            if (e.target.type !== 'checkbox' && e.target.tagName !== 'BUTTON' && !e.target.closest('form')) {
+                const cb = this.querySelector('.image-checkbox');
+                cb.checked = !cb.checked;
+                updateSelection();
+            }
+        });
+    });
+    
+    selectAllBtn.addEventListener('click', function() {
+        const allChecked = document.querySelectorAll('.image-checkbox:checked').length === checkboxes.length;
+        checkboxes.forEach(cb => cb.checked = !allChecked);
+        updateSelection();
+        this.innerHTML = allChecked ? '<i class="bi bi-check2-square me-1"></i>Tümünü Seç' : '<i class="bi bi-x-square me-1"></i>Seçimi Kaldır';
+    });
+    
+    clearSelectionBtn.addEventListener('click', function() {
+        checkboxes.forEach(cb => cb.checked = false);
+        updateSelection();
+    });
+</script>
+}

@@ -1,0 +1,89 @@
+@{
+    ViewData["Title"] = "Veri Aktarımı";
+    Layout = "_AdminLayout";
+}
+
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-warning text-dark">
+                    <h4 class="mb-0"><i class="bi bi-database-gear me-2"></i>Eski Siteden Veri Aktarımı</h4>
+                </div>
+                <div class="card-body">
+                    @if (TempData["Success"] != null)
+                    {
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <i class="bi bi-check-circle me-2"></i>@TempData["Success"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+                    
+                    @if (TempData["Error"] != null)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="bi bi-exclamation-triangle me-2"></i>@TempData["Error"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+
+                    <div class="alert alert-info">
+                        <h5><i class="bi bi-info-circle me-2"></i>Bilgilendirme</h5>
+                        <p class="mb-2">Bu işlem eski SQL Server veritabanından (ImperialDB) aşağıdaki verileri aktaracaktır:</p>
+                        <ul class="mb-0">
+                            <li><strong>Araçlar:</strong> Araclar ve AracDetaylar tablolarından</li>
+                            <li><strong>İletişim Mesajları:</strong> BizUlasinMailler tablosundan</li>
+                            <li><strong>Rezervasyonlar:</strong> Rezervasyonlar tablosundan</li>
+                        </ul>
+                    </div>
+
+                    <div class="alert alert-warning">
+                        <h5><i class="bi bi-exclamation-triangle me-2"></i>Dikkat!</h5>
+                        <ul class="mb-0">
+                            <li>Bu işlem mevcut araç verilerini silip yeniden yükleyecektir.</li>
+                            <li>Eski veritabanına <strong>sadece okuma</strong> yapılacak, hiçbir veri silinmeyecek veya değiştirilmeyecek.</li>
+                            <li>SQL Server'ın çalışıyor olması gerekmektedir.</li>
+                        </ul>
+                    </div>
+
+                    <form asp-action="RunMigration" method="post" onsubmit="return confirm('Veri aktarımını başlatmak istediğinize emin misiniz?');">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn btn-warning btn-lg">
+                            <i class="bi bi-cloud-download me-2"></i>Veri Aktarımını Başlat
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-md-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <i class="bi bi-car-front text-primary" style="font-size: 3rem;"></i>
+                    <h5 class="card-title mt-3">Araçlar</h5>
+                    <p class="card-text text-muted">Araç bilgileri ve detayları aktarılır</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <i class="bi bi-envelope text-success" style="font-size: 3rem;"></i>
+                    <h5 class="card-title mt-3">Mesajlar</h5>
+                    <p class="card-text text-muted">İletişim formundan gelen mesajlar</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <i class="bi bi-calendar-check text-warning" style="font-size: 3rem;"></i>
+                    <h5 class="card-title mt-3">Rezervasyonlar</h5>
+                    <p class="card-text text-muted">Tüm rezervasyon kayıtları</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,113 @@
+@{
+    ViewData["Title"] = "Unsere Fahrer";
+    var currentLang = "de";
+}
+
+<style>
+    body { background: #0f172a !important; }
+    @@keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
+
+<section class="page-header" style="opacity: 0; animation: fadeIn 0.3s ease-in forwards;">
+    <div class="container">
+        <h1>Unsere Fahrer</h1>
+        <nav class="breadcrumb">
+            <a asp-controller="Home" asp-action="Index" asp-route-lang="@currentLang">Startseite</a>
+            <span>/</span>
+            <span>Unsere Fahrer</span>
+        </nav>
+    </div>
+</section>
+
+<section class="drivers-intro section" style="opacity: 0; animation: fadeIn 0.3s 0.1s ease-in forwards; content-visibility: auto;">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-subtitle">Professionelles Team</span>
+            <h2 class="section-title">Unsere Fahrer machen den Unterschied</h2>
+            <p class="section-description">
+                Das wertvollste Gut von Imperial VIP ist unser professionelles Fahrerteam. 
+                Jeder wurde sorgfältig ausgewählt, geschult und verfügt über langjährige Erfahrung.
+            </p>
+        </div>
+    </div>
+</section>
+
+<section class="driver-features section section-dark" style="opacity: 0; animation: fadeIn 0.3s 0.2s ease-in forwards; content-visibility: auto;">
+    <div class="container">
+        <div class="driver-features-grid">
+            <div class="driver-feature">
+                <div class="feature-icon"><i class="bi bi-mortarboard"></i></div>
+                <h3>Ausgebildetes Team</h3>
+                <p>Alle unsere Fahrer haben VIP-Service-Schulungen absolviert und sind in professionellen Fahrttechniken zertifiziert.</p>
+            </div>
+            <div class="driver-feature">
+                <div class="feature-icon"><i class="bi bi-translate"></i></div>
+                <h3>Fremdsprachen</h3>
+                <p>Für unsere internationalen Gäste stehen englischsprachige Fahrer zur Verfügung.</p>
+            </div>
+            <div class="driver-feature">
+                <div class="feature-icon"><i class="bi bi-clock-history"></i></div>
+                <h3>Erfahrung</h3>
+                <p>Mit jahrelanger Erfahrung managen sie den Stadtverkehr optimal und bringen Sie pünktlich ans Ziel.</p>
+            </div>
+            <div class="driver-feature">
+                <div class="feature-icon"><i class="bi bi-emoji-smile"></i></div>
+                <h3>Freundlicher Service</h3>
+                <p>Gastfreundschaft ist für uns eine Lebensweise. Wir sind stets freundlich und hilfsbereit.</p>
+            </div>
+            <div class="driver-feature">
+                <div class="feature-icon"><i class="bi bi-geo-alt"></i></div>
+                <h3>Stadtkenntnisse</h3>
+                <p>Istanbul und Umgebung kennen sie wie ihre Westentasche. Sie wählen die schnellsten und sichersten Routen.</p>
+            </div>
+            <div class="driver-feature">
+                <div class="feature-icon"><i class="bi bi-person-badge"></i></div>
+                <h3>Professionelles Erscheinungsbild</h3>
+                <p>Unsere Fahrer erscheinen stets in sauberer und gepflegter Kleidung. Der erste Eindruck zählt.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="driver-promise section" style="opacity: 0; animation: fadeIn 0.3s 0.3s ease-in forwards; content-visibility: auto;">
+    <div class="container">
+        <div class="promise-content">
+            <div class="promise-text">
+                <span class="section-subtitle">Unser Versprechen</span>
+                <h2 class="section-title">Sie müssen nicht anrufen</h2>
+                <p>
+                    Als Imperial VIP ist dies unser wichtigstes Versprechen: <strong>Unsere Gäste müssen nie den Fahrer anrufen.</strong>
+                </p>
+                <p>
+                    Unsere Fahrer warten pünktlich am vereinbarten Ort. Bei Flughafentransfers wird der Flug verfolgt, 
+                    mögliche Verzögerungen werden mitgeteilt. Wir erwarten Sie mit einem Willkommensschild mit Ihrem Namen.
+                </p>
+                <ul class="promise-list">
+                    <li><i class="bi bi-check-circle-fill"></i><span>SMS/WhatsApp-Benachrichtigung vor dem Transfer</span></li>
+                    <li><i class="bi bi-check-circle-fill"></i><span>Fahrerkontaktdaten werden vorab mitgeteilt</span></li>
+                    <li><i class="bi bi-check-circle-fill"></i><span>Namentliche Abholung am Flughafen</span></li>
+                    <li><i class="bi bi-check-circle-fill"></i><span>Flugverfolgung und Verzögerungsmanagement</span></li>
+                    <li><i class="bi bi-check-circle-fill"></i><span>Gepäckhilfe</span></li>
+                </ul>
+            </div>
+            <div class="promise-image">
+                <img src="/images/driver.jpg" alt="Imperial VIP Fahrer" loading="lazy" decoding="async" onerror="this.style.display='none'" />
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="cta section" style="opacity: 0; animation: fadeIn 0.3s 0.4s ease-in forwards; content-visibility: auto;">
+    <div class="container">
+        <div class="cta-content">
+            <h2>Erleben Sie professionellen Service</h2>
+            <p>Buchen Sie jetzt und erleben Sie den Imperial VIP Unterschied.</p>
+            <a asp-controller="Reservation" asp-action="Index" asp-route-lang="@currentLang" class="btn btn-primary btn-lg">
+                <i class="bi bi-calendar-check"></i> Jetzt buchen
+            </a>
+        </div>
+    </div>
+</section>

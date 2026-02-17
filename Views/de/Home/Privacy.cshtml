@@ -1,0 +1,43 @@
+@{
+    ViewData["Title"] = "Datenschutz";
+    var currentLang = "de";
+}
+
+<section class="page-header">
+    <div class="container">
+        <h1>Datenschutz</h1>
+        <nav class="breadcrumb">
+            <a asp-controller="Home" asp-action="Index" asp-route-lang="@currentLang">Startseite</a>
+            <span>/</span>
+            <span>Datenschutz</span>
+        </nav>
+    </div>
+</section>
+
+<section class="privacy section">
+    <div class="container">
+        <div class="privacy-content" style="max-width: 800px; margin: 0 auto;">
+            <h2 style="margin-bottom: 20px;">Schutz personenbezogener Daten</h2>
+            <p style="color: #888; margin-bottom: 20px; line-height: 1.8;">
+                Bei Imperial VIP legen wir großen Wert auf den Schutz der personenbezogenen Daten unserer Kunden. 
+                Diese Datenschutzrichtlinie erläutert, wie die erhobenen Informationen verwendet und geschützt werden.
+            </p>
+            <h3 style="margin: 30px 0 15px; font-size: 20px;">Erhobene Informationen</h3>
+            <p style="color: #888; margin-bottom: 15px; line-height: 1.8;">
+                Bei Reservierungen werden Name, Telefonnummer, E-Mail-Adresse und Transferdetails erhoben.
+            </p>
+            <h3 style="margin: 30px 0 15px; font-size: 20px;">Verwendung der Informationen</h3>
+            <p style="color: #888; margin-bottom: 15px; line-height: 1.8;">
+                Die erhobenen Daten werden ausschließlich für die Leistungserbringung, Kundenkommunikation und gesetzliche Verpflichtungen verwendet.
+            </p>
+            <h3 style="margin: 30px 0 15px; font-size: 20px;">Datensicherheit</h3>
+            <p style="color: #888; margin-bottom: 15px; line-height: 1.8;">
+                Ihre personenbezogenen Daten werden mit branchenüblichen Sicherheitsmaßnahmen vor unbefugtem Zugriff geschützt.
+            </p>
+            <h3 style="margin: 30px 0 15px; font-size: 20px;">Kontakt</h3>
+            <p style="color: #888; line-height: 1.8;">
+                Bei Fragen zu unserer Datenschutzrichtlinie erreichen Sie uns unter <a href="mailto:info@imperialvip.com" style="color: #c9a962;">info@imperialvip.com</a>.
+            </p>
+        </div>
+    </div>
+</section>

@@ -1,0 +1,948 @@
+@{
+    ViewData["Title"] = "Hakkımızda";
+    var currentLang = ViewContext.RouteData.Values["lang"]?.ToString() ?? "tr";
+}
+
+<style>
+    /* About Page - Premium Design */
+    .about-hero-section {
+        padding: 160px 0 80px;
+        background: linear-gradient(135deg, #0a1628 0%, #1e3a5f 50%, #0f2440 100%);
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .about-hero-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: radial-gradient(ellipse at 30% 50%, rgba(184, 134, 11, 0.08) 0%, transparent 60%),
+                    radial-gradient(ellipse at 70% 30%, rgba(30, 58, 95, 0.3) 0%, transparent 50%);
+        pointer-events: none;
+    }
+
+    .about-hero-section .container {
+        position: relative;
+        z-index: 1;
+    }
+
+    .about-hero-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(184, 134, 11, 0.15);
+        border: 1px solid rgba(184, 134, 11, 0.3);
+        padding: 8px 20px;
+        border-radius: 50px;
+        color: #d4a84b;
+        font-size: 13px;
+        font-weight: 500;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        margin-bottom: 24px;
+    }
+
+    .about-hero-title {
+        font-size: 48px;
+        font-weight: 700;
+        color: #ffffff;
+        margin-bottom: 20px;
+        line-height: 1.2;
+    }
+
+    .about-hero-desc {
+        font-size: 18px;
+        color: rgba(255, 255, 255, 0.65);
+        max-width: 640px;
+        margin: 0 auto 32px;
+        line-height: 1.7;
+    }
+
+    .about-hero-breadcrumb {
+        display: flex;
+        justify-content: center;
+        gap: 12px;
+        font-size: 14px;
+        color: rgba(255, 255, 255, 0.4);
+    }
+
+    .about-hero-breadcrumb a {
+        color: rgba(255, 255, 255, 0.5);
+        text-decoration: none;
+        transition: 0.3s;
+    }
+
+    .about-hero-breadcrumb a:hover {
+        color: #d4a84b;
+    }
+
+    .about-hero-breadcrumb .active {
+        color: #d4a84b;
+    }
+
+    /* Story Section */
+    .about-story-section {
+        padding: 100px 0;
+        background: #ffffff;
+    }
+
+    .about-story-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 80px;
+        align-items: center;
+    }
+
+    .about-story-visual {
+        position: relative;
+    }
+
+    .about-story-card {
+        background: linear-gradient(135deg, #0a1628, #1e3a5f);
+        border-radius: 24px;
+        padding: 60px 48px;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .about-story-card::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(circle, rgba(184, 134, 11, 0.12) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .about-story-card .icon-large {
+        font-size: 56px;
+        color: #d4a84b;
+        margin-bottom: 24px;
+        display: block;
+    }
+
+    .about-story-card h3 {
+        font-size: 24px;
+        color: #ffffff;
+        margin-bottom: 12px;
+        font-weight: 600;
+    }
+
+    .about-story-card p {
+        color: rgba(255, 255, 255, 0.6);
+        font-size: 15px;
+        line-height: 1.6;
+    }
+
+    .about-story-floating {
+        position: absolute;
+        bottom: -20px;
+        right: -20px;
+        background: #d4a84b;
+        color: #0a1628;
+        padding: 20px 28px;
+        border-radius: 16px;
+        font-weight: 700;
+        font-size: 14px;
+        box-shadow: 0 12px 40px rgba(184, 134, 11, 0.3);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .about-story-floating i {
+        font-size: 20px;
+    }
+
+    .about-story-text .section-label {
+        display: inline-block;
+        color: #b8860b;
+        font-size: 13px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        margin-bottom: 12px;
+    }
+
+    .about-story-text h2 {
+        font-size: 36px;
+        font-weight: 700;
+        color: #0f172a;
+        line-height: 1.3;
+        margin-bottom: 24px;
+    }
+
+    .about-story-text p {
+        font-size: 16px;
+        color: #475569;
+        line-height: 1.8;
+        margin-bottom: 20px;
+    }
+
+    .about-tursab-notice {
+        background: linear-gradient(135deg, rgba(212, 175, 55, 0.08), rgba(212, 175, 55, 0.04));
+        border-left: 4px solid #d4a84b;
+        padding: 20px 24px;
+        margin: 28px 0;
+        border-radius: 0 12px 12px 0;
+        font-size: 14px;
+        line-height: 1.7;
+        color: #475569;
+    }
+
+    .about-tursab-notice strong {
+        color: #0f172a;
+    }
+
+    /* Values Section */
+    .about-values-section {
+        padding: 100px 0;
+        background: #f8fafc;
+    }
+
+    .about-values-header {
+        text-align: center;
+        max-width: 600px;
+        margin: 0 auto 60px;
+    }
+
+    .about-values-header .section-label {
+        display: inline-block;
+        color: #b8860b;
+        font-size: 13px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        margin-bottom: 12px;
+    }
+
+    .about-values-header h2 {
+        font-size: 36px;
+        font-weight: 700;
+        color: #0f172a;
+        line-height: 1.3;
+        margin-bottom: 16px;
+    }
+
+    .about-values-header p {
+        font-size: 16px;
+        color: #64748b;
+        line-height: 1.7;
+    }
+
+    .about-values-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 28px;
+    }
+
+    .about-value-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 20px;
+        padding: 40px 28px;
+        text-align: center;
+        transition: all 0.4s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .about-value-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, #b8860b, #d4a84b);
+        opacity: 0;
+        transition: opacity 0.4s ease;
+    }
+
+    .about-value-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+        border-color: transparent;
+    }
+
+    .about-value-card:hover::before {
+        opacity: 1;
+    }
+
+    .about-value-icon {
+        width: 72px;
+        height: 72px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 20px;
+        background: linear-gradient(135deg, rgba(184, 134, 11, 0.1), rgba(184, 134, 11, 0.05));
+        border-radius: 20px;
+        font-size: 28px;
+        color: #b8860b;
+        transition: all 0.4s ease;
+    }
+
+    .about-value-card:hover .about-value-icon {
+        background: linear-gradient(135deg, #b8860b, #d4a84b);
+        color: #ffffff;
+        transform: scale(1.05);
+    }
+
+    .about-value-card h4 {
+        font-size: 18px;
+        font-weight: 600;
+        color: #0f172a;
+        margin-bottom: 10px;
+    }
+
+    .about-value-card p {
+        font-size: 14px;
+        color: #64748b;
+        line-height: 1.6;
+        margin: 0;
+    }
+
+    /* Stats Section */
+    .about-stats-section {
+        padding: 80px 0;
+        background: linear-gradient(135deg, #0a1628, #1e3a5f);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .about-stats-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.02'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        pointer-events: none;
+    }
+
+    .about-stats-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 32px;
+        position: relative;
+        z-index: 1;
+    }
+
+    .about-stat-item {
+        text-align: center;
+        padding: 40px 20px;
+        border-radius: 16px;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        transition: all 0.3s ease;
+    }
+
+    .about-stat-item:hover {
+        background: rgba(255, 255, 255, 0.08);
+        transform: translateY(-4px);
+    }
+
+    .about-stat-icon {
+        font-size: 28px;
+        color: #d4a84b;
+        margin-bottom: 16px;
+    }
+
+    .about-stat-number {
+        display: block;
+        font-size: 44px;
+        font-weight: 700;
+        color: #d4a84b;
+        margin-bottom: 8px;
+        line-height: 1;
+    }
+
+    .about-stat-label {
+        font-size: 14px;
+        color: rgba(255, 255, 255, 0.6);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    /* Mission Vision Section */
+    .about-mission-section {
+        padding: 100px 0;
+        background: #ffffff;
+    }
+
+    .about-mission-header {
+        text-align: center;
+        max-width: 600px;
+        margin: 0 auto 60px;
+    }
+
+    .about-mission-header .section-label {
+        display: inline-block;
+        color: #b8860b;
+        font-size: 13px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        margin-bottom: 12px;
+    }
+
+    .about-mission-header h2 {
+        font-size: 36px;
+        font-weight: 700;
+        color: #0f172a;
+        line-height: 1.3;
+    }
+
+    .about-mission-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 32px;
+    }
+
+    .about-mission-card {
+        padding: 52px 44px;
+        border-radius: 24px;
+        position: relative;
+        overflow: hidden;
+        transition: all 0.4s ease;
+    }
+
+    .about-mission-card.mission {
+        background: linear-gradient(135deg, #0a1628, #162d4a);
+    }
+
+    .about-mission-card.vision {
+        background: linear-gradient(135deg, #1a0e00, #3d2200);
+    }
+
+    .about-mission-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 200px;
+        height: 200px;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.04) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .about-mission-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 24px 60px rgba(0, 0, 0, 0.2);
+    }
+
+    .about-mission-icon {
+        width: 64px;
+        height: 64px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 24px;
+        background: rgba(212, 168, 75, 0.15);
+        border-radius: 16px;
+        font-size: 26px;
+        color: #d4a84b;
+    }
+
+    .about-mission-card h3 {
+        font-size: 24px;
+        font-weight: 600;
+        color: #ffffff;
+        margin-bottom: 16px;
+    }
+
+    .about-mission-card p {
+        font-size: 15px;
+        color: rgba(255, 255, 255, 0.65);
+        line-height: 1.8;
+        margin: 0;
+    }
+
+    /* Why Choose Us - Extra Section */
+    .about-why-section {
+        padding: 100px 0;
+        background: #f8fafc;
+    }
+
+    .about-why-header {
+        text-align: center;
+        max-width: 600px;
+        margin: 0 auto 60px;
+    }
+
+    .about-why-header .section-label {
+        display: inline-block;
+        color: #b8860b;
+        font-size: 13px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        margin-bottom: 12px;
+    }
+
+    .about-why-header h2 {
+        font-size: 36px;
+        font-weight: 700;
+        color: #0f172a;
+        line-height: 1.3;
+        margin-bottom: 16px;
+    }
+
+    .about-why-header p {
+        font-size: 16px;
+        color: #64748b;
+        line-height: 1.7;
+    }
+
+    .about-why-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 28px;
+    }
+
+    .about-why-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 20px;
+        padding: 36px 28px;
+        transition: all 0.4s ease;
+        display: flex;
+        gap: 20px;
+        align-items: flex-start;
+    }
+
+    .about-why-card:hover {
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.06);
+        border-color: rgba(184, 134, 11, 0.2);
+        transform: translateY(-4px);
+    }
+
+    .about-why-card-icon {
+        flex-shrink: 0;
+        width: 52px;
+        height: 52px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, rgba(184, 134, 11, 0.1), rgba(184, 134, 11, 0.05));
+        border-radius: 14px;
+        font-size: 22px;
+        color: #b8860b;
+    }
+
+    .about-why-card h4 {
+        font-size: 16px;
+        font-weight: 600;
+        color: #0f172a;
+        margin-bottom: 8px;
+    }
+
+    .about-why-card p {
+        font-size: 14px;
+        color: #64748b;
+        line-height: 1.6;
+        margin: 0;
+    }
+
+    /* CTA Section */
+    .about-cta-section {
+        padding: 80px 0;
+        background: linear-gradient(135deg, #0a1628, #1e3a5f);
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .about-cta-section::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 600px;
+        height: 600px;
+        background: radial-gradient(circle, rgba(184, 134, 11, 0.06) 0%, transparent 60%);
+        pointer-events: none;
+    }
+
+    .about-cta-content {
+        position: relative;
+        z-index: 1;
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    .about-cta-content h2 {
+        font-size: 32px;
+        font-weight: 700;
+        color: #ffffff;
+        margin-bottom: 16px;
+    }
+
+    .about-cta-content p {
+        font-size: 16px;
+        color: rgba(255, 255, 255, 0.6);
+        margin-bottom: 32px;
+        line-height: 1.7;
+    }
+
+    .about-cta-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 16px;
+        flex-wrap: wrap;
+    }
+
+    .about-cta-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 14px 32px;
+        border-radius: 12px;
+        font-size: 15px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.3s ease;
+    }
+
+    .about-cta-btn.primary {
+        background: linear-gradient(135deg, #b8860b, #d4a84b);
+        color: #ffffff;
+    }
+
+    .about-cta-btn.primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 32px rgba(184, 134, 11, 0.35);
+    }
+
+    .about-cta-btn.secondary {
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        color: #ffffff;
+    }
+
+    .about-cta-btn.secondary:hover {
+        background: rgba(255, 255, 255, 0.15);
+        transform: translateY(-2px);
+    }
+
+    /* Animations */
+    @@keyframes aboutFadeUp {
+        from { opacity: 0; transform: translateY(30px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .about-animate {
+        opacity: 0;
+        animation: aboutFadeUp 0.6s ease forwards;
+    }
+
+    .about-animate-d1 { animation-delay: 0.1s; }
+    .about-animate-d2 { animation-delay: 0.2s; }
+    .about-animate-d3 { animation-delay: 0.3s; }
+    .about-animate-d4 { animation-delay: 0.4s; }
+
+    /* Responsive */
+    @@media (max-width: 1024px) {
+        .about-values-grid { grid-template-columns: repeat(2, 1fr); }
+        .about-why-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @@media (max-width: 900px) {
+        .about-story-grid {
+            grid-template-columns: 1fr;
+            gap: 48px;
+        }
+        .about-hero-title { font-size: 36px; }
+        .about-stats-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @@media (max-width: 768px) {
+        .about-hero-section { padding: 120px 0 60px; }
+        .about-hero-title { font-size: 30px; }
+        .about-hero-desc { font-size: 16px; }
+        .about-values-grid { grid-template-columns: 1fr; }
+        .about-mission-grid { grid-template-columns: 1fr; }
+        .about-why-grid { grid-template-columns: 1fr; }
+        .about-stats-grid { grid-template-columns: repeat(2, 1fr); gap: 16px; }
+        .about-stat-item { padding: 24px 16px; }
+        .about-stat-number { font-size: 34px; }
+        .about-story-card { padding: 40px 28px; }
+        .about-mission-card { padding: 36px 28px; }
+        .about-values-header h2,
+        .about-mission-header h2,
+        .about-why-header h2 { font-size: 28px; }
+        .about-cta-content h2 { font-size: 26px; }
+    }
+
+    @@media (max-width: 480px) {
+        .about-stats-grid { grid-template-columns: 1fr; }
+        .about-cta-buttons { flex-direction: column; align-items: center; }
+        .about-why-card { flex-direction: column; text-align: center; align-items: center; }
+    }
+</style>
+
+<!-- Hero Section -->
+<section class="about-hero-section">
+    <div class="container">
+        <div class="about-animate">
+            <span class="about-hero-badge">
+                <i class="bi bi-diamond-fill"></i> Imperial VIP Transfer
+            </span>
+            <h1 class="about-hero-title">Hakkımızda</h1>
+            <p class="about-hero-desc">
+                Premium transfer hizmetlerinde güvenin ve konforun adresi.
+                Yolculuğunuzu ayrıcalıklı bir deneyime dönüştürüyoruz.
+            </p>
+            <nav class="about-hero-breadcrumb">
+                <a asp-controller="Home" asp-action="Index" asp-route-lang="@currentLang">Ana Sayfa</a>
+                <span>/</span>
+                <span class="active">Hakkımızda</span>
+            </nav>
+        </div>
+    </div>
+</section>
+
+<!-- Story Section -->
+<section class="about-story-section">
+    <div class="container">
+        <div class="about-story-grid">
+            <div class="about-story-visual about-animate about-animate-d1">
+                <div class="about-story-card">
+                    <i class="bi bi-car-front-fill icon-large"></i>
+                    <h3>Imperial VIP</h3>
+                    <p>VIP transfer hizmetlerinde sektörün öncü markası</p>
+                </div>
+                <div class="about-story-floating">
+                    <i class="bi bi-patch-check-fill"></i>
+                    TÜRSAB Lisanslı
+                </div>
+            </div>
+            <div class="about-story-text about-animate about-animate-d2">
+                <span class="section-label">Biz Kimiz?</span>
+                <h2>Premium Transfer Hizmetlerinde Güvenilir Adres</h2>
+                <p>
+                    Imperial VIP olarak, VIP transfer hizmetlerinde sektörün öncü firmalarından biriyiz.
+                    Misyonumuz, müşterilerimize sadece bir ulaşım hizmeti değil, kusursuz bir seyahat
+                    deneyimi sunmaktır.
+                </p>
+                <p>
+                    Profesyonel şoför kadromuz, üst segment araç filomuz ve müşteri odaklı hizmet
+                    anlayışımız ile her transferde aynı kaliteyi garanti ediyoruz. Havalimanı
+                    transferlerinden şehirler arası seyahatlere kadar geniş bir hizmet yelpazesi sunuyoruz.
+                </p>
+                <div class="about-tursab-notice">
+                    Bu site üzerinden yapılan tur satışları,
+                    <strong>VİPANATOLİATRAVEL</strong> Taşımacılık Turizm İnşaat
+                    Emlak San. ve Tic. Ltd. Şti.
+                    (<strong>TÜRSAB – ADINDEN TURİZM</strong>) adına yapılmaktadır.
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Values Section -->
+<section class="about-values-section">
+    <div class="container">
+        <div class="about-values-header about-animate">
+            <span class="section-label">Değerlerimiz</span>
+            <h2>Hizmet Anlayışımız</h2>
+            <p>Her detayda mükemmelliği hedefliyoruz. İşte bizi farklı kılan temel değerlerimiz.</p>
+        </div>
+        <div class="about-values-grid">
+            <div class="about-value-card about-animate about-animate-d1">
+                <div class="about-value-icon">
+                    <i class="bi bi-gem"></i>
+                </div>
+                <h4>Kalite</h4>
+                <p>Her detayda mükemmellik anlayışı ile çalışıyor, en üst segment hizmeti sunuyoruz.</p>
+            </div>
+            <div class="about-value-card about-animate about-animate-d2">
+                <div class="about-value-icon">
+                    <i class="bi bi-shield-check"></i>
+                </div>
+                <h4>Güvenilirlik</h4>
+                <p>Söz verdiğimizi yaparız. Zamanında, güvenli ve konforlu transfer garantisi.</p>
+            </div>
+            <div class="about-value-card about-animate about-animate-d3">
+                <div class="about-value-icon">
+                    <i class="bi bi-heart"></i>
+                </div>
+                <h4>Müşteri Odaklılık</h4>
+                <p>Memnuniyetiniz en büyük önceliğimiz. Her müşterimiz bizim için özeldir.</p>
+            </div>
+            <div class="about-value-card about-animate about-animate-d4">
+                <div class="about-value-icon">
+                    <i class="bi bi-stars"></i>
+                </div>
+                <h4>Profesyonellik</h4>
+                <p>Deneyimli kadromuz ile sektörde en yüksek standartlarda hizmet sunuyoruz.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Stats Section -->
+<section class="about-stats-section">
+    <div class="container">
+        <div class="about-stats-grid">
+            <div class="about-stat-item about-animate about-animate-d1">
+                <div class="about-stat-icon">
+                    <i class="bi bi-emoji-smile"></i>
+                </div>
+                <span class="about-stat-number">5000+</span>
+                <span class="about-stat-label">Mutlu Müşteri</span>
+            </div>
+            <div class="about-stat-item about-animate about-animate-d2">
+                <div class="about-stat-icon">
+                    <i class="bi bi-car-front"></i>
+                </div>
+                <span class="about-stat-number">15+</span>
+                <span class="about-stat-label">VIP Araç</span>
+            </div>
+            <div class="about-stat-item about-animate about-animate-d3">
+                <div class="about-stat-icon">
+                    <i class="bi bi-person-badge"></i>
+                </div>
+                <span class="about-stat-number">10+</span>
+                <span class="about-stat-label">Profesyonel Şoför</span>
+            </div>
+            <div class="about-stat-item about-animate about-animate-d4">
+                <div class="about-stat-icon">
+                    <i class="bi bi-clock-history"></i>
+                </div>
+                <span class="about-stat-number">7/24</span>
+                <span class="about-stat-label">Kesintisiz Hizmet</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Mission & Vision Section -->
+<section class="about-mission-section">
+    <div class="container">
+        <div class="about-mission-header about-animate">
+            <span class="section-label">Hedeflerimiz</span>
+            <h2>Misyon & Vizyon</h2>
+        </div>
+        <div class="about-mission-grid">
+            <div class="about-mission-card mission about-animate about-animate-d1">
+                <div class="about-mission-icon">
+                    <i class="bi bi-bullseye"></i>
+                </div>
+                <h3>Misyonumuz</h3>
+                <p>
+                    Müşterilerimize en üst düzeyde konfor, güvenlik ve profesyonellik sunarak,
+                    seyahatlerini unutulmaz bir deneyime dönüştürmek. Her transferde aynı kaliteyi
+                    ve güveni sağlamak.
+                </p>
+            </div>
+            <div class="about-mission-card vision about-animate about-animate-d2">
+                <div class="about-mission-icon">
+                    <i class="bi bi-eye"></i>
+                </div>
+                <h3>Vizyonumuz</h3>
+                <p>
+                    Türkiye'nin en güvenilir ve tercih edilen VIP transfer markası olmak.
+                    Sektörde standartları belirleyen, yenilikçi hizmetler sunan öncü bir firma
+                    olarak konumumuzu sürdürmek.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Why Choose Us Section -->
+<section class="about-why-section">
+    <div class="container">
+        <div class="about-why-header about-animate">
+            <span class="section-label">Neden Biz?</span>
+            <h2>Imperial VIP'i Tercih Etmeniz İçin Nedenler</h2>
+            <p>Seyahatinizi özel kılan detaylar farkımızı ortaya koyar.</p>
+        </div>
+        <div class="about-why-grid">
+            <div class="about-why-card about-animate about-animate-d1">
+                <div class="about-why-card-icon">
+                    <i class="bi bi-airplane"></i>
+                </div>
+                <div>
+                    <h4>Havalimanı Transferi</h4>
+                    <p>Uçuş bilgileriniz takip edilir, gecikmeler dahil zamanında karşılama garantisi.</p>
+                </div>
+            </div>
+            <div class="about-why-card about-animate about-animate-d2">
+                <div class="about-why-card-icon">
+                    <i class="bi bi-geo-alt"></i>
+                </div>
+                <div>
+                    <h4>Şehirler Arası Transfer</h4>
+                    <p>Konforlu ve güvenli araçlarla uzun yol seyahatlerinde VIP deneyim.</p>
+                </div>
+            </div>
+            <div class="about-why-card about-animate about-animate-d3">
+                <div class="about-why-card-icon">
+                    <i class="bi bi-translate"></i>
+                </div>
+                <div>
+                    <h4>Çok Dilli Hizmet</h4>
+                    <p>Türkçe, İngilizce, Almanca ve Rusça destek ile uluslararası standartlarda hizmet.</p>
+                </div>
+            </div>
+            <div class="about-why-card about-animate about-animate-d1">
+                <div class="about-why-card-icon">
+                    <i class="bi bi-credit-card"></i>
+                </div>
+                <div>
+                    <h4>Şeffaf Fiyatlandırma</h4>
+                    <p>Gizli ücret yok. Fiyatınızı önceden bilir, güvenle rezervasyon yaparsınız.</p>
+                </div>
+            </div>
+            <div class="about-why-card about-animate about-animate-d2">
+                <div class="about-why-card-icon">
+                    <i class="bi bi-headset"></i>
+                </div>
+                <div>
+                    <h4>7/24 Destek</h4>
+                    <p>Günün her saati ulaşabileceğiniz müşteri hizmetleri desteği.</p>
+                </div>
+            </div>
+            <div class="about-why-card about-animate about-animate-d3">
+                <div class="about-why-card-icon">
+                    <i class="bi bi-award"></i>
+                </div>
+                <div>
+                    <h4>Lisanslı & Sigortalı</h4>
+                    <p>TÜRSAB lisanslı, tam sigortalı araçlar ile güvenli yolculuk.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="about-cta-section">
+    <div class="container">
+        <div class="about-cta-content about-animate">
+            <h2>Seyahatinizi Planlamaya Başlayın</h2>
+            <p>Premium transfer deneyimi için hemen iletişime geçin veya online rezervasyon yapın.</p>
+            <div class="about-cta-buttons">
+                <a asp-controller="Home" asp-action="Contact" asp-route-lang="@currentLang" class="about-cta-btn primary">
+                    <i class="bi bi-telephone"></i> İletişime Geçin
+                </a>
+                <a asp-controller="Reservation" asp-action="Index" asp-route-lang="@currentLang" class="about-cta-btn secondary">
+                    <i class="bi bi-calendar-check"></i> Rezervasyon Yap
+                </a>
+            </div>
+        </div>
+    </div>
+</section>

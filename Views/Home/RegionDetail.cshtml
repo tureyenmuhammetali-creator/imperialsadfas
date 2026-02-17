@@ -1,0 +1,202 @@
+@model Region
+@{
+    var currentLang = ViewContext.RouteData.Values["lang"]?.ToString() ?? "tr";
+    var regionName = (currentLang != "tr" && !string.IsNullOrWhiteSpace(Model.NameEn)) ? Model.NameEn : Model.Name;
+    var startPoint = (currentLang != "tr" && !string.IsNullOrWhiteSpace(Model.StartPointEn)) ? Model.StartPointEn : Model.StartPoint;
+    var regionDesc = (currentLang != "tr" && !string.IsNullOrWhiteSpace(Model.DescriptionEn)) ? Model.DescriptionEn : Model.Description;
+    ViewData["Title"] = $"{regionName} - VIP Transfer";
+    var vehicles = ViewBag.Vehicles as List<Vehicle> ?? new List<Vehicle>();
+    var reservationUrl = Url.Action("Index", "Reservation", new { lang = currentLang });
+    var regionId = Model.Id;
+    var t = new Dictionary<string, Dictionary<string, string>> {
+        ["tr"] = new Dictionary<string, string> { ["SelectVehicle"] = "Aracınızı Seçin", ["Passenger"] = "Yolcu", ["Luggage"] = "Bagaj", ["Continue"] = "Rezervasyona Devam Et", ["SelectHint"] = "Devam etmek için bir araç seçin", ["Selected"] = "Seçilen araç", ["About"] = "Hakkında", ["PricesFrom"] = "'den başlayan fiyatlar", ["Minutes"] = "dakika" },
+        ["de"] = new Dictionary<string, string> { ["SelectVehicle"] = "Wählen Sie Ihr Fahrzeug", ["Passenger"] = "Passagier", ["Luggage"] = "Gepäck", ["Continue"] = "Zur Reservierung", ["SelectHint"] = "Wählen Sie ein Fahrzeug", ["Selected"] = "Ausgewähltes Fahrzeug", ["About"] = "Über", ["PricesFrom"] = "Preise ab", ["Minutes"] = "Min." },
+        ["ru"] = new Dictionary<string, string> { ["SelectVehicle"] = "Выберите автомобиль", ["Passenger"] = "Пассажир", ["Luggage"] = "Багаж", ["Continue"] = "К бронированию", ["SelectHint"] = "Выберите автомобиль", ["Selected"] = "Выбранный автомобиль", ["About"] = "О", ["PricesFrom"] = "Цены от", ["Minutes"] = "мин." },
+        ["en"] = new Dictionary<string, string> { ["SelectVehicle"] = "Choose Your Vehicle", ["Passenger"] = "Passenger", ["Luggage"] = "Luggage", ["Continue"] = "Continue to Reservation", ["SelectHint"] = "Select a vehicle to continue", ["Selected"] = "Selected vehicle", ["About"] = "About", ["PricesFrom"] = "prices from", ["Minutes"] = "min" }
+    };
+    var txt = t.ContainsKey(currentLang) ? t[currentLang] : t["tr"];
+}
+
+<div class="region-detail-page">
+    <!-- Region Hero -->
+    <div class="region-hero">
+        @if (!string.IsNullOrEmpty(Model.ImageUrl))
+        {
+            var heroImgSrc = Url.Content("~/" + Model.ImageUrl.TrimStart('/')) + "?v=" + (Model.UpdatedAt?.Ticks ?? Model.Id);
+            <img src="@heroImgSrc" 
+                 alt="@Model.Name" 
+                 loading="eager" 
+                 decoding="async"
+                 fetchpriority="high"
+                 onerror="this.style.display='none'" />
+        }
+        <div class="region-hero-overlay">
+            <div class="container">
+                <h1>@regionName</h1>
+                <div class="region-meta">
+                    <span><i class="bi bi-geo-alt"></i> @startPoint → @regionName</span>
+                    @if (Model.DistanceKm > 0)
+                    {
+                        <span><i class="bi bi-signpost"></i> @Model.DistanceKm.ToString("N0") km</span>
+                    }
+                    @if (Model.EstimatedDurationMinutes > 0)
+                    {
+                        <span><i class="bi bi-clock"></i> ~@Model.EstimatedDurationMinutes @txt["Minutes"]</span>
+                    }
+                    <span><i class="bi bi-tag"></i> <span class="region-detail-price-value" data-amount-eur="@Model.Price.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)">@Model.Price.ToString("N0", System.Globalization.CultureInfo.GetCultureInfo("tr-TR"))</span> <span class="region-detail-currency-symbol">€</span> @txt["PricesFrom"]</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Vehicle Selection -->
+    <section class="vehicle-selection-section">
+        <div class="container">
+            <h2>@txt["SelectVehicle"]</h2>
+            
+            <!-- Continue Button -->
+            <div class="text-center mb-4">
+                <a href="#" id="continueToReservation" class="btn btn-accent btn-lg disabled-btn">
+                    <i class="bi bi-arrow-right"></i> @txt["Continue"]
+                </a>
+            </div>
+            
+            <div class="vehicle-selection-grid">
+                @foreach (var vehicle in vehicles)
+                {
+                    <div class="vehicle-select-card" data-vehicle-id="@vehicle.Id" data-vehicle-name="@vehicle.Name" data-price="@vehicle.MinimumPrice">
+                        <div class="vehicle-img">
+                            @if (!string.IsNullOrEmpty(vehicle.ImageUrl))
+                            {
+                                <img src="@vehicle.ImageUrl" 
+                                     alt="@vehicle.Name" 
+                                     loading="lazy" 
+                                     decoding="async"
+                                     onerror="this.style.display='none'" />
+                            }
+                        </div>
+                        <div class="vehicle-details">
+                            <h3>@vehicle.Name</h3>
+                            <div class="vehicle-specs">
+                                <span><i class="bi bi-people"></i> @vehicle.PassengerCapacity @txt["Passenger"]</span>
+                                <span><i class="bi bi-briefcase"></i> @vehicle.LuggageCapacity @txt["Luggage"]</span>
+                            </div>
+                            <div class="vehicle-price region-vehicle-price" data-amount-eur="@vehicle.MinimumPrice.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)"><span class="region-vehicle-price-value">@vehicle.MinimumPrice.ToString("N0", System.Globalization.CultureInfo.GetCultureInfo("tr-TR"))</span> <span class="vehicle-currency-symbol">€</span></div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </section>
+    
+    <!-- Region Description -->
+    @if (!string.IsNullOrEmpty(regionDesc))
+    {
+        <section class="section">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-8 mx-auto">
+                        <h3 class="mb-3">@txt["About"] @regionName</h3>
+                        <p>@regionDesc</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    }
+</div>
+
+<style>
+    .disabled-btn {
+        pointer-events: none;
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+    .enabled-btn {
+        pointer-events: auto !important;
+        opacity: 1 !important;
+        cursor: pointer;
+    }
+    .vehicle-select-card {
+        cursor: pointer;
+    }
+    .vehicle-select-card.selected {
+        border-color: #b8860b !important;
+        box-shadow: 0 0 20px rgba(184, 134, 11, 0.3) !important;
+    }
+</style>
+
+@section Scripts {
+<script>
+    (function() {
+        function updateRegionDetailPrices() {
+            var cur = window.getImperialCurrency ? window.getImperialCurrency() : { symbol: '€', code: 'EUR' };
+            document.querySelectorAll('.region-detail-price-value').forEach(function(el) {
+                var eur = parseFloat(el.getAttribute('data-amount-eur'));
+                if (isNaN(eur)) return;
+                var amount = (cur.code === 'EUR') ? eur : (window.convertFromEur ? window.convertFromEur(eur) : eur);
+                var formatted = (typeof amount === 'number' ? amount : 0).toLocaleString('tr-TR', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+                el.textContent = formatted;
+                var sym = el.parentElement && el.parentElement.querySelector('.region-detail-currency-symbol');
+                if (sym) sym.textContent = cur.symbol || '€';
+            });
+            document.querySelectorAll('.region-vehicle-price').forEach(function(el) {
+                var eur = parseFloat(el.getAttribute('data-amount-eur'));
+                if (isNaN(eur)) return;
+                var amount = (cur.code === 'EUR') ? eur : (window.convertFromEur ? window.convertFromEur(eur) : eur);
+                var formatted = (typeof amount === 'number' ? amount : 0).toLocaleString('tr-TR', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+                var valSpan = el.querySelector('.region-vehicle-price-value');
+                var symSpan = el.querySelector('.vehicle-currency-symbol');
+                if (valSpan) valSpan.textContent = formatted;
+                if (symSpan) symSpan.textContent = cur.symbol || '€';
+            });
+        }
+        document.addEventListener('DOMContentLoaded', function() { updateRegionDetailPrices(); });
+        window.addEventListener('imperialCurrencyChanged', updateRegionDetailPrices);
+        window.addEventListener('imperialCurrencyRatesReady', updateRegionDetailPrices);
+
+        console.log('Vehicle selection script loaded');
+        
+        var vehicleCards = document.querySelectorAll('.vehicle-select-card');
+        var continueBtn = document.getElementById('continueToReservation');
+        var baseUrl = '@Html.Raw(reservationUrl)';
+        var startPoint = '@Html.Raw(startPoint)';
+        var regionName = '@Html.Raw(regionName)';
+        var regionId = '@regionId';
+        
+        console.log('Found ' + vehicleCards.length + ' vehicle cards');
+        console.log('Base URL: ' + baseUrl);
+        
+        if (vehicleCards.length === 0) {
+            console.error('No vehicle cards found!');
+            return;
+        }
+        
+        for (var i = 0; i < vehicleCards.length; i++) {
+            vehicleCards[i].onclick = function() {
+                console.log('Card clicked: ' + this.getAttribute('data-vehicle-name'));
+                
+                // Remove selection from all cards
+                for (var j = 0; j < vehicleCards.length; j++) {
+                    vehicleCards[j].classList.remove('selected');
+                }
+                
+                // Add selection to clicked card
+                this.classList.add('selected');
+                var vehicleId = this.getAttribute('data-vehicle-id');
+                var vehicleName = this.getAttribute('data-vehicle-name');
+                
+                // Enable continue button
+                if (continueBtn) {
+                    continueBtn.className = 'btn btn-accent btn-lg enabled-btn';
+                    continueBtn.href = baseUrl + '?vehicleId=' + vehicleId + 
+                                       '&pickupLocation=' + encodeURIComponent(startPoint) + 
+                                       '&dropoffLocation=' + encodeURIComponent(regionName) + 
+                                       '&regionId=' + regionId;
+                    console.log('Button href set to: ' + continueBtn.href);
+                }
+                
+            };
+        }
+    })();
+</script>
+}

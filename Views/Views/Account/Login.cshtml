@@ -1,0 +1,72 @@
+@model LoginViewModel
+@{
+    ViewData["Title"] = "Giriş";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Imperial VIP Admin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="~/css/admin.css" asp-append-version="true" />
+</head>
+<body class="login-page">
+    <div class="login-container">
+        <div class="login-card">
+            <div class="login-logo">
+                <span class="logo-text">IMPERIAL</span>
+                <span class="logo-vip">VIP</span>
+            </div>
+            <h1>Admin Girişi</h1>
+            
+            <form asp-action="Login" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="returnUrl" value="@ViewData["ReturnUrl"]" />
+
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+                <div class="form-group">
+                    <label asp-for="Email">
+                        <i class="bi bi-envelope"></i>
+                        E-posta
+                    </label>
+                    <input asp-for="Email" class="form-control" placeholder="admin@imperialvip.com" autofocus />
+                    <span asp-validation-for="Email" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Password">
+                        <i class="bi bi-lock"></i>
+                        Şifre
+                    </label>
+                    <input asp-for="Password" class="form-control" placeholder="••••••••" />
+                    <span asp-validation-for="Password" class="text-danger"></span>
+                </div>
+
+                <div class="form-group form-check">
+                    <input asp-for="RememberMe" class="form-check-input" />
+                    <label asp-for="RememberMe" class="form-check-label">Beni Hatırla</label>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-block">
+                    <i class="bi bi-box-arrow-in-right"></i>
+                    Giriş Yap
+                </button>
+            </form>
+
+            <div class="login-footer">
+                <a asp-controller="Home" asp-action="Index">
+                    <i class="bi bi-arrow-left"></i>
+                    Ana Sayfaya Dön
+                </a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

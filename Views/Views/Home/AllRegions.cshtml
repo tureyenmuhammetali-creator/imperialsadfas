@@ -1,0 +1,45 @@
+@model IEnumerable<Region>
+@{
+    ViewData["Title"] = "Tüm Bölgeler";
+}
+
+<div class="all-regions-page" style="content-visibility: auto;">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="container">
+            <h1>TÜM BÖLGELER</h1>
+            <p>Hedefinizi seçin ve VIP transfer yolculuğunuza başlayın</p>
+        </div>
+    </div>
+    
+    <!-- Regions Grid -->
+    <div class="container">
+        <div class="all-regions-grid">
+            @foreach (var region in Model)
+            {
+                <a asp-action="RegionDetail" asp-route-id="@region.Id" class="region-card">
+                    <div class="region-image">
+                        @if (!string.IsNullOrEmpty(region.ImageUrl))
+                        {
+                            <img src="@region.ImageUrl" 
+                                 alt="@region.Name" 
+                                 loading="lazy" 
+                                 decoding="async"
+                                 onerror="this.style.display='none'" />
+                        }
+                        else
+                        {
+                            <div class="region-placeholder"><i class="bi bi-geo-alt"></i></div>
+                        }
+                    </div>
+                    <div class="region-overlay">
+                        <h3 class="region-name">@region.Name</h3>
+                        <p class="region-route">@region.StartPoint → @region.Name</p>
+                        <p class="region-price">Fiyatlar: <strong>@region.Price.ToString("N0") €</strong>'den başlayan</p>
+                        <span class="btn btn-accent btn-sm">Rezervasyon Yap</span>
+                    </div>
+                </a>
+            }
+        </div>
+    </div>
+</div>

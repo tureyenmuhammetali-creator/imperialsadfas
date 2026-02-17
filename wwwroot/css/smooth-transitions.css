@@ -1,0 +1,289 @@
+/**
+ * IMPERIAL VIP - SMOOTH TRANSITIONS CSS
+ * Flash/duraksama problemini çözer!
+ */
+
+/* ========== 1. PREVENT WHITE FLASH ========== */
+html {
+    background-color: #ffffff;
+}
+
+body {
+    background-color: #ffffff;
+    margin: 0;
+    padding: 0;
+    opacity: 1;
+    transition: opacity 0.15s ease-in-out !important;
+}
+
+/* Sayfa yüklenirken opacity */
+body.loading {
+    opacity: 0;
+}
+
+/* ========== 2. SMOOTH PAGE TRANSITIONS ========== */
+@supports (view-transition-name: none) {
+    /* View Transitions API destekleyen tarayıcılar için */
+    ::view-transition-old(root),
+    ::view-transition-new(root) {
+        animation-duration: 0.2s;
+        animation-timing-function: ease-in-out;
+    }
+    
+    ::view-transition-old(root) {
+        animation-name: fade-out;
+    }
+    
+    ::view-transition-new(root) {
+        animation-name: fade-in;
+    }
+}
+
+@keyframes fade-out {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+    }
+}
+
+@keyframes fade-in {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ========== 3. PAGE TRANSITION STATE ========== */
+body.page-transitioning {
+    pointer-events: none;
+    cursor: wait;
+}
+
+body.page-transitioning * {
+    pointer-events: none;
+}
+
+/* Active link during transition */
+.active-transition {
+    opacity: 0.7 !important;
+    transform: scale(0.98) !important;
+}
+
+/* ========== 4. PREVENT LAYOUT SHIFT ========== */
+* {
+    /* Prevent unexpected shifts */
+    box-sizing: border-box;
+}
+
+img, video, iframe {
+    /* Prevent image layout shifts */
+    max-width: 100%;
+    height: auto;
+    display: block;
+}
+
+/* Reserve space for navbar */
+body {
+    min-height: 100vh;
+}
+
+/* ========== 5. SMOOTH CONTENT APPEARANCE ========== */
+main, .main-content {
+    animation: content-appear 0.3s ease-in-out;
+}
+
+@keyframes content-appear {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ========== 6. NAVBAR FIXED & SMOOTH ========== */
+.header, header, nav {
+    /* GPU acceleration */
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    will-change: transform;
+    
+    /* Smooth transitions */
+    transition: all 0.15s ease-in-out;
+}
+
+/* ========== 7. NO FLASH FOR IMAGES ========== */
+img {
+    /* Prevent image flash */
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+}
+
+img:not([src]) {
+    /* Hide images without src */
+    visibility: hidden;
+}
+
+img[loading="lazy"] {
+    /* Smooth lazy load */
+    transition: opacity 0.3s ease-in-out;
+}
+
+/* ========== 8. SMOOTH SCROLL ========== */
+html {
+    scroll-behavior: smooth;
+}
+
+/* ========== 9. REDUCE REPAINT ========== */
+.nav-link, .btn, a {
+    /* GPU acceleration for links */
+    will-change: transform, opacity;
+    transform: translateZ(0);
+}
+
+/* ========== 10. INSTANT HOVER FEEDBACK ========== */
+.nav-link {
+    transition: all 0.1s ease !important;
+}
+
+.nav-link:hover {
+    transform: translateY(-2px) !important;
+}
+
+.nav-link:active {
+    transform: translateY(0) scale(0.98) !important;
+    opacity: 0.8 !important;
+    transition: all 0.05s ease !important;
+}
+
+/* ========== 11. PREVENT FOUC (Flash of Unstyled Content) ========== */
+.no-fouc {
+    opacity: 0;
+    transition: opacity 0.2s ease-in;
+}
+
+.no-fouc.loaded {
+    opacity: 1;
+}
+
+/* ========== 12. PROGRESSIVE ENHANCEMENT ========== */
+@media (prefers-reduced-motion: no-preference) {
+    /* Full animations for users who don't prefer reduced motion */
+    * {
+        transition-duration: inherit;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    /* Instant for accessibility */
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* ========== 13. CONTENT VISIBILITY (Performance) ========== */
+section, .section {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 500px;
+}
+
+/* First section always visible */
+section:first-of-type,
+.section:first-of-type {
+    content-visibility: visible;
+}
+
+/* ========== 14. LOADING STATES ========== */
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.9);
+    z-index: 9999;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s ease-in-out;
+}
+
+.loading-overlay.active {
+    opacity: 1;
+    pointer-events: all;
+}
+
+/* ========== 15. SMOOTH BACKGROUND ========== */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: inherit;
+    z-index: -1;
+    pointer-events: none;
+}
+
+/* ========== 16. CRITICAL CSS (Above the fold) ========== */
+.header {
+    /* Critical: Always visible */
+    contain: layout style;
+}
+
+.hero, .main-content {
+    /* Critical: Render priority */
+    content-visibility: visible;
+}
+
+/* ========== 17. PRINT OPTIMIZATION ========== */
+@media print {
+    body {
+        opacity: 1 !important;
+    }
+    
+    .page-transitioning {
+        pointer-events: auto;
+    }
+    
+    * {
+        transition: none !important;
+        animation: none !important;
+    }
+}
+
+/* ========== 18. HIGH CONTRAST MODE ========== */
+@media (prefers-contrast: high) {
+    body {
+        transition: none;
+    }
+    
+    * {
+        animation: none !important;
+    }
+}
+
+/* ========== 19. DARK MODE SMOOTH ========== */
+@media (prefers-color-scheme: dark) {
+    html, body {
+        background-color: #1a1a1a;
+    }
+    
+    body::before {
+        background: #1a1a1a;
+    }
+}
+

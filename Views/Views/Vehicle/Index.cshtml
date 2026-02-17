@@ -1,0 +1,218 @@
+@model IEnumerable<Vehicle>
+@{
+    ViewData["Title"] = "Araçlarımız";
+    var currentLang = ViewContext.RouteData.Values["lang"]?.ToString() ?? "tr";
+}
+
+<!-- Page Header -->
+<section class="page-header">
+    <div class="container">
+        <h1>Araçlarımız</h1>
+        <nav class="breadcrumb">
+            <a asp-controller="Home" asp-action="Index">Ana Sayfa</a>
+            <span>/</span>
+            <span>Araçlarımız</span>
+        </nav>
+    </div>
+</section>
+
+<!-- Vehicles Intro -->
+<section class="vehicles-intro section" style="content-visibility: auto;">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-subtitle">VIP Filo</span>
+            <h2 class="section-title">Lüks Araç Filomuz</h2>
+            <p class="section-description">
+                Imperial VIP olarak, seyahatlerinizi ayrıcalıklı kılacak üst segment araçlarla hizmet veriyoruz. 
+                Tüm araçlarımız düzenli bakımdan geçer ve maksimum konfor sunar.
+            </p>
+        </div>
+    </div>
+</section>
+
+<!-- Vehicles Grid: Sol = Albüm, Sağ = Bilgiler -->
+<section class="vehicles-list section" style="content-visibility: auto;">
+    <div class="container">
+        <div class="vehicles-full-grid">
+            @foreach (var vehicle in Model)
+            {
+                <div class="vehicle-card-full">
+                    <div class="vehicle-album">
+                        <div class="vehicle-album-main">
+                            <img src="@vehicle.ImageUrl" 
+                                 alt="@vehicle.Name" 
+                                 loading="lazy"
+                                 decoding="async"
+                                 class="vehicle-album-main-img"
+                                 onerror="this.src='/images/imgs/no-image.jpg'" />
+                            <span class="vehicle-type-badge">@vehicle.Type</span>
+                        </div>
+                        @if (vehicle.Images != null && vehicle.Images.Any())
+                        {
+                            <div class="vehicle-album-thumbs">
+                                <button type="button" class="vehicle-thumb active" data-src="@vehicle.ImageUrl" aria-label="Ana görsel">
+                                    <img src="@vehicle.ImageUrl" alt="" loading="lazy" />
+                                </button>
+                                @foreach (var img in vehicle.Images.OrderBy(i => i.SortOrder))
+                                {
+                                    <button type="button" class="vehicle-thumb" data-src="@img.ImageUrl" aria-label="Albüm fotoğrafı">
+                                        <img src="@img.ImageUrl" alt="" loading="lazy" />
+                                    </button>
+                                }
+                            </div>
+                        }
+                    </div>
+                    <div class="vehicle-details">
+                        <div class="vehicle-header">
+                            <h3>@vehicle.Name</h3>
+                            <span class="vehicle-brand">@vehicle.Brand @vehicle.Model</span>
+                        </div>
+                        
+                        <p class="vehicle-description">@vehicle.Description</p>
+                        
+                        <div class="vehicle-specs-grid">
+                            <div class="spec-item">
+                                <i class="bi bi-people"></i>
+                                <span>Yolcu: Min 1 – Maks @vehicle.PassengerCapacity</span>
+                            </div>
+                            <div class="spec-item">
+                                <i class="bi bi-briefcase"></i>
+                                <span>Bagaj: @vehicle.LuggageCapacity Parça</span>
+                            </div>
+                        </div>
+
+                        @if (!string.IsNullOrEmpty(vehicle.Features))
+                        {
+                            <div class="vehicle-features">
+                                @foreach (var feature in vehicle.Features.Split(','))
+                                {
+                                    <span class="feature-tag">
+                                        <i class="bi bi-check"></i>
+                                        @feature.Trim()
+                                    </span>
+                                }
+                            </div>
+                        }
+                    </div>
+                    <div class="vehicle-price-block">
+                        <div class="vehicle-price-main">
+                            @{
+                                var hasPrice = vehicle.MinimumPrice > 0 || vehicle.MinimumPriceUsd > 0 || vehicle.MinimumPriceTry > 0;
+                            }
+                            @if (hasPrice)
+                            {
+                                <span class="vehicle-price-value"
+                                      data-amount-eur="@vehicle.MinimumPrice.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)"
+                                      data-amount-usd="@vehicle.MinimumPriceUsd.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)"
+                                      data-amount-try="@vehicle.MinimumPriceTry.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)">
+                                    @vehicle.MinimumPrice.ToString("N2", System.Globalization.CultureInfo.GetCultureInfo("tr-TR")) <span class="vehicle-currency-symbol">€</span>
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="vehicle-price-no-price">Fiyat için iletişime geçin</span>
+                            }
+                        </div>
+                        <div class="vehicle-actions">
+                            <a asp-controller="Reservation" asp-action="Index" asp-route-lang="@currentLang" asp-route-vehicleId="@vehicle.Id" class="btn btn-primary btn-select-vehicle">
+                                <i class="bi bi-calendar-check"></i>
+                                Rezervasyon Yap
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</section>
+
+<!-- Vehicle Info -->
+<section class="vehicle-info section" style="content-visibility: auto;">
+    <div class="container">
+        <div class="info-grid">
+            <div class="info-card">
+                <div class="info-icon">
+                    <i class="bi bi-tools"></i>
+                </div>
+                <h4>Düzenli Bakım</h4>
+                <p>Tüm araçlarımız düzenli periyodik bakımdan geçer. Güvenliğiniz bizim için önceliklidir.</p>
+            </div>
+            <div class="info-card">
+                <div class="info-icon">
+                    <i class="bi bi-droplet"></i>
+                </div>
+                <h4>Hijyen</h4>
+                <p>Her transfer öncesi araçlarımız detaylı şekilde temizlenir ve dezenfekte edilir.</p>
+            </div>
+            <div class="info-card">
+                <div class="info-icon">
+                    <i class="bi bi-snow"></i>
+                </div>
+                <h4>Klima</h4>
+                <p>Tüm araçlarımızda çift bölgeli otomatik klima sistemi bulunmaktadır.</p>
+            </div>
+            <div class="info-card">
+                <div class="info-icon">
+                    <i class="bi bi-wifi"></i>
+                </div>
+                <h4>WiFi & Şarj</h4>
+                <p>Yolculuğunuz boyunca WiFi ve USB şarj imkanı sunuyoruz.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA -->
+<section class="cta section" style="content-visibility: auto;">
+    <div class="container">
+        <div class="cta-content">
+            <h2>Aracınızı Seçin, Rezervasyon Yapın</h2>
+            <p>VIP transfer deneyimi için hemen rezervasyon oluşturun.</p>
+            <a asp-controller="Reservation" asp-action="Index" class="btn btn-primary btn-lg">
+                <i class="bi bi-calendar-check"></i>
+                Rezervasyon Yap
+            </a>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    function updateVehiclePrices() {
+        var cur = window.getImperialCurrency ? window.getImperialCurrency() : { symbol: '€', code: 'EUR' };
+        var code = (cur.code || 'EUR').toUpperCase();
+        document.querySelectorAll('.vehicle-price-value').forEach(function(el) {
+            var amount = parseFloat(el.getAttribute('data-amount-' + code));
+            if (isNaN(amount) || amount <= 0) {
+                var eur = parseFloat(el.getAttribute('data-amount-eur'));
+                if (!isNaN(eur) && eur > 0 && window.convertFromEur) amount = window.convertFromEur(eur);
+                else if (isNaN(amount) || amount <= 0) amount = eur || 0;
+            }
+            var formatted = (typeof amount === 'number' ? amount : 0).toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            if (el.childNodes.length && el.childNodes[0].nodeType === 3) el.childNodes[0].textContent = formatted + ' ';
+            var symSpan = el.querySelector('.vehicle-currency-symbol');
+            if (symSpan) symSpan.textContent = cur.symbol;
+        });
+    }
+    updateVehiclePrices();
+    window.addEventListener('imperialCurrencyChanged', updateVehiclePrices);
+    window.addEventListener('imperialCurrencyRatesReady', updateVehiclePrices);
+
+    document.querySelectorAll('.vehicle-album-thumbs').forEach(function(thumbBar) {
+        var mainImg = thumbBar.closest('.vehicle-album').querySelector('.vehicle-album-main-img');
+        if (!mainImg) return;
+        thumbBar.querySelectorAll('.vehicle-thumb').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                var src = this.getAttribute('data-src');
+                if (src && mainImg.src !== src) {
+                    mainImg.src = src;
+                    thumbBar.querySelectorAll('.vehicle-thumb').forEach(function(b) { b.classList.remove('active'); });
+                    this.classList.add('active');
+                }
+            });
+        });
+    });
+});
+</script>
+}

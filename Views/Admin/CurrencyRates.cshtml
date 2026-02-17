@@ -1,0 +1,62 @@
+@using System.Globalization
+@{
+    ViewData["Title"] = "Kur Ayarları";
+    Layout = "_AdminLayout";
+    decimal tryVal = ViewBag.TRY != null ? Convert.ToDecimal(ViewBag.TRY) : 38.27m;
+    decimal usdVal = ViewBag.USD != null ? Convert.ToDecimal(ViewBag.USD) : 1.05m;
+    decimal gbpVal = ViewBag.GBP != null ? Convert.ToDecimal(ViewBag.GBP) : 0.83m;
+    // HTML5 number input için nokta kullan (virgül bazı tarayıcılarda boş görünür)
+    var tryStr = tryVal.ToString(CultureInfo.InvariantCulture);
+    var usdStr = usdVal.ToString(CultureInfo.InvariantCulture);
+    var gbpStr = gbpVal.ToString(CultureInfo.InvariantCulture);
+}
+
+<div class="admin-form-page">
+    <div class="admin-card">
+        <div class="card-header">
+            <h2><i class="bi bi-currency-exchange"></i> Döviz Kurları</h2>
+        </div>
+        <div class="card-body">
+            @if (TempData["Error"] != null)
+            {
+                <div class="alert alert-danger d-flex align-items-center mb-4" role="alert">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    <span>@TempData["Error"]</span>
+                </div>
+            }
+            @if (TempData["Success"] != null)
+            {
+                <div class="alert alert-success d-flex align-items-center mb-4" role="alert">
+                    <i class="bi bi-check-circle me-2"></i>
+                    <span>@TempData["Success"]</span>
+                </div>
+            }
+            <p class="text-muted mb-4">
+                Ana para birimi <strong>Euro (EUR)</strong>. Sitede araç ve bölge fiyatları EUR üzerinden kayıtlıdır.
+                Ziyaretçi TL, USD veya GBP seçtiğinde fiyatlar aşağıdaki kurlara göre otomatik dönüştürülür.
+                Kur oynadığında buradan güncelleyin.
+            </p>
+
+            <form asp-action="CurrencyRates" method="post" class="admin-form" style="max-width: 480px;">
+                @Html.AntiForgeryToken()
+                <div class="form-group">
+                    <label>1 EUR = ? TRY (Türk Lirası)</label>
+                    <input type="number" name="TRY" value="@tryStr" step="0.01" min="0.01" class="form-control" required placeholder="örn. 38.28 (80 EUR ≈ 3062 TL)" inputmode="decimal" />
+                </div>
+                <div class="form-group">
+                    <label>1 EUR = ? USD (Amerikan Doları)</label>
+                    <input type="number" name="USD" value="@usdStr" step="0.01" min="0.01" class="form-control" required placeholder="örn. 1.05" />
+                </div>
+                <div class="form-group">
+                    <label>1 EUR = ? GBP (İngiliz Sterlini)</label>
+                    <input type="number" name="GBP" value="@gbpStr" step="0.01" min="0.01" class="form-control" required placeholder="örn. 0.83" />
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-lg"></i> Kurları Kaydet
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,106 @@
+@model IEnumerable<SiteSettings>
+@{
+    ViewData["Title"] = "Site Ayarları";
+    Layout = "_AdminLayout";
+    
+    var contactSettings = Model.Where(s => new[] { "CompanyName", "Phone", "Email", "Address", "WhatsApp", "Instagram", "Facebook" }.Contains(s.Key));
+    
+    // Dil bazlı hero ayarları
+    var languages = new[] { "tr", "de", "ru", "en" };
+    var langNames = new Dictionary<string, string> 
+    { 
+        ["tr"] = "Türkçe", 
+        ["de"] = "Deutsch", 
+        ["ru"] = "Русский", 
+        ["en"] = "English" 
+    };
+    var heroKeys = new[] { "hero_badge", "hero_title", "hero_subtitle", "hero_description" };
+    var heroDescriptions = new Dictionary<string, string>
+    {
+        ["hero_badge"] = "Ana Sayfa Üst Rozet Yazısı",
+        ["hero_title"] = "Ana Sayfa Başlık (1. Satır)",
+        ["hero_subtitle"] = "Ana Sayfa Başlık (2. Satır)",
+        ["hero_description"] = "Ana Sayfa Açıklama"
+    };
+}
+
+<div class="admin-form-page">
+    <form asp-controller="Admin" asp-action="UpdateSettings" method="post" class="admin-form" id="settings-form">
+        @Html.AntiForgeryToken()
+        
+        <!-- Hero/Ana Sayfa Ayarları - Dil Bazlı -->
+        <div class="admin-card">
+            <div class="card-header">
+                <h3><i class="bi bi-house"></i> Ana Sayfa Metinleri</h3>
+            </div>
+            <div class="card-body">
+                @foreach (var lang in languages)
+                {
+                    <div style="border: 1px solid #30363d; border-radius: 8px; padding: 20px; margin-bottom: 24px; background: #161b22;">
+                        <h4 style="color: #58a6ff; margin-bottom: 20px; font-size: 18px; font-weight: 600;">
+                            <i class="bi bi-translate"></i> @langNames[lang]
+                        </h4>
+                        
+                        @foreach (var heroKey in heroKeys)
+                        {
+                            var settingKey = $"{heroKey}_{lang}";
+                            var setting = Model.FirstOrDefault(s => s.Key == settingKey);
+                            var value = setting?.Value ?? "";
+                            var description = heroDescriptions[heroKey];
+                            
+                            <div class="form-group" style="margin-bottom: 16px;">
+                                <label style="color: #c9d1d9; font-weight: 500; margin-bottom: 6px; display: block;">
+                                    @description (@langNames[lang])
+                                </label>
+                                @if (heroKey == "hero_description")
+                                {
+                                    <textarea name="setting_@(settingKey)" class="form-control" rows="3" style="background: #0d1117; border: 1px solid #30363d; color: #c9d1d9;">@value</textarea>
+                                }
+                                else
+                                {
+                                    <input type="text" name="setting_@(settingKey)" value="@value" class="form-control" style="background: #0d1117; border: 1px solid #30363d; color: #c9d1d9;" />
+                                }
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- İletişim Ayarları -->
+        <div class="admin-card" style="margin-top: 20px;">
+            <div class="card-header">
+                <h3><i class="bi bi-telephone"></i> İletişim Bilgileri</h3>
+            </div>
+            <div class="card-body">
+                @foreach (var setting in contactSettings)
+                {
+                    <div class="form-group">
+                        <label>@setting.Description</label>
+                        <input type="text" name="setting_@(setting.Key)" value="@setting.Value" class="form-control" />
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="form-actions form-actions-sticky" style="margin-top: 24px;">
+            <button type="submit" class="btn btn-primary btn-lg">
+                <i class="bi bi-check-lg"></i> Değişiklikleri Kaydet
+            </button>
+        </div>
+    </form>
+
+    <div class="admin-card" style="margin-top: 20px;">
+        <div class="card-header">
+            <h3><i class="bi bi-info-circle"></i> Bilgi</h3>
+        </div>
+        <div class="card-body">
+            <p style="color: #8b949e; font-size: 14px;">
+                <strong>Ana Sayfa Metinleri:</strong> Bu ayarlar ana sayfadaki başlık, alt başlık ve açıklama metinlerini kontrol eder.
+            </p>
+            <p style="color: #8b949e; font-size: 14px;">
+                <strong>WhatsApp numarası formatı:</strong> +905303471580 (başında + ve ülke kodu olmalı, boşluk olmadan)
+            </p>
+        </div>
+    </div>
+</div>

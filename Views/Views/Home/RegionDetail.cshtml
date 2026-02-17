@@ -1,0 +1,171 @@
+@model Region
+@{
+    ViewData["Title"] = $"{Model.Name} - VIP Transfer";
+    var vehicles = ViewBag.Vehicles as List<Vehicle> ?? new List<Vehicle>();
+    var reservationUrl = Url.Action("Index", "Reservation");
+    var startPoint = Model.StartPoint;
+    var regionName = Model.Name;
+    var regionId = Model.Id;
+}
+
+<div class="region-detail-page">
+    <!-- Region Hero -->
+    <div class="region-hero">
+        @if (!string.IsNullOrEmpty(Model.ImageUrl))
+        {
+            <img src="@Model.ImageUrl" 
+                 alt="@Model.Name" 
+                 loading="eager" 
+                 decoding="async"
+                 fetchpriority="high"
+                 onerror="this.style.display='none'" />
+        }
+        <div class="region-hero-overlay">
+            <div class="container">
+                <h1>@Model.Name</h1>
+                <div class="region-meta">
+                    <span><i class="bi bi-geo-alt"></i> @Model.StartPoint → @Model.Name</span>
+                    @if (Model.DistanceKm > 0)
+                    {
+                        <span><i class="bi bi-signpost"></i> @Model.DistanceKm.ToString("N0") km</span>
+                    }
+                    @if (Model.EstimatedDurationMinutes > 0)
+                    {
+                        <span><i class="bi bi-clock"></i> ~@Model.EstimatedDurationMinutes dakika</span>
+                    }
+                    <span><i class="bi bi-tag"></i> @Model.Price.ToString("N0") € 'den başlayan fiyatlar</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Vehicle Selection -->
+    <section class="vehicle-selection-section">
+        <div class="container">
+            <h2>Aracınızı Seçin</h2>
+            
+            <div class="vehicle-selection-grid">
+                @foreach (var vehicle in vehicles)
+                {
+                    <div class="vehicle-select-card" data-vehicle-id="@vehicle.Id" data-vehicle-name="@vehicle.Name" data-price="@vehicle.MinimumPrice">
+                        <div class="vehicle-img">
+                            @if (!string.IsNullOrEmpty(vehicle.ImageUrl))
+                            {
+                                <img src="@vehicle.ImageUrl" 
+                                     alt="@vehicle.Name" 
+                                     loading="lazy" 
+                                     decoding="async"
+                                     onerror="this.style.display='none'" />
+                            }
+                        </div>
+                        <div class="vehicle-details">
+                            <h3>@vehicle.Name</h3>
+                            <div class="vehicle-specs">
+                                <span><i class="bi bi-people"></i> @vehicle.PassengerCapacity Yolcu</span>
+                                <span><i class="bi bi-briefcase"></i> @vehicle.LuggageCapacity Bagaj</span>
+                            </div>
+                            <div class="vehicle-price">@vehicle.MinimumPrice.ToString("N0") €</div>
+                        </div>
+                    </div>
+                }
+            </div>
+            
+            <!-- Continue Button -->
+            <div class="text-center mt-5">
+                <a href="#" id="continueToReservation" class="btn btn-accent btn-lg disabled-btn">
+                    <i class="bi bi-arrow-right"></i> Rezervasyona Devam Et
+                </a>
+                <p class="text-muted mt-2" id="selectionHint">Devam etmek için bir araç seçin</p>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Region Description -->
+    @if (!string.IsNullOrEmpty(Model.Description))
+    {
+        <section class="section">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-8 mx-auto">
+                        <h3 class="mb-3">@Model.Name Hakkında</h3>
+                        <p>@Model.Description</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    }
+</div>
+
+<style>
+    .disabled-btn {
+        pointer-events: none;
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+    .enabled-btn {
+        pointer-events: auto !important;
+        opacity: 1 !important;
+        cursor: pointer;
+    }
+    .vehicle-select-card {
+        cursor: pointer;
+    }
+    .vehicle-select-card.selected {
+        border-color: #b8860b !important;
+        box-shadow: 0 0 20px rgba(184, 134, 11, 0.3) !important;
+    }
+</style>
+
+@section Scripts {
+<script>
+    (function() {
+        console.log('Vehicle selection script loaded');
+        
+        var vehicleCards = document.querySelectorAll('.vehicle-select-card');
+        var continueBtn = document.getElementById('continueToReservation');
+        var hint = document.getElementById('selectionHint');
+        var baseUrl = '@Html.Raw(reservationUrl)';
+        var startPoint = '@Html.Raw(startPoint)';
+        var regionName = '@Html.Raw(regionName)';
+        var regionId = '@regionId';
+        
+        console.log('Found ' + vehicleCards.length + ' vehicle cards');
+        console.log('Base URL: ' + baseUrl);
+        
+        if (vehicleCards.length === 0) {
+            console.error('No vehicle cards found!');
+            return;
+        }
+        
+        for (var i = 0; i < vehicleCards.length; i++) {
+            vehicleCards[i].onclick = function() {
+                console.log('Card clicked: ' + this.getAttribute('data-vehicle-name'));
+                
+                // Remove selection from all cards
+                for (var j = 0; j < vehicleCards.length; j++) {
+                    vehicleCards[j].classList.remove('selected');
+                }
+                
+                // Add selection to clicked card
+                this.classList.add('selected');
+                var vehicleId = this.getAttribute('data-vehicle-id');
+                var vehicleName = this.getAttribute('data-vehicle-name');
+                
+                // Enable continue button
+                if (continueBtn) {
+                    continueBtn.className = 'btn btn-accent btn-lg enabled-btn';
+                    continueBtn.href = baseUrl + '?vehicleId=' + vehicleId + 
+                                       '&pickupLocation=' + encodeURIComponent(startPoint) + 
+                                       '&dropoffLocation=' + encodeURIComponent(regionName) + 
+                                       '&regionId=' + regionId;
+                    console.log('Button href set to: ' + continueBtn.href);
+                }
+                
+                if (hint) {
+                    hint.textContent = 'Seçilen araç: ' + vehicleName;
+                }
+            };
+        }
+    })();
+</script>
+}

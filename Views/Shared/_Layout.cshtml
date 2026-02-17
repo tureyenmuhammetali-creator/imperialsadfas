@@ -1,0 +1,495 @@
+@inject IConfiguration Configuration
+@inject ImperialVip.Services.ICurrencyRateService CurrencyRateService
+@{
+    var currentLang = ViewContext.RouteData.Values["lang"]?.ToString() ?? "tr";
+    var currencyRates = CurrencyRateService.GetRates();
+    currencyRates.TryGetValue("TRY", out var rateTry);
+    currencyRates.TryGetValue("USD", out var rateUsd);
+    currencyRates.TryGetValue("GBP", out var rateGbp);
+    var tryVal = rateTry > 0 ? rateTry : 38.27m;
+    var usdVal = rateUsd > 0 ? rateUsd : 1.05m;
+    var gbpVal = rateGbp > 0 ? rateGbp : 0.83m;
+    var controller = ViewContext.RouteData.Values["controller"]?.ToString() ?? "Home";
+    var action = ViewContext.RouteData.Values["action"]?.ToString() ?? "Index";
+    var routeId = ViewContext.RouteData.Values["id"];
+    var nav = new Dictionary<string, string> {
+        ["tr"] = "Ana Sayfa|Bölgeler|Araçlarımız|Rezervasyon|Hakkımızda|Galeri|İletişim",
+        ["de"] = "Startseite|Regionen|Unsere Fahrzeuge|Reservierung|Über uns|Galerie|Kontakt",
+        ["ru"] = "Главная|Регионы|Наши автомобили|Бронирование|О нас|Галерея|Контакты",
+        ["en"] = "Home|Regions|Our Vehicles|Reservation|About|Gallery|Contact"
+    };
+    var navItems = (nav.ContainsKey(currentLang) ? nav[currentLang] : nav["tr"]).Split('|');
+    
+    // Footer ve ortak metinler - tüm proje için dil desteği
+    var footer = new Dictionary<string, Dictionary<string, string>> {
+        ["tr"] = new Dictionary<string, string> {
+            ["Description"] = "Premium VIP transfer hizmetleri ile seyahatlerinizi ayrıcalıklı kılıyoruz. Güvenli, konforlu ve zamanında.",
+            ["TursabInfo"] = "Bu site üzerinden yapılan tur satışları,<br />VİPANATOLİATRAVEL Taşımacılık Turizm İnşaat<br />Emlak San. ve Tic. Ltd. Şti.<br />(TÜRSAB – ADINDEN TURİZM) adına yapılmaktadır.",
+            ["TursabLink"] = "TÜRSAB Dijital Doğrulama",
+            ["TursabMember"] = "TÜRSAB üyesidir",
+            ["QuickAccess"] = "Hızlı Erişim", ["Services"] = "Hizmetler", ["Contact"] = "İletişim",
+            ["Home"] = "Ana Sayfa", ["Vehicles"] = "Araçlarımız", ["Reservation"] = "Rezervasyon", ["About"] = "Hakkımızda", ["Gallery"] = "Galeri",
+            ["AirportTransfer"] = "Havalimanı Transferi", ["HotelTransfer"] = "Otel Transferi", ["VIPRental"] = "VIP Araç Kiralama", ["IntercityTransfer"] = "Şehirler Arası Transfer",
+            ["Location"] = "ULUS MAH. CAHİT SITKI CAD. BİBER APT. NO:28/A KEPEZ / ANTALYA", ["Rights"] = "Tüm hakları saklıdır.", ["CurrencySelect"] = "Para Birimi Seçin", ["LangSelect"] = "Dil Seçin"
+        },
+        ["de"] = new Dictionary<string, string> {
+            ["Description"] = "Mit Premium-VIP-Transfer machen wir Ihre Reisen exklusiv. Sicher, komfortabel und pünktlich.",
+            ["TursabInfo"] = "Die auf dieser Website durchgeführten Tourverkäufe werden im Namen von<br />VİPANATOLİATRAVEL Taşımacılık Turizm İnşaat<br />Emlak San. ve Tic. Ltd. Şti.<br />(TÜRSAB – ADINDEN TURİZM) durchgeführt.",
+            ["TursabLink"] = "TÜRSAB Digitale Verifizierung",
+            ["TursabMember"] = "TÜRSAB-Mitglied",
+            ["QuickAccess"] = "Schnellzugriff", ["Services"] = "Dienstleistungen", ["Contact"] = "Kontakt",
+            ["Home"] = "Startseite", ["Vehicles"] = "Unsere Fahrzeuge", ["Reservation"] = "Reservierung", ["About"] = "Über uns", ["Gallery"] = "Galerie",
+            ["AirportTransfer"] = "Flughafentransfer", ["HotelTransfer"] = "Hoteltransfer", ["VIPRental"] = "VIP-Fahrzeugvermietung", ["IntercityTransfer"] = "Städteverbindung",
+            ["Location"] = "ULUS MAH. CAHİT SITKI CAD. BİBER APT. NO:28/A KEPEZ / ANTALYA", ["Rights"] = "Alle Rechte vorbehalten.", ["CurrencySelect"] = "Währung wählen", ["LangSelect"] = "Sprache wählen"
+        },
+        ["ru"] = new Dictionary<string, string> {
+            ["Description"] = "Премиум VIP-трансфер делает ваши поездки особенными. Безопасно, комфортно и вовремя.",
+            ["TursabInfo"] = "Продажи туров, осуществляемые через данный сайт, проводятся от имени<br />VİPANATOLİATRAVEL Taşımacılık Turizm İnşaat<br />Emlak San. ve Tic. Ltd. Şti.<br />(ТЮРСАБ – ADINDEN TURİZM).",
+            ["TursabLink"] = "ТЮРСАБ Цифровая верификация",
+            ["TursabMember"] = "Член ТЮРСАБ",
+            ["QuickAccess"] = "Быстрый доступ", ["Services"] = "Услуги", ["Contact"] = "Контакты",
+            ["Home"] = "Главная", ["Vehicles"] = "Наши автомобили", ["Reservation"] = "Бронирование", ["About"] = "О нас", ["Gallery"] = "Галерея",
+            ["AirportTransfer"] = "Трансфер в аэропорт", ["HotelTransfer"] = "Трансфер в отель", ["VIPRental"] = "VIP аренда авто", ["IntercityTransfer"] = "Междугородний трансфер",
+            ["Location"] = "ULUS MAH. CAHİT SITKI CAD. BİBER APT. NO:28/A KEPEZ / ANTALYA", ["Rights"] = "Все права защищены.", ["CurrencySelect"] = "Выбрать валюту", ["LangSelect"] = "Выбрать язык"
+        },
+        ["en"] = new Dictionary<string, string> {
+            ["Description"] = "We make your travels exclusive with premium VIP transfer services. Safe, comfortable and on time.",
+            ["TursabInfo"] = "Tour sales made through this website are conducted on behalf of<br />VİPANATOLİATRAVEL Taşımacılık Turizm İnşaat<br />Emlak San. ve Tic. Ltd. Şti.<br />(TÜRSAB – ADINDEN TURİZM).",
+            ["TursabLink"] = "TÜRSAB Digital Verification",
+            ["TursabMember"] = "TÜRSAB member",
+            ["QuickAccess"] = "Quick Access", ["Services"] = "Services", ["Contact"] = "Contact",
+            ["Home"] = "Home", ["Vehicles"] = "Our Vehicles", ["Reservation"] = "Reservation", ["About"] = "About", ["Gallery"] = "Gallery",
+            ["AirportTransfer"] = "Airport Transfer", ["HotelTransfer"] = "Hotel Transfer", ["VIPRental"] = "VIP Car Rental", ["IntercityTransfer"] = "Intercity Transfer",
+            ["Location"] = "ULUS MAH. CAHİT SITKI CAD. BİBER APT. NO:28/A KEPEZ / ANTALYA", ["Rights"] = "All rights reserved.", ["CurrencySelect"] = "Select Currency", ["LangSelect"] = "Select Language"
+        }
+    };
+    var ft = footer.ContainsKey(currentLang) ? footer[currentLang] : footer["tr"];
+}
+<!DOCTYPE html>
+<html lang="@currentLang">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Imperial VIP - Profesyonel VIP Transfer Hizmetleri. Havalimanı transferi, özel şoförlü araç kiralama." />
+    <meta name="theme-color" content="#d4af37" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>@ViewData["Title"] - Imperial VIP</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="/images/imgs/core-img/favicon.ico">
+    <link rel="shortcut icon" href="/images/imgs/core-img/favicon.ico">
+    
+    <!-- DNS Prefetch & Preconnect (Hız için kritik!) -->
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com">
+    <link rel="dns-prefetch" href="https://fonts.gstatic.com">
+    <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    <!-- ANTI-FLASH CSS + PERFORMANCE -->
+    <style>
+        html, body {
+            background-color: #f8fafc !important;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            opacity: 1;
+            transition: none !important;
+            will-change: contents;
+        }
+        /* FLASH KİLLER - Transition overlay */
+        #transition-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: #f8fafc;
+            z-index: 999999;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.15s ease-out;
+        }
+        #transition-overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+        /* GPU acceleration for smooth transitions */
+        section, .container, img {
+            will-change: transform, opacity;
+            transform: translateZ(0);
+            backface-visibility: hidden;
+        }
+        /* Prevent layout shift */
+        img {
+            content-visibility: auto;
+        }
+    </style>
+    
+    <!-- Google Fonts - Preload critical fonts -->
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"></noscript>
+    
+    <!-- Bootstrap Icons - Async load -->
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css"></noscript>
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="~/css/style.css" asp-append-version="true" />
+    
+    <!-- OKUNABİLİRLİK - Sadece koyu arka planlı bölümlerde beyaz metin -->
+    <style>
+        .section-dark .section-header .section-title,
+        .section-dark .section-header .section-description,
+        .services-detail-section .services-detail-title,
+        .services-detail-section .services-intro,
+        .services-detail-section .services-desc,
+        .why-choose-section .why-choose-title,
+        .why-choose-card h3, .why-choose-card p { color: #ffffff !important; }
+        .section-dark .section-header .section-label,
+        .services-detail-section .services-detail-ghost,
+        .why-choose-section .why-choose-ghost { color: #d4a84b !important; }
+        .trust-bar { background: #ffffff !important; }
+        .trust-item span { color: #0f172a !important; font-weight: 600 !important; }
+        .footer-tursab:hover { opacity: 0.85; text-decoration: underline; }
+    </style>
+    
+    <!-- Performance hints -->
+    <meta name="format-detection" content="telephone=no">
+    <script>
+        window.IMPERIAL_CURRENCY_RATES = {
+            EUR: 1,
+            TRY: @(tryVal.ToString(System.Globalization.CultureInfo.InvariantCulture)),
+            USD: @(usdVal.ToString(System.Globalization.CultureInfo.InvariantCulture)),
+            GBP: @(gbpVal.ToString(System.Globalization.CultureInfo.InvariantCulture))
+        };
+        // Eski localStorage'daki TRY kaydını temizle - artık sessionStorage kullanıyoruz, site EUR ile başlasın
+        try { localStorage.removeItem('imperial_currency'); } catch(e) {}
+        // Para birimi yardımcıları – sayfa scriptleri çalışmadan önce tanımlı (kur dönüşümü için)
+        window.getImperialCurrency = function() {
+            try {
+                var o = JSON.parse(sessionStorage.getItem('imperial_currency'));
+                return { code: (o && o.code) ? o.code : 'EUR', symbol: (o && o.symbol) ? o.symbol : '€' };
+            } catch (e) { return { code: 'EUR', symbol: '€' }; }
+        };
+        window.convertFromEur = function(amountEur) {
+            if (typeof amountEur !== 'number' || isNaN(amountEur)) return 0;
+            var rates = window.IMPERIAL_CURRENCY_RATES || { EUR: 1, TRY: 38.27, USD: 1.05, GBP: 0.83 };
+            var cur = window.getImperialCurrency();
+            var rate = rates[cur.code];
+            if (rate == null || rate <= 0) rate = 1;
+            return amountEur * rate;
+        };
+        // Admin'de güncellenen kurlar hemen yansısın - anlık güncelleme
+        (function() {
+            var lang = document.documentElement.getAttribute('lang') || 'tr';
+            function getUrl() { return '/' + lang + '/Home/CurrencyRatesJson?_=' + Date.now(); }
+            function applyRates(rates) {
+                if (rates && typeof rates === 'object') {
+                    window.IMPERIAL_CURRENCY_RATES = rates;
+                    window.dispatchEvent(new Event('imperialCurrencyRatesReady'));
+                }
+            }
+            function fetchRates() {
+                fetch(getUrl(), { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } })
+                    .then(function(r) { return r.ok ? r.json() : Promise.reject(); })
+                    .then(applyRates)
+                    .catch(function() {
+                        return fetch('/Home/CurrencyRatesJson?_=' + Date.now(), { cache: 'no-store' })
+                            .then(function(r) { return r.ok ? r.json() : Promise.reject(); });
+                    })
+                    .then(function(rates) { if (rates) applyRates(rates); })
+                    .catch(function() {});
+            }
+            fetchRates();
+            setInterval(fetchRates, 15000);
+        })();
+    </script>
+</head>
+<body>
+    <!-- TRANSITION OVERLAY - Flash önleyici -->
+    <div id="transition-overlay"></div>
+    
+    <!-- Header -->
+    <header class="header" id="header">
+        <nav class="nav container">
+            <a asp-controller="Home" asp-action="Index" asp-route-lang="@currentLang" class="nav-logo">
+                <img src="/images/imgs/core-img/logo.png" alt="Imperial VIP" class="nav-logo-img" width="180" height="48" />
+            </a>
+
+            <div class="nav-menu" id="nav-menu">
+                <ul class="nav-list">
+                    <li class="nav-item"><a asp-controller="Home" asp-action="Index" asp-route-lang="@currentLang" class="nav-link">@navItems[0]</a></li>
+                    <li class="nav-item"><a asp-controller="Home" asp-action="AllRegions" asp-route-lang="@currentLang" class="nav-link">@navItems[1]</a></li>
+                    <li class="nav-item"><a asp-controller="Vehicle" asp-action="Index" asp-route-lang="@currentLang" class="nav-link">@navItems[2]</a></li>
+                    <li class="nav-item"><a asp-controller="Vehicle" asp-action="Index" asp-route-lang="@currentLang" class="nav-link">@navItems[3]</a></li>
+                    <li class="nav-item"><a asp-controller="Home" asp-action="About" asp-route-lang="@currentLang" class="nav-link">@navItems[4]</a></li>
+                    <li class="nav-item"><a asp-controller="Home" asp-action="Galeri" asp-route-lang="@currentLang" class="nav-link">@navItems[5]</a></li>
+                    <li class="nav-item"><a asp-controller="Home" asp-action="Contact" asp-route-lang="@currentLang" class="nav-link">@navItems[6]</a></li>
+                </ul>
+
+                <div class="nav-close" id="nav-close">
+                    <i class="bi bi-x"></i>
+                </div>
+            </div>
+
+            <div class="nav-buttons">
+                <div class="currency-selector" id="currencySelector">
+                    <button class="currency-btn" id="currencyBtn" aria-label="@ft["CurrencySelect"]" title="@ft["CurrencySelect"]">
+                        <span class="currency-symbol" id="currencySymbol">€</span>
+                        <span class="currency-code" id="currencyCode">EUR</span>
+                        <i class="bi bi-chevron-down"></i>
+                    </button>
+                    <div class="currency-dropdown" id="currencyDropdown">
+                        <button type="button" class="currency-option" data-currency="EUR" data-symbol="€">€ EUR</button>
+                        <button type="button" class="currency-option" data-currency="USD" data-symbol="$">$ USD</button>
+                        <button type="button" class="currency-option" data-currency="TRY" data-symbol="₺">₺ TR</button>
+                        <button type="button" class="currency-option" data-currency="GBP" data-symbol="£">£ GBP</button>
+                    </div>
+                </div>
+                @{
+                    var flagBase = Url.Content("~/images/imgs/flags/");
+                    var validLang = (currentLang == "tr" || currentLang == "de" || currentLang == "ru" || currentLang == "en") ? currentLang : "tr";
+                    var currentFlagSrc = $"{flagBase}{validLang}.jpg";
+                }
+                <div class="lang-selector">
+                    <button class="lang-btn" id="langBtn" aria-label="@ft["LangSelect"]" title="@ft["LangSelect"]">
+                        <img src="@currentFlagSrc" alt="" class="lang-flag-img" width="20" height="14" />
+                        <span class="lang-current">@currentLang.ToUpperInvariant()</span>
+                        <i class="bi bi-chevron-down"></i>
+                    </button>
+                    <div class="lang-dropdown" id="langDropdown">
+                        <a href="/tr/@controller/@action@(routeId != null ? "/" + routeId : "")" class="lang-option @(currentLang == "tr" ? "active" : "")"><img src="@(flagBase)tr.jpg" alt="" class="lang-option-flag" width="20" height="14" /> Türkçe</a>
+                        <a href="/de/@controller/@action@(routeId != null ? "/" + routeId : "")" class="lang-option @(currentLang == "de" ? "active" : "")"><img src="@(flagBase)de.jpg" alt="" class="lang-option-flag" width="20" height="14" /> Deutsch</a>
+                        <a href="/ru/@controller/@action@(routeId != null ? "/" + routeId : "")" class="lang-option @(currentLang == "ru" ? "active" : "")"><img src="@(flagBase)ru.jpg" alt="" class="lang-option-flag" width="20" height="14" /> Русский</a>
+                        <a href="/en/@controller/@action@(routeId != null ? "/" + routeId : "")" class="lang-option @(currentLang == "en" ? "active" : "")"><img src="@(flagBase)en.jpg" alt="" class="lang-option-flag" width="20" height="14" /> English</a>
+                    </div>
+                </div>
+                <a asp-controller="Vehicle" asp-action="Index" asp-route-lang="@currentLang" class="btn btn-primary">
+                    <i class="bi bi-calendar-check"></i>
+                    <span>@navItems[3]</span>
+                </a>
+                <div class="nav-toggle" id="nav-toggle">
+                    <i class="bi bi-list"></i>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main">
+        @RenderBody()
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <a asp-controller="Home" asp-action="Index" asp-route-lang="@currentLang" class="footer-logo">
+                        <img src="/images/imgs/core-img/logo.png" alt="Imperial VIP" class="footer-logo-img" width="180" height="48" />
+                    </a>
+                    <a href="https://www.tursab.org.tr/tr/ddsv" target="_blank" rel="noopener noreferrer" class="footer-tursab" title="@ft["TursabLink"]" style="display: inline-flex; align-items: center; gap: 6px; margin-top: 10px; font-size: 0.9rem; color: inherit; text-decoration: none;">
+                        <i class="bi bi-file-earmark-text" style="font-size: 1.25rem;" aria-hidden="true"></i>
+                        <span>@ft["TursabMember"]</span>
+                    </a>
+                    <p class="footer-description">
+                        @ft["Description"]
+                    </p>
+                </div>
+
+                <div class="footer-links">
+                    <h4>@ft["QuickAccess"]</h4>
+                    <ul>
+                        <li><a asp-controller="Home" asp-action="Index" asp-route-lang="@currentLang">@ft["Home"]</a></li>
+                        <li><a asp-controller="Vehicle" asp-action="Index" asp-route-lang="@currentLang">@ft["Vehicles"]</a></li>
+                        <li><a asp-controller="Reservation" asp-action="Index" asp-route-lang="@currentLang">@ft["Reservation"]</a></li>
+                        <li><a asp-controller="Home" asp-action="About" asp-route-lang="@currentLang">@ft["About"]</a></li>
+                        <li><a asp-controller="Home" asp-action="Galeri" asp-route-lang="@currentLang">@ft["Gallery"]</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-links">
+                    <h4>@ft["Services"]</h4>
+                    <ul>
+                        <li><a href="#">@ft["AirportTransfer"]</a></li>
+                        <li><a href="#">@ft["HotelTransfer"]</a></li>
+                        <li><a href="#">@ft["VIPRental"]</a></li>
+                        <li><a href="#">@ft["IntercityTransfer"]</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-contact">
+                    <h4>@ft["Contact"]</h4>
+                    <ul>
+                        <li>
+                            <i class="bi bi-geo-alt"></i>
+                            <span>@ft["Location"]</span>
+                        </li>
+                        <li>
+                            <i class="bi bi-telephone"></i>
+                            <a href="tel:+905303471580">+90 530 347 1580</a>
+                        </li>
+                        <li>
+                            <i class="bi bi-envelope"></i>
+                            <a href="mailto:info@transferimperialvip.com">info@transferimperialvip.com</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <p class="tursab-info" style="font-size: 0.85rem; line-height: 1.5; margin-bottom: 12px; max-width: 500px;">
+                    @Html.Raw(ft["TursabInfo"])
+                </p>
+                <p>&copy; @DateTime.Now.Year Imperial VIP. @ft["Rights"]</p>
+                <div class="footer-social">
+                    <a href="#" target="_blank"><i class="bi bi-instagram"></i></a>
+                    <a href="#" target="_blank"><i class="bi bi-facebook"></i></a>
+                    <a href="#" target="_blank"><i class="bi bi-twitter-x"></i></a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- WhatsApp Button -->
+    <a href="https://wa.me/905303471580" class="whatsapp-float" title="+90 530 347 1580" target="_blank" rel="noopener" aria-label="WhatsApp İletişim">
+        <i class="bi bi-whatsapp"></i>
+    </a>
+
+    <!-- Scripts - Async/Defer for better performance -->
+    <script src="~/js/main.js" asp-append-version="true" defer></script>
+    
+    <!-- INSTANT PAGE LOAD - Prefetch on hover -->
+    <script>
+    (function() {
+        'use strict';
+        
+        const prefetched = new Set();
+        let mousedownTime = 0;
+        
+        // 1. PREFETCH on hover (100ms delay)
+        let prefetchTimer;
+        document.addEventListener('mouseover', function(e) {
+            const link = e.target.closest('a');
+            if (!link || !link.href || prefetched.has(link.href)) return;
+            if (link.classList.contains('lang-option')) return; // Dil değiştirme: prefetch yapma, her zaman taze yükle
+            const href = link.href;
+            if (!href.startsWith(window.location.origin) || href.includes('#')) return;
+            
+            clearTimeout(prefetchTimer);
+            prefetchTimer = setTimeout(() => {
+                // Create prefetch link
+                const prefetchLink = document.createElement('link');
+                prefetchLink.rel = 'prefetch';
+                prefetchLink.as = 'document';
+                prefetchLink.href = href;
+                document.head.appendChild(prefetchLink);
+                prefetched.add(href);
+                
+                console.log('⚡ Prefetched:', href);
+            }, 100);
+        }, {passive: true});
+        
+        // 2. INSTANT navigation on mousedown
+        document.addEventListener('mousedown', function(e) {
+            mousedownTime = Date.now();
+            const link = e.target.closest('a');
+            if (!link || !link.href) return;
+            if (link.classList.contains('lang-option')) return; // Dil değiştirme: prefetch yapma
+            const href = link.href;
+            if (!href.startsWith(window.location.origin) || href.includes('#')) return;
+            
+            // Prefetch immediately on mousedown (if not already)
+            if (!prefetched.has(href)) {
+                const prefetchLink = document.createElement('link');
+                prefetchLink.rel = 'prefetch';
+                prefetchLink.href = href;
+                document.head.appendChild(prefetchLink);
+                prefetched.add(href);
+            }
+        }, {passive: true});
+        
+        // 3. INSTANT navigation WITH overlay (NO FLASH!)
+        document.addEventListener('click', function(e) {
+            const link = e.target.closest('a');
+            if (!link || !link.href) return;
+            
+            let href = link.href;
+            if (!href.startsWith(window.location.origin) || href.includes('#')) return;
+            
+            // Dil değiştirme: cache-busting ekle (önbellekten eski/yanlış dil gelmesin)
+            if (link.classList.contains('lang-option')) {
+                href = href + (href.includes('?') ? '&' : '?') + '_=' + Date.now();
+            }
+            
+            // OVERLAY AKTIF - Dark ekran görünsün
+            e.preventDefault();
+            const overlay = document.getElementById('transition-overlay');
+            overlay.classList.add('active');
+            
+            // 150ms sonra navigate (overlay görünür durumda)
+            setTimeout(() => {
+                window.location.href = href;
+            }, 150);
+        });
+        
+        // 4. Hide overlay on page load
+        window.addEventListener('DOMContentLoaded', function() {
+            const overlay = document.getElementById('transition-overlay');
+            // Sayfa hazır - overlay'i kaldır
+            setTimeout(() => {
+                overlay.classList.remove('active');
+            }, 100);
+        });
+        
+        // 5. PageShow event (back/forward için)
+        window.addEventListener('pageshow', function(e) {
+            const overlay = document.getElementById('transition-overlay');
+            overlay.classList.remove('active');
+            if (e.persisted) {
+                console.log('⚡ From cache (instant!)');
+            }
+        });
+        
+        // 5. AUTO-PRELOAD ALL NAVBAR LINKS
+        setTimeout(() => {
+            // Navbar'daki TÜM linkleri otomatik bul ve prefetch et (dil seçici hariç)
+            const navLinks = document.querySelectorAll('nav a:not(.lang-option), .nav-link, .navbar a:not(.lang-option)');
+            navLinks.forEach(link => {
+                const href = link.href;
+                if (href && href.startsWith(window.location.origin) && !href.includes('#') && !prefetched.has(href)) {
+                    const prefetchLink = document.createElement('link');
+                    prefetchLink.rel = 'prefetch';
+                    prefetchLink.href = href;
+                    document.head.appendChild(prefetchLink);
+                    prefetched.add(href);
+                    console.log('🔥 Auto-prefetched:', href);
+                }
+            });
+        }, 1000);
+        
+        console.log('⚡ INSTANT LOAD: Active');
+    })();
+    </script>
+    @await RenderSectionAsync("Scripts", required: false)
+    
+    <!-- Performance optimization: Lazy load font awesome async -->
+    <script>
+        // Font loading optimization
+        if ('fonts' in document) {
+            Promise.all([
+                document.fonts.load('400 1em Inter'),
+                document.fonts.load('600 1em Inter')
+            ]).then(() => document.documentElement.classList.add('fonts-loaded'));
+        }
+        
+        // Service Worker for offline support (optional, uncomment when ready)
+        // if ('serviceWorker' in navigator) {
+        //     navigator.serviceWorker.register('/sw.js');
+        // }
+    </script>
+</body>
+</html>
+
