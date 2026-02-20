@@ -8,6 +8,8 @@ using ImperialVip.Services;
 using ImperialVip.Infrastructure;
 using Microsoft.Extensions.Options;
 
+QuestPDF.Settings.License = QuestPDF.Infrastructure.LicenseType.Community;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // ========== PERFORMANS OPTİMİZASYONLARI ==========
@@ -84,10 +86,15 @@ builder.Services.AddOutputCache(options =>
         .Tag("static"));
 });
 
-// SQLite Veritabanı Bağlantısı (Optimizasyonlar eklendi)
+// SQLite Veritabanı - App_Data klasörü (IIS yazma izni olan klasör)
+var appDataDir = Path.Combine(builder.Environment.ContentRootPath, "App_Data");
+if (!Directory.Exists(appDataDir))
+    Directory.CreateDirectory(appDataDir);
+var dbPath = Path.Combine(appDataDir, "imperialvip.db");
+var connectionString = $"Data Source={dbPath};Cache=Shared;Mode=ReadWriteCreate;Pooling=True";
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlite(
-        builder.Configuration.GetConnectionString("DefaultConnection"),
+        connectionString,
         sqliteOptions =>
         {
             sqliteOptions.CommandTimeout(30);
@@ -142,6 +149,8 @@ builder.Services.AddScoped<DataMigrationService>();
 builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
 builder.Services.AddScoped<IReservationPdfService, ReservationPdfService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.Configure<WhatsAppSettings>(builder.Configuration.GetSection("WhatsAppSettings"));
+builder.Services.AddScoped<IWhatsAppService, WhatsAppService>();
 builder.Services.AddScoped<ICurrencyRateService, CurrencyRateService>();
 
 // Admin Exception Filter (hata yakalama ve kullanıcıya popup gösterme)
@@ -158,8 +167,9 @@ var app = builder.Build();
 ImperialVip.Infrastructure.EmailLogHelper.SetLogFolder(app.Environment.ContentRootPath ?? Directory.GetCurrentDirectory());
 
 // Veritabanını Oluştur ve Seed Data Ekle
-using (var scope = app.Services.CreateScope())
+try
 {
+    using var scope = app.Services.CreateScope();
     var services = scope.ServiceProvider;
     var context = services.GetRequiredService<ApplicationDbContext>();
     var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
@@ -167,7 +177,6 @@ using (var scope = app.Services.CreateScope())
     
     context.Database.EnsureCreated();
     
-    // Regions tablosu yoksa oluştur (EnsureCreated mevcut DB'ye yeni tablo eklemez)
     try
     {
         var sql = @"
@@ -190,47 +199,46 @@ using (var scope = app.Services.CreateScope())
             )";
         context.Database.ExecuteSqlRaw(sql);
     }
-    catch (Exception ex)
+    catch (Exception ex) { Console.WriteLine($"Regions tablosu kontrol: {ex.Message}"); }
+    
+    var alterCommands = new[]
     {
-        Console.WriteLine($"Regions tablosu kontrol edilirken hata: {ex.Message}");
+        "ALTER TABLE Reservations ADD COLUMN RegionId INTEGER",
+        "ALTER TABLE Reservations ADD COLUMN AirlineCompany TEXT",
+        "ALTER TABLE Reservations ADD COLUMN AdditionalPassengerNames TEXT",
+        "ALTER TABLE Reservations ADD COLUMN HotelName TEXT",
+        "ALTER TABLE Reservations ADD COLUMN IsReturnTransfer INTEGER DEFAULT 0",
+        "ALTER TABLE Reservations ADD COLUMN ReturnTransferDate TEXT",
+        "ALTER TABLE Reservations ADD COLUMN ReturnTransferTime TEXT",
+        "ALTER TABLE Reservations ADD COLUMN ReturnFlightNumber TEXT",
+        "ALTER TABLE Reservations ADD COLUMN NumberOfAdults INTEGER DEFAULT 1",
+        "ALTER TABLE Reservations ADD COLUMN NumberOfChildren INTEGER DEFAULT 0",
+        "ALTER TABLE Reservations ADD COLUMN ChildSeatCount INTEGER DEFAULT 0",
+        "ALTER TABLE Reservations ADD COLUMN ChildNames TEXT",
+        "ALTER TABLE Reservations ADD COLUMN Language TEXT DEFAULT 'en'",
+        "ALTER TABLE Reservations ADD COLUMN Currency TEXT DEFAULT 'EUR'",
+        "ALTER TABLE Vehicles ADD COLUMN Currency TEXT",
+        "ALTER TABLE Regions ADD COLUMN Currency TEXT",
+        "ALTER TABLE Vehicles ADD COLUMN PricePerKmUsd REAL DEFAULT 0",
+        "ALTER TABLE Vehicles ADD COLUMN MinimumPriceUsd REAL DEFAULT 0",
+        "ALTER TABLE Vehicles ADD COLUMN PricePerKmTry REAL DEFAULT 0",
+        "ALTER TABLE Vehicles ADD COLUMN MinimumPriceTry REAL DEFAULT 0",
+    };
+    foreach (var cmd in alterCommands)
+    {
+        try { context.Database.ExecuteSqlRaw(cmd); } catch { }
     }
     
-    // Reservations tablosuna yeni kolonlar (RegionId, AirlineCompany, AdditionalPassengerNames)
-    try
+    var updateCommands = new[]
     {
-        context.Database.ExecuteSqlRaw("ALTER TABLE Reservations ADD COLUMN RegionId INTEGER");
-    }
-    catch { /* Kolon zaten varsa yoksay */ }
-    try
+        "UPDATE Vehicles SET Currency = 'EUR' WHERE Currency IS NULL OR Currency = ''",
+        "UPDATE Regions SET Currency = 'EUR' WHERE Currency IS NULL OR Currency = ''",
+    };
+    foreach (var cmd in updateCommands)
     {
-        context.Database.ExecuteSqlRaw("ALTER TABLE Reservations ADD COLUMN AirlineCompany TEXT");
+        try { context.Database.ExecuteSqlRaw(cmd); } catch { }
     }
-    catch { /* Kolon zaten varsa yoksay */ }
-    try
-    {
-        context.Database.ExecuteSqlRaw("ALTER TABLE Reservations ADD COLUMN AdditionalPassengerNames TEXT");
-    }
-    catch { /* Kolon zaten varsa yoksay */ }
-    try { context.Database.ExecuteSqlRaw("ALTER TABLE Reservations ADD COLUMN HotelName TEXT"); } catch { }
-    try { context.Database.ExecuteSqlRaw("ALTER TABLE Reservations ADD COLUMN IsReturnTransfer INTEGER DEFAULT 0"); } catch { }
-    try { context.Database.ExecuteSqlRaw("ALTER TABLE Reservations ADD COLUMN ReturnTransferDate TEXT"); } catch { }
-    try { context.Database.ExecuteSqlRaw("ALTER TABLE Reservations ADD COLUMN ReturnTransferTime TEXT"); } catch { }
-    try { context.Database.ExecuteSqlRaw("ALTER TABLE Reservations ADD COLUMN ReturnFlightNumber TEXT"); } catch { }
-    try { context.Database.ExecuteSqlRaw("ALTER TABLE Reservations ADD COLUMN NumberOfAdults INTEGER DEFAULT 1"); } catch { }
-    try { context.Database.ExecuteSqlRaw("ALTER TABLE Reservations ADD COLUMN NumberOfChildren INTEGER DEFAULT 0"); } catch { }
-    try { context.Database.ExecuteSqlRaw("ALTER TABLE Reservations ADD COLUMN ChildSeatCount INTEGER DEFAULT 0"); } catch { }
     
-    // Vehicles ve Regions: Para birimi kolonu (admin panelinde TL/EUR/USD seçimi)
-    try { context.Database.ExecuteSqlRaw("ALTER TABLE Vehicles ADD COLUMN Currency TEXT"); } catch { }
-    try { context.Database.ExecuteSqlRaw("UPDATE Vehicles SET Currency = 'EUR' WHERE Currency IS NULL OR Currency = ''"); } catch { }
-    try { context.Database.ExecuteSqlRaw("ALTER TABLE Regions ADD COLUMN Currency TEXT"); } catch { }
-    try { context.Database.ExecuteSqlRaw("UPDATE Regions SET Currency = 'EUR' WHERE Currency IS NULL OR Currency = ''"); } catch { }
-    try { context.Database.ExecuteSqlRaw("ALTER TABLE Vehicles ADD COLUMN PricePerKmUsd REAL DEFAULT 0"); } catch { }
-    try { context.Database.ExecuteSqlRaw("ALTER TABLE Vehicles ADD COLUMN MinimumPriceUsd REAL DEFAULT 0"); } catch { }
-    try { context.Database.ExecuteSqlRaw("ALTER TABLE Vehicles ADD COLUMN PricePerKmTry REAL DEFAULT 0"); } catch { }
-    try { context.Database.ExecuteSqlRaw("ALTER TABLE Vehicles ADD COLUMN MinimumPriceTry REAL DEFAULT 0"); } catch { }
-    
-    // CurrencyRates tablosu (admin panelinden kur düzenleme)
     try
     {
         context.Database.ExecuteSqlRaw(@"
@@ -243,6 +251,7 @@ using (var scope = app.Services.CreateScope())
         context.Database.ExecuteSqlRaw("CREATE UNIQUE INDEX IF NOT EXISTS IX_CurrencyRates_CurrencyCode ON CurrencyRates(CurrencyCode)");
     }
     catch (Exception ex) { Console.WriteLine($"CurrencyRates tablosu: {ex.Message}"); }
+    
     try
     {
         if (!context.CurrencyRates.Any())
@@ -259,34 +268,38 @@ using (var scope = app.Services.CreateScope())
     }
     catch (Exception ex) { Console.WriteLine($"CurrencyRates seed: {ex.Message}"); }
     
-    // Reservations: NULL olan alanları varsayılanla doldur (ordinal 26 / admin hatası önlenir)
-    try { context.Database.ExecuteSqlRaw("UPDATE Reservations SET VehicleId = (SELECT Id FROM Vehicles LIMIT 1) WHERE VehicleId IS NULL"); } catch { }
-    try { context.Database.ExecuteSqlRaw("UPDATE Reservations SET PassengerCount = 1 WHERE PassengerCount IS NULL"); } catch { }
-    try { context.Database.ExecuteSqlRaw("UPDATE Reservations SET NumberOfAdults = 1 WHERE NumberOfAdults IS NULL"); } catch { }
-    try { context.Database.ExecuteSqlRaw("UPDATE Reservations SET NumberOfChildren = 0 WHERE NumberOfChildren IS NULL"); } catch { }
-    try { context.Database.ExecuteSqlRaw("UPDATE Reservations SET ChildSeatCount = 0 WHERE ChildSeatCount IS NULL"); } catch { }
-    try { context.Database.ExecuteSqlRaw("UPDATE Reservations SET LuggageCount = 0 WHERE LuggageCount IS NULL"); } catch { }
-    try { context.Database.ExecuteSqlRaw("UPDATE Reservations SET Status = 0 WHERE Status IS NULL"); } catch { }
-    try { context.Database.ExecuteSqlRaw("UPDATE Reservations SET DistanceKm = 0 WHERE DistanceKm IS NULL"); } catch { }
-    try { context.Database.ExecuteSqlRaw("UPDATE Reservations SET EstimatedPrice = 0 WHERE EstimatedPrice IS NULL"); } catch { }
-    try { context.Database.ExecuteSqlRaw("UPDATE Reservations SET CreatedAt = datetime('now') WHERE CreatedAt IS NULL"); } catch { }
-    try { context.Database.ExecuteSqlRaw("UPDATE Reservations SET IsReturnTransfer = 0 WHERE IsReturnTransfer IS NULL"); } catch { }
-    try { context.Database.ExecuteSqlRaw("UPDATE Reservations SET PickupLocationType = 0 WHERE PickupLocationType IS NULL"); } catch { }
-    try { context.Database.ExecuteSqlRaw("UPDATE Reservations SET DropoffLocationType = 0 WHERE DropoffLocationType IS NULL"); } catch { }
-    try { context.Database.ExecuteSqlRaw("UPDATE Reservations SET TransferDate = date('now') WHERE TransferDate IS NULL"); } catch { }
-    try { context.Database.ExecuteSqlRaw("UPDATE Reservations SET TransferTime = '' WHERE TransferTime IS NULL"); } catch { }
-    try { context.Database.ExecuteSqlRaw("UPDATE Reservations SET CustomerName = '' WHERE CustomerName IS NULL"); } catch { }
-    try { context.Database.ExecuteSqlRaw("UPDATE Reservations SET PickupLocation = '' WHERE PickupLocation IS NULL"); } catch { }
-    try { context.Database.ExecuteSqlRaw("UPDATE Reservations SET DropoffLocation = '' WHERE DropoffLocation IS NULL"); } catch { }
-    try { context.Database.ExecuteSqlRaw("UPDATE Reservations SET CustomerPhone = '' WHERE CustomerPhone IS NULL"); } catch { }
-    try { context.Database.ExecuteSqlRaw("UPDATE Vehicles SET CreatedAt = datetime('now') WHERE CreatedAt IS NULL"); } catch { }
-    // Vehicle: NULL sayısal alanlar (admin rezervasyon detay join hatası önlenir)
-    try { context.Database.ExecuteSqlRaw("UPDATE Vehicles SET PassengerCapacity = 4 WHERE PassengerCapacity IS NULL"); } catch { }
-    try { context.Database.ExecuteSqlRaw("UPDATE Vehicles SET LuggageCapacity = 2 WHERE LuggageCapacity IS NULL"); } catch { }
-    try { context.Database.ExecuteSqlRaw("UPDATE Vehicles SET IsActive = 1 WHERE IsActive IS NULL"); } catch { }
-    try { context.Database.ExecuteSqlRaw("UPDATE Vehicles SET SortOrder = 0 WHERE SortOrder IS NULL"); } catch { }
+    var nullFixCommands = new[]
+    {
+        "UPDATE Reservations SET VehicleId = (SELECT Id FROM Vehicles LIMIT 1) WHERE VehicleId IS NULL",
+        "UPDATE Reservations SET PassengerCount = 1 WHERE PassengerCount IS NULL",
+        "UPDATE Reservations SET NumberOfAdults = 1 WHERE NumberOfAdults IS NULL",
+        "UPDATE Reservations SET NumberOfChildren = 0 WHERE NumberOfChildren IS NULL",
+        "UPDATE Reservations SET ChildSeatCount = 0 WHERE ChildSeatCount IS NULL",
+        "UPDATE Reservations SET LuggageCount = 0 WHERE LuggageCount IS NULL",
+        "UPDATE Reservations SET Status = 0 WHERE Status IS NULL",
+        "UPDATE Reservations SET DistanceKm = 0 WHERE DistanceKm IS NULL",
+        "UPDATE Reservations SET EstimatedPrice = 0 WHERE EstimatedPrice IS NULL",
+        "UPDATE Reservations SET CreatedAt = datetime('now') WHERE CreatedAt IS NULL",
+        "UPDATE Reservations SET IsReturnTransfer = 0 WHERE IsReturnTransfer IS NULL",
+        "UPDATE Reservations SET PickupLocationType = 0 WHERE PickupLocationType IS NULL",
+        "UPDATE Reservations SET DropoffLocationType = 0 WHERE DropoffLocationType IS NULL",
+        "UPDATE Reservations SET TransferDate = date('now') WHERE TransferDate IS NULL",
+        "UPDATE Reservations SET TransferTime = '' WHERE TransferTime IS NULL",
+        "UPDATE Reservations SET CustomerName = '' WHERE CustomerName IS NULL",
+        "UPDATE Reservations SET PickupLocation = '' WHERE PickupLocation IS NULL",
+        "UPDATE Reservations SET DropoffLocation = '' WHERE DropoffLocation IS NULL",
+        "UPDATE Reservations SET CustomerPhone = '' WHERE CustomerPhone IS NULL",
+        "UPDATE Vehicles SET CreatedAt = datetime('now') WHERE CreatedAt IS NULL",
+        "UPDATE Vehicles SET PassengerCapacity = 4 WHERE PassengerCapacity IS NULL",
+        "UPDATE Vehicles SET LuggageCapacity = 2 WHERE LuggageCapacity IS NULL",
+        "UPDATE Vehicles SET IsActive = 1 WHERE IsActive IS NULL",
+        "UPDATE Vehicles SET SortOrder = 0 WHERE SortOrder IS NULL",
+    };
+    foreach (var cmd in nullFixCommands)
+    {
+        try { context.Database.ExecuteSqlRaw(cmd); } catch { }
+    }
     
-    // Boş/yarım kalmış araç kayıtlarını temizle (güncelleme hatasıyla boşalan kayıt)
     try
     {
         context.Database.ExecuteSqlRaw(@"UPDATE Reservations SET VehicleId = (SELECT Id FROM Vehicles WHERE Name IS NOT NULL AND TRIM(Name) <> '' LIMIT 1) WHERE VehicleId IN (SELECT Id FROM Vehicles WHERE Name IS NULL OR TRIM(COALESCE(Name,'')) = '')");
@@ -296,6 +309,10 @@ using (var scope = app.Services.CreateScope())
     catch (Exception ex) { Console.WriteLine($"Boş araç temizliği: {ex.Message}"); }
     
     await DbInitializer.Initialize(context, userManager, roleManager);
+}
+catch (Exception ex)
+{
+    Console.WriteLine($"KRITIK: Veritabanı başlatma hatası: {ex}");
 }
 
 // Bölge görselleri için images/regions klasörünü oluştur (yoksa)
@@ -310,12 +327,35 @@ try
 }
 catch (Exception ex) { Console.WriteLine($"images/regions klasörü: {ex.Message}"); }
 
-if (!app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment())
+{
+    app.UseDeveloperExceptionPage();
+}
+else
 {
     app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
     app.UseHttpsRedirection();
 }
+
+// Teşhis endpoint'i - sunucu durumunu kontrol et
+app.MapGet("/diag", () =>
+{
+    var info = new
+    {
+        status = "OK",
+        time = DateTime.UtcNow.ToString("o"),
+        env = app.Environment.EnvironmentName,
+        contentRoot = app.Environment.ContentRootPath,
+        webRoot = app.Environment.WebRootPath,
+        dbPath = Path.Combine(app.Environment.ContentRootPath, "imperialvip.db"),
+        dbExists = File.Exists(Path.Combine(app.Environment.ContentRootPath, "imperialvip.db")),
+        runtime = System.Runtime.InteropServices.RuntimeInformation.FrameworkDescription,
+        os = System.Runtime.InteropServices.RuntimeInformation.OSDescription,
+        arch = System.Runtime.InteropServices.RuntimeInformation.ProcessArchitecture.ToString()
+    };
+    return Results.Json(info);
+});
 
 // ========== PERFORMANS MIDDLEWARE'LERİ ==========
 
@@ -358,7 +398,7 @@ app.UseAuthorization();
 
 // Dil bazlı routing: /tr/, /de/, /ru/, /en/ - Her dil ayrı site (çeviri değil)
 var langConstraint = new LanguageRouteConstraint();
-app.MapControllerRoute(name: "root", pattern: "", defaults: new { controller = "Home", action = "Index", lang = "tr" });
+app.MapControllerRoute(name: "root", pattern: "", defaults: new { controller = "Home", action = "Index", lang = "en" });
 app.MapControllerRoute(name: "account", pattern: "Account/{action=Login}/{id?}", defaults: new { controller = "Account", lang = "tr" });
 app.MapControllerRoute(name: "admin", pattern: "Admin/{action=Index}/{id?}", defaults: new { controller = "Admin", lang = "tr" });
 // Kur API'si - lang olmadan da erişilebilir (fetch fallback için)

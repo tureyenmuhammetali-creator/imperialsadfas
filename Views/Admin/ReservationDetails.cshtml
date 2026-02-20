@@ -74,13 +74,15 @@
             </div>
             <div class="card-body">
                 <div class="info-list">
-                    <div class="info-item">
-                        <span class="info-label">Tarih:</span>
-                        <span class="info-value">@(Model.TransferDate?.ToString("dd MMMM yyyy") ?? "Belirtilmemiş")</span>
-                    </div>
-                    <div class="info-item">
-                        <span class="info-label">Saat:</span>
-                        <span class="info-value">@Model.TransferTime</span>
+                    <div class="info-item" style="grid-column: 1 / -1;">
+                        <span class="info-label">Tarih & Saat:</span>
+                        <div class="detail-datetime">
+                            <div class="dt-badge"><i class="bi bi-calendar3"></i></div>
+                            <div class="dt-text">
+                                <span class="dt-date">@(Model.TransferDate?.ToString("dd MMMM yyyy, dddd") ?? "Belirtilmemiş")</span>
+                                <span class="dt-time"><i class="bi bi-clock" style="margin-right:4px;"></i> @(Model.TransferTime ?? "—")</span>
+                            </div>
+                        </div>
                     </div>
                     <div class="info-item">
                         <span class="info-label">Alış Noktası:</span>
@@ -94,7 +96,7 @@
                         </div>
                     }
                     <div class="info-item">
-                        <span class="info-label">Bırakış Noktası:</span>
+                        <span class="info-label">Varış Noktası:</span>
                         <span class="info-value">@Model.DropoffLocation</span>
                     </div>
                     @if (!string.IsNullOrEmpty(Model.DropoffLocationDetail))
@@ -123,13 +125,27 @@
             <div class="card-body">
                 <div class="info-list">
                     <div class="info-item">
-                        <span class="info-label">Yolcu Sayısı:</span>
-                        <span class="info-value">@(Model.PassengerCount ?? 0)</span>
+                        <span class="info-label">Yetişkin:</span>
+                        <span class="info-value">@(Model.NumberOfAdults ?? 1)</span>
                     </div>
                     <div class="info-item">
-                        <span class="info-label">Bagaj Sayısı:</span>
-                        <span class="info-value">@(Model.LuggageCount ?? 0)</span>
+                        <span class="info-label">Çocuk:</span>
+                        <span class="info-value">@(Model.NumberOfChildren ?? 0)</span>
                     </div>
+                    @if (!string.IsNullOrEmpty(Model.AdditionalPassengerNames))
+                    {
+                        <div class="info-item">
+                            <span class="info-label">Diğer Yetişkinler:</span>
+                            <span class="info-value">@Model.AdditionalPassengerNames</span>
+                        </div>
+                    }
+                    @if (!string.IsNullOrEmpty(Model.ChildNames))
+                    {
+                        <div class="info-item">
+                            <span class="info-label">Çocuk İsimleri:</span>
+                            <span class="info-value">@Model.ChildNames</span>
+                        </div>
+                    }
                     @if (Model.Vehicle != null)
                     {
                         <div class="info-item">
@@ -137,18 +153,28 @@
                             <span class="info-value">@Model.Vehicle.Name</span>
                         </div>
                     }
+                </div>
+            </div>
+        </div>
+
+        <!-- Ücretlendirme -->
+        <div class="admin-card">
+            <div class="card-header">
+                <h3><i class="bi bi-currency-euro"></i> Ücretlendirme</h3>
+            </div>
+            <div class="card-body">
+                <div class="info-list">
+                    <div class="info-item">
+                        <span class="info-label">Fiyat:</span>
+                        <span class="info-value price" style="font-size: 1.3em; font-weight: bold; color: #d4af37;">
+                            @((Model.EstimatedPrice ?? 0).ToString("N2")) €
+                        </span>
+                    </div>
                     @if ((Model.DistanceKm ?? 0) > 0)
                     {
                         <div class="info-item">
                             <span class="info-label">Mesafe:</span>
                             <span class="info-value">@(Model.DistanceKm?.ToString("N0")) KM</span>
-                        </div>
-                    }
-                    @if ((Model.EstimatedPrice ?? 0) > 0)
-                    {
-                        <div class="info-item">
-                            <span class="info-label">Tahmini Fiyat:</span>
-                            <span class="info-value price">@((Model.EstimatedPrice ?? 0).ToString("N2")) ₺</span>
                         </div>
                     }
                 </div>
@@ -179,6 +205,29 @@
                 {
                     <p class="text-muted">Not bulunmuyor.</p>
                 }
+            </div>
+        </div>
+    </div>
+
+    <!-- PDF İndir (4 Dil) -->
+    <div class="admin-card">
+        <div class="card-header">
+            <h3><i class="bi bi-file-pdf"></i> PDF Çıktısı</h3>
+        </div>
+        <div class="card-body">
+            <div class="d-flex gap-2 flex-wrap">
+                <a href="@Url.Action("DownloadPdf", "Admin", new { id = Model.Id, lang = "tr" })" class="btn btn-outline" target="_blank">
+                    <i class="bi bi-download"></i> Türkçe PDF
+                </a>
+                <a href="@Url.Action("DownloadPdf", "Admin", new { id = Model.Id, lang = "en" })" class="btn btn-outline" target="_blank">
+                    <i class="bi bi-download"></i> English PDF
+                </a>
+                <a href="@Url.Action("DownloadPdf", "Admin", new { id = Model.Id, lang = "de" })" class="btn btn-outline" target="_blank">
+                    <i class="bi bi-download"></i> Deutsch PDF
+                </a>
+                <a href="@Url.Action("DownloadPdf", "Admin", new { id = Model.Id, lang = "ru" })" class="btn btn-outline" target="_blank">
+                    <i class="bi bi-download"></i> Русский PDF
+                </a>
             </div>
         </div>
     </div>

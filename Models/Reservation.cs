@@ -121,6 +121,14 @@ namespace ImperialVip.Models
         [Range(0, 20)]
         public int? LuggageCount { get; set; } = 0;
 
+        [Display(Name = "Çocuk İsimleri")]
+        [MaxLength(500)]
+        public string? ChildNames { get; set; }
+
+        [Display(Name = "Rezervasyon Dili")]
+        [MaxLength(5)]
+        public string? Language { get; set; } = "en";
+
         // Araç (nullable: eski kayıtlarda NULL olabilir; yeni rezervasyonda zorunlu)
         [Range(1, int.MaxValue, ErrorMessage = "Lütfen bir araç seçiniz")]
         [Display(Name = "Seçilen Araç")]
@@ -141,6 +149,10 @@ namespace ImperialVip.Models
         [Display(Name = "Tahmini Fiyat")]
         [Column(TypeName = "decimal(18,2)")]
         public decimal? EstimatedPrice { get; set; }
+
+        [Display(Name = "Para Birimi")]
+        [MaxLength(5)]
+        public string? Currency { get; set; } = "EUR";
 
         // Notlar
         [Display(Name = "Özel Notlar")]

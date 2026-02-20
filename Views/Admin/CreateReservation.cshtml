@@ -49,7 +49,7 @@
                             <option value="">— Bölge seçiniz —</option>
                             @foreach (var r in regions)
                             {
-                                <option value="@r.Id" data-start="@r.StartPoint" data-name="@r.Name">@r.Name</option>
+                                <option value="@r.Id" data-start="@r.StartPoint" data-name="@r.Name" data-price="@r.Price.ToString(System.Globalization.CultureInfo.InvariantCulture)">@r.Name — @r.Price.ToString("N0") €</option>
                             }
                         </select>
                         <span asp-validation-for="RegionId" class="text-danger"></span>
@@ -72,28 +72,31 @@
                 <!-- Araç -->
                 <div class="form-group">
                     <label asp-for="VehicleId">Araç *</label>
-                    <select asp-for="VehicleId" class="form-control" required>
+                    <select asp-for="VehicleId" class="form-control" id="vehicleSelect" required>
                         <option value="">— Araç seçiniz —</option>
                         @foreach (var v in vehicles)
                         {
-                            <option value="@v.Id">@v.Name</option>
+                            <option value="@v.Id" data-min-eur="@v.MinimumPrice.ToString(System.Globalization.CultureInfo.InvariantCulture)">@v.Name — @v.MinimumPrice.ToString("N0") €</option>
                         }
                     </select>
                     <span asp-validation-for="VehicleId" class="text-danger"></span>
                 </div>
 
                 <!-- Tarih ve Saat -->
-                <div class="form-row">
-                    <div class="form-group">
-                        <label asp-for="TransferDate">Transfer Tarihi *</label>
-                        <input asp-for="TransferDate" type="date" class="form-control" required id="transferDate" />
-                        <span asp-validation-for="TransferDate" class="text-danger"></span>
+                <div class="form-group">
+                    <label>Transfer Tarih ve Saati *</label>
+                    <div class="datetime-row">
+                        <div class="datetime-input-wrap">
+                            <span class="dt-icon"><i class="bi bi-calendar3"></i></span>
+                            <input asp-for="TransferDate" type="date" class="form-control" required id="transferDate" />
+                        </div>
+                        <div class="datetime-input-wrap">
+                            <span class="dt-icon"><i class="bi bi-clock"></i></span>
+                            <input asp-for="TransferTime" type="time" class="form-control" required id="transferTime" />
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label asp-for="TransferTime">Transfer Saati *</label>
-                        <input asp-for="TransferTime" type="time" class="form-control" required id="transferTime" />
-                        <span asp-validation-for="TransferTime" class="text-danger"></span>
-                    </div>
+                    <span asp-validation-for="TransferDate" class="text-danger"></span>
+                    <span asp-validation-for="TransferTime" class="text-danger"></span>
                 </div>
 
                 <!-- Otel, Uçuş -->
@@ -120,14 +123,19 @@
                     </label>
                 </div>
 
-                <div id="returnFields" class="form-row" style="display:none;">
+                <div id="returnFields" style="display:none;">
                     <div class="form-group">
-                        <label asp-for="ReturnTransferDate">Dönüş Tarihi</label>
-                        <input asp-for="ReturnTransferDate" type="date" class="form-control" />
-                    </div>
-                    <div class="form-group">
-                        <label asp-for="ReturnTransferTime">Dönüş Saati</label>
-                        <input asp-for="ReturnTransferTime" type="time" class="form-control" />
+                        <label>Dönüş Tarih ve Saati</label>
+                        <div class="datetime-row">
+                            <div class="datetime-input-wrap">
+                                <span class="dt-icon"><i class="bi bi-calendar3"></i></span>
+                                <input asp-for="ReturnTransferDate" type="date" class="form-control" />
+                            </div>
+                            <div class="datetime-input-wrap">
+                                <span class="dt-icon"><i class="bi bi-clock"></i></span>
+                                <input asp-for="ReturnTransferTime" type="time" class="form-control" />
+                            </div>
+                        </div>
                     </div>
                     <div class="form-group">
                         <label asp-for="ReturnFlightNumber">Dönüş Uçuş Numarası</label>
@@ -149,10 +157,6 @@
                     <div class="form-group">
                         <label asp-for="ChildSeatCount">Çocuk Koltuğu</label>
                         <input asp-for="ChildSeatCount" type="number" class="form-control" min="0" max="10" value="0" />
-                    </div>
-                    <div class="form-group">
-                        <label asp-for="LuggageCount">Bagaj Sayısı</label>
-                        <input asp-for="LuggageCount" type="number" class="form-control" min="0" max="20" value="0" />
                     </div>
                 </div>
                 <input type="hidden" asp-for="PassengerCount" id="passengerCountHidden" value="1" />
@@ -182,6 +186,55 @@
                     <label class="control-label">2. yetişkin, 3. yetişkin... / 1. çocuk, 2. çocuk... (sadece Ad Soyad)</label>
                     <div id="additionalPassengerInputs"></div>
                     <input type="hidden" name="AdditionalPassengerNames" id="additionalPassengerNamesHidden" />
+                    <input type="hidden" name="ChildNames" id="childNamesHidden" />
+                </div>
+
+                <!-- Ücretlendirme -->
+                <h5 class="mt-4 mb-2">Ücretlendirme</h5>
+
+                <div id="autoPriceSection">
+                    <div class="d-flex align-items-center gap-3 mb-3" style="flex-wrap:wrap;">
+                        <div style="flex:1; min-width:200px;">
+                            <label class="control-label" style="margin-bottom:4px; font-size:0.85em; color:#aaa;">Hesaplanan Fiyat (Bölge + Araç)</label>
+                            <div id="calculatedPriceDisplay" style="font-size:1.5em; font-weight:700; color:#d4af37; letter-spacing:1px;">
+                                — €
+                            </div>
+                            <div id="priceBreakdown" style="font-size:0.82em; color:#888; margin-top:2px;"></div>
+                        </div>
+                        <div>
+                            <button type="button" class="btn btn-outline" id="toggleManualPriceBtn" style="white-space:nowrap;">
+                                <i class="bi bi-pencil-square"></i> Manuel Fiyatlandırma
+                            </button>
+                        </div>
+                    </div>
+                    <input type="hidden" asp-for="EstimatedPrice" id="estimatedPriceHidden" />
+                </div>
+
+                <div id="manualPriceSection" style="display:none;">
+                    <div class="d-flex align-items-end gap-3 mb-2" style="flex-wrap:wrap;">
+                        <div class="form-group" style="flex:1; min-width:200px; margin-bottom:0;">
+                            <label asp-for="EstimatedPrice">Manuel Fiyat (€)</label>
+                            <input type="number" step="0.01" class="form-control" min="0" placeholder="0.00" id="manualPriceInput" />
+                        </div>
+                        <div>
+                            <button type="button" class="btn btn-outline" id="toggleAutoPriceBtn" style="white-space:nowrap;">
+                                <i class="bi bi-calculator"></i> Otomatik Fiyata Dön
+                            </button>
+                        </div>
+                    </div>
+                    <small class="form-hint" style="color:#d4af37;">Otomatik hesaplanan fiyat yerine kendiniz fiyat belirleyebilirsiniz.</small>
+                </div>
+
+                <!-- Dil Seçimi -->
+                <div class="form-group">
+                    <label asp-for="Language">Müşteri Dili</label>
+                    <select asp-for="Language" class="form-control" style="max-width: 220px;">
+                        <option value="tr">Türkçe</option>
+                        <option value="en" selected>English</option>
+                        <option value="de">Deutsch</option>
+                        <option value="ru">Русский</option>
+                    </select>
+                    <small class="form-hint">Müşteriye mail ve PDF bu dilde gönderilir</small>
                 </div>
 
                 <!-- Notlar ve Durum -->
@@ -245,17 +298,14 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    if (regionSelect) {
-        regionSelect.addEventListener('change', applyDirection);
-    }
-    if (dirAirport) dirAirport.addEventListener('change', applyDirection);
-    if (dirHotel) dirHotel.addEventListener('change', applyDirection);
+    if (dirAirport) dirAirport.addEventListener('change', function() { applyDirection(); calculatePrice(); });
+    if (dirHotel) dirHotel.addEventListener('change', function() { applyDirection(); calculatePrice(); });
 
     if (isReturn && returnFields) {
         isReturn.addEventListener('change', function() {
-            returnFields.style.display = this.checked ? 'flex' : 'none';
+            returnFields.style.display = this.checked ? 'block' : 'none';
         });
-        returnFields.style.display = isReturn.checked ? 'flex' : 'none';
+        returnFields.style.display = isReturn.checked ? 'block' : 'none';
     }
 
     // Yolcu sayısı mantığı - sitedeki ile aynı: 2. Yetişkin, 3. Yetişkin... / 1. Çocuk, 2. Çocuk...
@@ -278,12 +328,19 @@ document.addEventListener('DOMContentLoaded', function() {
             input.className = 'form-control';
             input.placeholder = 'Ad Soyad';
             input.name = 'additionalPassenger_' + (++idx);
+            input.setAttribute('data-type', 'adult');
             var div = document.createElement('div');
             div.className = 'form-group form-group-sm';
             div.style.marginBottom = '12px';
             div.appendChild(label);
             div.appendChild(input);
             container.appendChild(div);
+        }
+        if (children > 0) {
+            var sep = document.createElement('hr');
+            sep.style.margin = '16px 0 8px 0';
+            sep.style.borderColor = '#d4af37';
+            container.appendChild(sep);
         }
         for (var j = 0; j < children; j++) {
             var label = document.createElement('label');
@@ -293,7 +350,8 @@ document.addEventListener('DOMContentLoaded', function() {
             input.type = 'text';
             input.className = 'form-control';
             input.placeholder = 'Ad Soyad';
-            input.name = 'additionalPassenger_' + (++idx);
+            input.name = 'childPassenger_' + (j + 1);
+            input.setAttribute('data-type', 'child');
             var div = document.createElement('div');
             div.className = 'form-group form-group-sm';
             div.style.marginBottom = '12px';
@@ -305,14 +363,15 @@ document.addEventListener('DOMContentLoaded', function() {
         if (hiddenCount) hiddenCount.value = total.toString();
     }
     function collectAdditionalPassengerNames() {
-        var inputs = document.querySelectorAll('#additionalPassengerInputs input[type="text"]');
-        var names = [];
-        for (var i = 0; i < inputs.length; i++) {
-            var v = (inputs[i].value || '').trim();
-            if (v) names.push(v);
-        }
+        var adultInputs = document.querySelectorAll('#additionalPassengerInputs input[data-type="adult"]');
+        var childInputs = document.querySelectorAll('#additionalPassengerInputs input[data-type="child"]');
+        var adultNames = [], childNames = [];
+        adultInputs.forEach(function(inp) { var v = (inp.value||'').trim(); if (v) adultNames.push(v); });
+        childInputs.forEach(function(inp) { var v = (inp.value||'').trim(); if (v) childNames.push(v); });
         var hidden = document.getElementById('additionalPassengerNamesHidden');
-        if (hidden) hidden.value = names.join('; ');
+        if (hidden) hidden.value = adultNames.join('; ');
+        var childHidden = document.getElementById('childNamesHidden');
+        if (childHidden) childHidden.value = childNames.join('; ');
     }
     var adultsInput = document.getElementById('numberOfAdults') || document.querySelector('input[name="NumberOfAdults"]');
     var childrenInput = document.getElementById('numberOfChildren') || document.querySelector('input[name="NumberOfChildren"]');
@@ -331,8 +390,68 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    // --- Fiyat Hesaplama ---
+    var vehicleSelect = document.getElementById('vehicleSelect');
+    var estimatedPriceHidden = document.getElementById('estimatedPriceHidden');
+    var calculatedPriceDisplay = document.getElementById('calculatedPriceDisplay');
+    var priceBreakdown = document.getElementById('priceBreakdown');
+    var manualPriceInput = document.getElementById('manualPriceInput');
+    var autoPriceSection = document.getElementById('autoPriceSection');
+    var manualPriceSection = document.getElementById('manualPriceSection');
+    var toggleManualBtn = document.getElementById('toggleManualPriceBtn');
+    var toggleAutoBtn = document.getElementById('toggleAutoPriceBtn');
+    var isManualPricing = false;
+
+    function calculatePrice() {
+        if (isManualPricing) return;
+        var regionOpt = regionSelect && regionSelect.options[regionSelect.selectedIndex];
+        var vehicleOpt = vehicleSelect && vehicleSelect.options[vehicleSelect.selectedIndex];
+        var regionPrice = (regionOpt && regionOpt.value) ? parseFloat(regionOpt.getAttribute('data-price') || '0') : 0;
+        var vehiclePrice = (vehicleOpt && vehicleOpt.value) ? parseFloat(vehicleOpt.getAttribute('data-min-eur') || '0') : 0;
+        var total = regionPrice + vehiclePrice;
+
+        if (total > 0) {
+            calculatedPriceDisplay.textContent = total.toFixed(2).replace('.', ',') + ' €';
+            var parts = [];
+            if (regionPrice > 0) parts.push('Bölge: ' + regionPrice.toFixed(0) + ' €');
+            if (vehiclePrice > 0) parts.push('Araç: ' + vehiclePrice.toFixed(0) + ' €');
+            priceBreakdown.textContent = parts.join(' + ');
+        } else {
+            calculatedPriceDisplay.textContent = '— €';
+            priceBreakdown.textContent = 'Bölge ve araç seçilince fiyat otomatik hesaplanır';
+        }
+        estimatedPriceHidden.value = total > 0 ? total.toFixed(2) : '';
+    }
+
+    if (toggleManualBtn) {
+        toggleManualBtn.addEventListener('click', function() {
+            isManualPricing = true;
+            autoPriceSection.style.display = 'none';
+            manualPriceSection.style.display = 'block';
+            manualPriceInput.value = estimatedPriceHidden.value || '';
+            manualPriceInput.focus();
+        });
+    }
+    if (toggleAutoBtn) {
+        toggleAutoBtn.addEventListener('click', function() {
+            isManualPricing = false;
+            manualPriceSection.style.display = 'none';
+            autoPriceSection.style.display = 'block';
+            calculatePrice();
+        });
+    }
+    if (manualPriceInput) {
+        manualPriceInput.addEventListener('input', function() {
+            estimatedPriceHidden.value = this.value || '';
+        });
+    }
+
+    if (regionSelect) regionSelect.addEventListener('change', function() { applyDirection(); calculatePrice(); });
+    if (vehicleSelect) vehicleSelect.addEventListener('change', calculatePrice);
+
     // Sayfa yüklendiğinde bölge seçiliyse güncelle
     if (regionSelect && regionSelect.value) applyDirection();
+    calculatePrice();
 });
 </script>
 }

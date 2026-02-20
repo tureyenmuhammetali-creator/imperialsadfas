@@ -18,5 +18,6 @@ public class AdminReservationListItem
     public string? VehicleName { get; set; }
     public ReservationStatus Status { get; set; }
     public DateTime? CreatedAt { get; set; }
+    public decimal? EstimatedPrice { get; set; }
 }
 

@@ -4717,3 +4717,313 @@ textarea.form-control-new {
         grid-template-columns: 1fr;
     }
 }
+
+/* ===== Vehicle Slider ===== */
+.vehicle-slider-wrap { position: relative; overflow: hidden; border-radius: 12px; }
+.vehicle-slider { position: relative; width: 100%; aspect-ratio: 16/10; background: #0a0e1a; }
+.vehicle-slide { position: absolute; inset: 0; opacity: 0; transition: opacity .45s ease; }
+.vehicle-slide.active { opacity: 1; z-index: 1; }
+.vehicle-slide img { width: 100%; height: 100%; object-fit: cover; }
+.slider-btn {
+    position: absolute; top: 50%; transform: translateY(-50%); z-index: 5;
+    width: 40px; height: 40px; border-radius: 50%; border: none; cursor: pointer;
+    background: rgba(0,0,0,.55); color: #fff; font-size: 18px;
+    display: flex; align-items: center; justify-content: center;
+    transition: background .25s;
+}
+.slider-btn:hover { background: rgba(212,175,55,.85); }
+.slider-prev { left: 10px; }
+.slider-next { right: 10px; }
+.slider-dots {
+    position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%);
+    z-index: 5; display: flex; gap: 6px;
+}
+.slider-dot {
+    width: 10px; height: 10px; border-radius: 50%; background: rgba(255,255,255,.45);
+    cursor: pointer; transition: background .25s;
+}
+.slider-dot.active { background: #d4af37; }
+
+/* ===== Vehicle Plate Blur ===== */
+.plate-blur .vehicle-slide img,
+.plate-blur .vehicle-slider img {
+    filter: none;
+}
+.plate-blur .vehicle-slide::after,
+.plate-blur .vehicle-slider-track .vehicle-slide::after {
+    content: '';
+    position: absolute;
+    bottom: 8%; left: 30%; right: 30%;
+    height: 8%;
+    background: rgba(30, 30, 30, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-radius: 4px;
+    z-index: 2;
+}
+
+/* ===== Date/Time Picker — Premium Design ===== */
+.datetime-input-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+.datetime-input-wrap .dt-icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 38px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    background: linear-gradient(135deg, rgba(184,134,11,.12) 0%, rgba(212,168,75,.08) 100%);
+    color: var(--color-accent, #b8860b);
+    font-size: 17px;
+    pointer-events: none;
+    z-index: 2;
+    transition: all .3s ease;
+}
+.datetime-input-wrap:hover .dt-icon,
+.datetime-input-wrap:focus-within .dt-icon {
+    background: linear-gradient(135deg, rgba(184,134,11,.22) 0%, rgba(212,168,75,.15) 100%);
+    color: #b8860b;
+    transform: translateY(-50%) scale(1.06);
+}
+
+input[type="date"],
+input[type="time"] {
+    position: relative;
+    width: 100%;
+    padding: 14px 16px 14px 62px;
+    font-size: 15px;
+    font-weight: 500;
+    font-family: inherit;
+    letter-spacing: .3px;
+    color: var(--color-gray-800, #1e293b);
+    background: var(--color-gray-50, #f8fafc);
+    border: 2px solid var(--color-gray-200, #e2e8f0);
+    border-radius: 12px;
+    transition: all .3s ease;
+    appearance: none;
+    -webkit-appearance: none;
+    min-height: 52px;
+}
+input[type="date"]:hover,
+input[type="time"]:hover {
+    border-color: var(--color-gray-300, #cbd5e1);
+    background: var(--color-white, #fff);
+}
+input[type="date"]:focus,
+input[type="time"]:focus {
+    outline: none;
+    border-color: var(--color-accent, #b8860b);
+    background: var(--color-white, #fff);
+    box-shadow: 0 0 0 4px rgba(184, 134, 11, .10), 0 4px 16px rgba(184, 134, 11, .06);
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="time"]::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 8px;
+    transition: all .25s ease;
+    opacity: .6;
+    filter: none;
+}
+input[type="date"]::-webkit-calendar-picker-indicator:hover,
+input[type="time"]::-webkit-calendar-picker-indicator:hover {
+    background: rgba(184, 134, 11, .12);
+    opacity: 1;
+}
+
+input[type="date"]::-webkit-datetime-edit-fields-wrapper,
+input[type="time"]::-webkit-datetime-edit-fields-wrapper {
+    padding: 0;
+}
+input[type="date"]::-webkit-datetime-edit-day-field,
+input[type="date"]::-webkit-datetime-edit-month-field,
+input[type="date"]::-webkit-datetime-edit-year-field,
+input[type="time"]::-webkit-datetime-edit-hour-field,
+input[type="time"]::-webkit-datetime-edit-minute-field,
+input[type="time"]::-webkit-datetime-edit-ampm-field {
+    padding: 2px 4px;
+    border-radius: 4px;
+    transition: all .2s ease;
+}
+input[type="date"]::-webkit-datetime-edit-day-field:focus,
+input[type="date"]::-webkit-datetime-edit-month-field:focus,
+input[type="date"]::-webkit-datetime-edit-year-field:focus,
+input[type="time"]::-webkit-datetime-edit-hour-field:focus,
+input[type="time"]::-webkit-datetime-edit-minute-field:focus,
+input[type="time"]::-webkit-datetime-edit-ampm-field:focus {
+    background: rgba(184, 134, 11, .10);
+    color: var(--color-accent, #b8860b);
+    outline: none;
+}
+
+.datetime-row {
+    display: flex;
+    gap: 14px;
+    align-items: stretch;
+}
+.datetime-row .datetime-input-wrap {
+    flex: 1;
+}
+
+@media (max-width: 600px) {
+    .datetime-row {
+        flex-direction: column;
+        gap: 10px;
+    }
+}
+
+/* Admin panel date/time inputs */
+.admin-form input[type="date"],
+.admin-form input[type="time"] {
+    background: #161b22;
+    border: 2px solid #30363d;
+    color: #e6edf3;
+    border-radius: 10px;
+}
+.admin-form input[type="date"]:hover,
+.admin-form input[type="time"]:hover {
+    border-color: #484f58;
+    background: #1c2129;
+}
+.admin-form input[type="date"]:focus,
+.admin-form input[type="time"]:focus {
+    border-color: #d4af37;
+    background: #1c2129;
+    box-shadow: 0 0 0 4px rgba(212, 175, 55, .12), 0 4px 16px rgba(212, 175, 55, .06);
+}
+.admin-form input[type="date"]::-webkit-calendar-picker-indicator,
+.admin-form input[type="time"]::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+    opacity: .5;
+}
+.admin-form input[type="date"]::-webkit-calendar-picker-indicator:hover,
+.admin-form input[type="time"]::-webkit-calendar-picker-indicator:hover {
+    opacity: .9;
+    background: rgba(212, 175, 55, .15);
+}
+.admin-form .datetime-input-wrap .dt-icon {
+    background: linear-gradient(135deg, rgba(212,175,55,.18) 0%, rgba(184,134,11,.10) 100%);
+    color: #d4af37;
+}
+.admin-form .datetime-input-wrap:hover .dt-icon,
+.admin-form .datetime-input-wrap:focus-within .dt-icon {
+    background: linear-gradient(135deg, rgba(212,175,55,.28) 0%, rgba(184,134,11,.18) 100%);
+}
+.admin-form input[type="date"]::-webkit-datetime-edit-day-field:focus,
+.admin-form input[type="date"]::-webkit-datetime-edit-month-field:focus,
+.admin-form input[type="date"]::-webkit-datetime-edit-year-field:focus,
+.admin-form input[type="time"]::-webkit-datetime-edit-hour-field:focus,
+.admin-form input[type="time"]::-webkit-datetime-edit-minute-field:focus,
+.admin-form input[type="time"]::-webkit-datetime-edit-ampm-field:focus {
+    background: rgba(212, 175, 55, .15);
+    color: #d4af37;
+}
+
+/* Reservations list date badge */
+.res-date-badge {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 3px;
+}
+.res-date-badge .res-date {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 600;
+    font-size: 13.5px;
+    color: var(--color-gray-800, #1e293b);
+}
+.res-date-badge .res-date i {
+    color: var(--color-accent, #b8860b);
+    font-size: 14px;
+}
+.res-date-badge .res-time {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12.5px;
+    color: var(--color-gray-500, #64748b);
+    font-weight: 500;
+}
+.res-date-badge .res-time i {
+    color: var(--color-accent-light, #d4a84b);
+    font-size: 12px;
+}
+
+/* Admin table date styling */
+.admin-table .res-date-badge .res-date {
+    color: #e6edf3;
+}
+.admin-table .res-date-badge .res-date i {
+    color: #d4af37;
+}
+.admin-table .res-date-badge .res-time {
+    color: #8b949e;
+}
+.admin-table .res-date-badge .res-time i {
+    color: #d4af37;
+}
+
+/* Reservation detail page date display */
+.detail-datetime {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    background: linear-gradient(135deg, rgba(184,134,11,.06) 0%, rgba(212,168,75,.03) 100%);
+    border: 1px solid rgba(184,134,11,.15);
+    border-radius: 10px;
+    margin: 4px 0;
+}
+.detail-datetime .dt-badge {
+    width: 42px;
+    height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, rgba(184,134,11,.15), rgba(212,168,75,.1));
+    border-radius: 10px;
+    color: var(--color-accent, #b8860b);
+    font-size: 18px;
+    flex-shrink: 0;
+}
+.detail-datetime .dt-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+.detail-datetime .dt-text .dt-date {
+    font-weight: 600;
+    font-size: 15px;
+    color: var(--color-gray-800, #1e293b);
+}
+.detail-datetime .dt-text .dt-time {
+    font-size: 13px;
+    color: var(--color-gray-500, #64748b);
+    font-weight: 500;
+}
+
+/* Admin detail page dark theme override */
+.admin-detail-page .detail-datetime {
+    background: linear-gradient(135deg, rgba(212,175,55,.08) 0%, rgba(184,134,11,.04) 100%);
+    border-color: rgba(212,175,55,.2);
+}
+.admin-detail-page .detail-datetime .dt-badge {
+    background: linear-gradient(135deg, rgba(212,175,55,.2), rgba(184,134,11,.12));
+    color: #d4af37;
+}
+.admin-detail-page .detail-datetime .dt-text .dt-date {
+    color: #e6edf3;
+}
+.admin-detail-page .detail-datetime .dt-text .dt-time {
+    color: #8b949e;
+}

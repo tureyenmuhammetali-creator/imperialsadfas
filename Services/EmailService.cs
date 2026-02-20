@@ -96,6 +96,124 @@ namespace ImperialVip.Services
             }
         }
 
+        private byte[]? LoadLogoBytes()
+        {
+            var logoPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", "logo.png");
+            return File.Exists(logoPath) ? File.ReadAllBytes(logoPath) : null;
+        }
+
+        private async Task<bool> SendEmailWithInlineLogoAsync(string to, string subject, string htmlBody, byte[]? logoBytes, byte[]? pdfBytes = null, string? pdfFileName = null)
+        {
+            try
+            {
+                var message = new MimeMessage();
+                message.From.Add(new MailboxAddress(_emailSettings.SenderName, _emailSettings.SenderEmail));
+                message.To.Add(MailboxAddress.Parse(to));
+                message.Subject = subject;
+
+                var builder = new BodyBuilder { HtmlBody = htmlBody };
+
+                if (logoBytes != null)
+                {
+                    var logoResource = builder.LinkedResources.Add("logo.png", logoBytes, ContentType.Parse("image/png"));
+                    logoResource.ContentId = "imperial_logo";
+                    logoResource.ContentDisposition = new ContentDisposition(ContentDisposition.Inline);
+                }
+
+                if (pdfBytes != null && !string.IsNullOrEmpty(pdfFileName))
+                    builder.Attachments.Add(pdfFileName, pdfBytes, ContentType.Parse("application/pdf"));
+
+                message.Body = builder.ToMessageBody();
+
+                using var client = new SmtpClient();
+                await client.ConnectAsync(_emailSettings.SmtpServer, _emailSettings.SmtpPort, _emailSettings.EnableSsl ? SecureSocketOptions.StartTls : SecureSocketOptions.None);
+                await client.AuthenticateAsync(_emailSettings.SmtpUsername, _emailSettings.SmtpPassword);
+                await client.SendAsync(message);
+                await client.DisconnectAsync(true);
+
+                _logger.LogInformation($"Email with inline logo sent to {to}");
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Failed to send email with inline logo to {to}: {ex.Message}");
+                EmailLogHelper.Write($"[SMTP HATA] Alıcı: {to} | Inline logo mail - {ex.Message}");
+                return false;
+            }
+        }
+
+        private async Task<bool> SendEmailWithInlineLogoAndMultipleAttachmentsAsync(string to, string subject, string htmlBody, byte[]? logoBytes, List<(byte[] Data, string FileName)> attachments)
+        {
+            try
+            {
+                var message = new MimeMessage();
+                message.From.Add(new MailboxAddress(_emailSettings.SenderName, _emailSettings.SenderEmail));
+                message.To.Add(MailboxAddress.Parse(to));
+                message.Subject = subject;
+
+                var builder = new BodyBuilder { HtmlBody = htmlBody };
+
+                if (logoBytes != null)
+                {
+                    var logoResource = builder.LinkedResources.Add("logo.png", logoBytes, ContentType.Parse("image/png"));
+                    logoResource.ContentId = "imperial_logo";
+                    logoResource.ContentDisposition = new ContentDisposition(ContentDisposition.Inline);
+                }
+
+                foreach (var att in attachments)
+                    builder.Attachments.Add(att.FileName, att.Data, ContentType.Parse("application/pdf"));
+
+                message.Body = builder.ToMessageBody();
+
+                using var client = new SmtpClient();
+                await client.ConnectAsync(_emailSettings.SmtpServer, _emailSettings.SmtpPort, _emailSettings.EnableSsl ? SecureSocketOptions.StartTls : SecureSocketOptions.None);
+                await client.AuthenticateAsync(_emailSettings.SmtpUsername, _emailSettings.SmtpPassword);
+                await client.SendAsync(message);
+                await client.DisconnectAsync(true);
+
+                _logger.LogInformation($"Email with inline logo and {attachments.Count} attachments sent to {to}");
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Failed to send email with attachments to {to}: {ex.Message}");
+                EmailLogHelper.Write($"[SMTP HATA] Alıcı: {to} | Multi-PDF + logo - {ex.Message}");
+                return false;
+            }
+        }
+
+        private async Task<bool> SendEmailWithMultipleAttachmentsAsync(string to, string subject, string htmlBody, List<(byte[] Data, string FileName)> attachments)
+        {
+            try
+            {
+                var message = new MimeMessage();
+                message.From.Add(new MailboxAddress(_emailSettings.SenderName, _emailSettings.SenderEmail));
+                message.To.Add(MailboxAddress.Parse(to));
+                message.Subject = subject;
+
+                var builder = new BodyBuilder { HtmlBody = htmlBody };
+                foreach (var att in attachments)
+                    builder.Attachments.Add(att.FileName, att.Data, ContentType.Parse("application/pdf"));
+
+                message.Body = builder.ToMessageBody();
+
+                using var client = new SmtpClient();
+                await client.ConnectAsync(_emailSettings.SmtpServer, _emailSettings.SmtpPort, _emailSettings.EnableSsl ? SecureSocketOptions.StartTls : SecureSocketOptions.None);
+                await client.AuthenticateAsync(_emailSettings.SmtpUsername, _emailSettings.SmtpPassword);
+                await client.SendAsync(message);
+                await client.DisconnectAsync(true);
+
+                _logger.LogInformation($"Email with {attachments.Count} PDF attachments sent to {to}");
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Failed to send email with attachments to {to}: {ex.Message}");
+                EmailLogHelper.Write($"[SMTP HATA] Alıcı: {to} | Multi-PDF - {ex.Message}");
+                return false;
+            }
+        }
+
         public async Task<bool> SendReservationConfirmationAsync(Reservation reservation)
         {
             if (string.IsNullOrEmpty(reservation.CustomerEmail))
@@ -104,19 +222,21 @@ namespace ImperialVip.Services
                 return false;
             }
 
-            var subject = $"Rezervasyon Onayı - #{reservation.Id} | Imperial VIP Transfer";
-            var body = GetReservationConfirmationTemplate(reservation);
+            var customerLang = reservation.Language ?? "en";
+            var subject = GetSubjectByLang(reservation.Id, customerLang);
+            var body = GetReservationConfirmationTemplate(reservation, customerLang);
+            var logoBytes = LoadLogoBytes();
 
             try
             {
-                var pdfBytes = _pdfService.GenerateReservationPdf(reservation);
-                var pdfName = $"Rezervasyon_{reservation.Id}_tr.pdf";
-                return await SendEmailWithAttachmentAsync(reservation.CustomerEmail, subject, body, pdfBytes, pdfName);
+                var customerPdf = _pdfService.GenerateReservationPdf(reservation, customerLang);
+                var customerPdfName = $"Rezervasyon_{reservation.Id}_{customerLang}.pdf";
+                return await SendEmailWithInlineLogoAsync(reservation.CustomerEmail, subject, body, logoBytes, customerPdf, customerPdfName);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"PDF oluşturulamadı, e-posta ekinden gönderiliyor: {ex.Message}");
-                return await SendEmailAsync(reservation.CustomerEmail, subject, body);
+                _logger.LogError(ex, $"PDF oluşturulamadı, e-posta eksiz gönderiliyor: {ex.Message}");
+                return await SendEmailWithInlineLogoAsync(reservation.CustomerEmail, subject, body, logoBytes);
             }
         }
 
@@ -132,10 +252,78 @@ namespace ImperialVip.Services
                 .ToList();
             if (adminEmails.Count == 0) adminEmails.Add(_emailSettings.AdminEmail);
 
+            var customerLang = reservation.Language ?? "en";
+            var attachments = new List<(byte[] Data, string FileName)>();
+
+            try
+            {
+                var trPdf = _pdfService.GenerateReservationPdf(reservation, "tr");
+                attachments.Add((trPdf, $"Rezervasyon_{reservation.Id}_tr.pdf"));
+
+                if (customerLang != "tr")
+                {
+                    var langPdf = _pdfService.GenerateReservationPdf(reservation, customerLang);
+                    attachments.Add((langPdf, $"Rezervasyon_{reservation.Id}_{customerLang}.pdf"));
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Admin mail PDF oluşturma hatası: {Message}", ex.Message);
+            }
+
             var allOk = true;
             foreach (var to in adminEmails)
             {
-                var ok = await SendEmailAsync(to, subject, body);
+                bool ok;
+                if (attachments.Count > 0)
+                    ok = await SendEmailWithMultipleAttachmentsAsync(to, subject, body, attachments);
+                else
+                    ok = await SendEmailAsync(to, subject, body);
+                if (!ok) allOk = false;
+            }
+            return allOk;
+        }
+
+        public async Task<bool> SendReservationNotificationToAdminWithLogoAsync(Reservation reservation)
+        {
+            var subject = $"🚗 Yeni Rezervasyon - #{reservation.Id} | {reservation.CustomerName}";
+            var body = GetAdminNotificationTemplate(reservation);
+            var logoBytes = LoadLogoBytes();
+
+            var adminEmails = _emailSettings.AdminEmail
+                .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                .Select(e => e.Trim())
+                .Where(e => !string.IsNullOrEmpty(e))
+                .ToList();
+            if (adminEmails.Count == 0) adminEmails.Add(_emailSettings.AdminEmail);
+
+            var customerLang = reservation.Language ?? "en";
+            var attachments = new List<(byte[] Data, string FileName)>();
+
+            try
+            {
+                var trPdf = _pdfService.GenerateReservationPdf(reservation, "tr");
+                attachments.Add((trPdf, $"Rezervasyon_{reservation.Id}_tr.pdf"));
+
+                if (customerLang != "tr")
+                {
+                    var langPdf = _pdfService.GenerateReservationPdf(reservation, customerLang);
+                    attachments.Add((langPdf, $"Rezervasyon_{reservation.Id}_{customerLang}.pdf"));
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Admin mail PDF oluşturma hatası: {Message}", ex.Message);
+            }
+
+            var allOk = true;
+            foreach (var to in adminEmails)
+            {
+                bool ok;
+                if (attachments.Count > 0)
+                    ok = await SendEmailWithInlineLogoAndMultipleAttachmentsAsync(to, subject, body, logoBytes, attachments);
+                else
+                    ok = await SendEmailWithInlineLogoAsync(to, subject, body, logoBytes);
                 if (!ok) allOk = false;
             }
             return allOk;
@@ -171,15 +359,147 @@ namespace ImperialVip.Services
             return adminResult;
         }
 
-        private string GetReservationConfirmationTemplate(Reservation reservation)
+        private static string GetSubjectByLang(int id, string lang)
         {
-            var vehicleName = reservation.Vehicle?.Name ?? "Belirtilmedi";
+            return lang switch
+            {
+                "de" => $"Reservierungsbestätigung - #{id} | Imperial VIP Transfer",
+                "ru" => $"Подтверждение бронирования - #{id} | Imperial VIP Transfer",
+                "en" => $"Reservation Confirmation - #{id} | Imperial VIP Transfer",
+                _ => $"Rezervasyon Onayı - #{id} | Imperial VIP Transfer"
+            };
+        }
+
+        private static Dictionary<string, Dictionary<string, string>> GetEmailTranslations()
+        {
+            return new Dictionary<string, Dictionary<string, string>>
+            {
+                ["tr"] = new()
+                {
+                    ["ArrivalInfo"] = "Geliş Bilgileri",
+                    ["ReturnInfo"] = "Dönüş Bilgileri",
+                    ["FullName"] = "Adı Soyadı",
+                    ["Phone"] = "Telefon",
+                    ["Email"] = "E-posta",
+                    ["PickupPoint"] = "Alış Noktası",
+                    ["DropoffPoint"] = "Varış Noktası",
+                    ["ArrivalDate"] = "Geliş Tarihi",
+                    ["ArrivalFlight"] = "Geliş Uçuş Numarası",
+                    ["Airline"] = "Havayolu Şirketi",
+                    ["HotelName"] = "Otel Adı",
+                    ["Passengers"] = "Yolcular",
+                    ["VehicleType"] = "Araç Türü",
+                    ["Price"] = "Fiyat",
+                    ["Adults"] = "Yetişkin Sayısı",
+                    ["Children"] = "Çocuk Sayısı",
+                    ["ChildSeats"] = "Çocuk Koltuğu Sayısı",
+                    ["SpecialNote"] = "Özel Not",
+                    ["ReturnDate"] = "Dönüş Tarihi",
+                    ["ReturnFlight"] = "Dönüş Uçuş Numarası",
+                    ["PickupTime"] = "Araç Alış Saati"
+                },
+                ["en"] = new()
+                {
+                    ["ArrivalInfo"] = "Arrival Information",
+                    ["ReturnInfo"] = "Return Information",
+                    ["FullName"] = "Full Name",
+                    ["Phone"] = "Phone",
+                    ["Email"] = "Email",
+                    ["PickupPoint"] = "Pick-up Point",
+                    ["DropoffPoint"] = "Drop-off Point",
+                    ["ArrivalDate"] = "Arrival Date",
+                    ["ArrivalFlight"] = "Arrival Flight Number",
+                    ["Airline"] = "Airline",
+                    ["HotelName"] = "Hotel Name",
+                    ["Passengers"] = "Passengers",
+                    ["VehicleType"] = "Vehicle Type",
+                    ["Price"] = "Price",
+                    ["Adults"] = "Number of Adults",
+                    ["Children"] = "Number of Children",
+                    ["ChildSeats"] = "Child Seats",
+                    ["SpecialNote"] = "Special Note",
+                    ["ReturnDate"] = "Return Date",
+                    ["ReturnFlight"] = "Return Flight Number",
+                    ["PickupTime"] = "Pick-up Time"
+                },
+                ["de"] = new()
+                {
+                    ["ArrivalInfo"] = "Ankunftsinformationen",
+                    ["ReturnInfo"] = "Rückreiseinformationen",
+                    ["FullName"] = "Vollständiger Name",
+                    ["Phone"] = "Telefon",
+                    ["Email"] = "E-Mail",
+                    ["PickupPoint"] = "Abholort",
+                    ["DropoffPoint"] = "Zielort",
+                    ["ArrivalDate"] = "Ankunftsdatum",
+                    ["ArrivalFlight"] = "Ankunftsflugnummer",
+                    ["Airline"] = "Fluggesellschaft",
+                    ["HotelName"] = "Hotelname",
+                    ["Passengers"] = "Passagiere",
+                    ["VehicleType"] = "Fahrzeugtyp",
+                    ["Price"] = "Preis",
+                    ["Adults"] = "Anzahl Erwachsene",
+                    ["Children"] = "Anzahl Kinder",
+                    ["ChildSeats"] = "Kindersitze",
+                    ["SpecialNote"] = "Besondere Hinweise",
+                    ["ReturnDate"] = "Rückreisedatum",
+                    ["ReturnFlight"] = "Rückflugnummer",
+                    ["PickupTime"] = "Abholzeit"
+                },
+                ["ru"] = new()
+                {
+                    ["ArrivalInfo"] = "Информация о прибытии",
+                    ["ReturnInfo"] = "Информация об обратном трансфере",
+                    ["FullName"] = "ФИО",
+                    ["Phone"] = "Телефон",
+                    ["Email"] = "Эл. почта",
+                    ["PickupPoint"] = "Место посадки",
+                    ["DropoffPoint"] = "Место высадки",
+                    ["ArrivalDate"] = "Дата прибытия",
+                    ["ArrivalFlight"] = "Номер рейса прибытия",
+                    ["Airline"] = "Авиакомпания",
+                    ["HotelName"] = "Название отеля",
+                    ["Passengers"] = "Пассажиры",
+                    ["VehicleType"] = "Тип автомобиля",
+                    ["Price"] = "Цена",
+                    ["Adults"] = "Взрослых",
+                    ["Children"] = "Детей",
+                    ["ChildSeats"] = "Детских кресел",
+                    ["SpecialNote"] = "Особые пожелания",
+                    ["ReturnDate"] = "Дата обратного трансфера",
+                    ["ReturnFlight"] = "Номер обратного рейса",
+                    ["PickupTime"] = "Время посадки"
+                }
+            };
+        }
+
+        private static string EmailRow(string label, string value)
+        {
+            return $@"<tr>
+<td style='padding:7px 0;font-size:13px;font-weight:bold;color:#000;border-bottom:1px solid #eee;width:40%;'>{label}</td>
+<td style='padding:7px 0;font-size:13px;color:#000;border-bottom:1px solid #eee;'>{value}</td>
+</tr>";
+        }
+
+        private string GetReservationConfirmationTemplate(Reservation reservation, string lang = "tr")
+        {
+            var translations = GetEmailTranslations();
+            var t = translations.ContainsKey(lang) ? translations[lang] : translations["tr"];
+
+            var vehicleName = reservation.Vehicle?.Name ?? "-";
             var yolcular = string.IsNullOrEmpty(reservation.AdditionalPassengerNames)
                 ? reservation.CustomerName
                 : $"{reservation.CustomerName}, {reservation.AdditionalPassengerNames}";
+            var currencySymbol = (reservation.Currency ?? "EUR").ToUpper() switch
+            {
+                "USD" => "$",
+                "TRY" => "₺",
+                "GBP" => "£",
+                _ => "€"
+            };
             var fiyat = reservation.EstimatedPrice.HasValue && reservation.EstimatedPrice.Value > 0
-                ? $"{(int)reservation.EstimatedPrice.Value} €"
-                : "0 €";
+                ? $"{(int)reservation.EstimatedPrice.Value} {currencySymbol}"
+                : $"0 {currencySymbol}";
             var yetiskin = reservation.NumberOfAdults ?? reservation.PassengerCount ?? 1;
             var cocuk = reservation.NumberOfChildren ?? 0;
             var cocukKoltuk = reservation.ChildSeatCount ?? 0;
@@ -197,94 +517,68 @@ namespace ImperialVip.Services
                     donusTarihiStr += " " + reservation.ReturnTransferTime;
             }
 
-            // PDF'deki gibi: Gidiş-dönüşte +90 532 580 70 77, tek seferde +90 533 925 10 20
             var footerTel = isGidisDonus ? "+90 532 580 70 77" : "+90 533 925 10 20";
 
-            // Header - PDF ve görsellerdeki gibi: koyu lacivert banner, altın IMPERIALVIP logo
-            var headerImgUrl = !string.IsNullOrWhiteSpace(_emailSettings.SiteBaseUrl)
-                ? $"{_emailSettings.SiteBaseUrl.TrimEnd('/')}/images/imgs/imperial-page-header.png"
-                : "";
-            var headerHtml = !string.IsNullOrEmpty(headerImgUrl)
-                ? $@"<div style='text-align: center; margin: 0 0 24px 0;'><img src='{headerImgUrl}' alt='Imperial VIP Transfer' width='560' height='80' style='max-width: 100%; height: auto; display: block; margin: 0 auto;' /></div>"
-                : @"<div style='background: #0a0e1a; padding: 28px 20px; text-align: center; margin: 0 0 24px 0;'>
-<span style='font-family: Georgia, serif; font-size: 28px; font-weight: bold; color: #d4af37; letter-spacing: 2px;'>IMPERIAL</span><span style='font-family: Georgia, serif; font-size: 28px; font-weight: bold; color: #c0c0c0; letter-spacing: 2px;'>VIP</span>
-</div>";
+            var emailVal = string.IsNullOrEmpty(reservation.CustomerEmail)
+                ? "-"
+                : $"<a href='mailto:{reservation.CustomerEmail}' style='color:#1a56db;text-decoration:none;'>{reservation.CustomerEmail}</a>";
 
-            // Geliş Bilgileri tablosu - PDF sırası ve ifadeleri birebir (Rezervasyon_5358_tr.pdf, Rezervasyon_5363_tr.pdf)
-            var gelisTable = $@"
-<table style='width: 100%; border-collapse: collapse; font-size: 14px; color: #000; font-family: Arial, Helvetica, sans-serif;'>
-<tr><td style='padding: 6px 0; border-bottom: 1px solid #eee;'><strong>Adı Soyadı</strong></td><td style='padding: 6px 0; text-align: right; border-bottom: 1px solid #eee;'>{reservation.CustomerName}</td></tr>
-<tr><td style='padding: 6px 0; border-bottom: 1px solid #eee;'><strong>Telefon</strong></td><td style='padding: 6px 0; text-align: right; border-bottom: 1px solid #eee;'>{reservation.CustomerPhone}</td></tr>
-<tr><td style='padding: 6px 0; border-bottom: 1px solid #eee;'><strong>E-posta</strong></td><td style='padding: 6px 0; text-align: right; border-bottom: 1px solid #eee;'>{(string.IsNullOrEmpty(reservation.CustomerEmail) ? "-" : $"<a href='mailto:{reservation.CustomerEmail}' style='color: #1e40af;'>{reservation.CustomerEmail}</a>")}</td></tr>
-<tr><td style='padding: 6px 0; border-bottom: 1px solid #eee;'><strong>Alış Noktası</strong></td><td style='padding: 6px 0; text-align: right; border-bottom: 1px solid #eee;'>{reservation.PickupLocation}</td></tr>
-<tr><td style='padding: 6px 0; border-bottom: 1px solid #eee;'><strong>Varış Noktası</strong></td><td style='padding: 6px 0; text-align: right; border-bottom: 1px solid #eee;'>{reservation.DropoffLocation}</td></tr>
-<tr><td style='padding: 6px 0; border-bottom: 1px solid #eee;'><strong>Geliş Tarihi</strong></td><td style='padding: 6px 0; text-align: right; border-bottom: 1px solid #eee;'>{gelisTarihi}</td></tr>
-<tr><td style='padding: 6px 0; border-bottom: 1px solid #eee;'><strong>Geliş Uçuş Numarası</strong></td><td style='padding: 6px 0; text-align: right; border-bottom: 1px solid #eee;'>{reservation.FlightNumber ?? "-"}</td></tr>
-<tr><td style='padding: 6px 0; border-bottom: 1px solid #eee;'><strong>Havayolu Şirketi</strong></td><td style='padding: 6px 0; text-align: right; border-bottom: 1px solid #eee;'>{reservation.AirlineCompany ?? "-"}</td></tr>
-<tr><td style='padding: 6px 0; border-bottom: 1px solid #eee;'><strong>Otel Adı</strong></td><td style='padding: 6px 0; text-align: right; border-bottom: 1px solid #eee;'>{reservation.HotelName ?? "-"}</td></tr>
-<tr><td style='padding: 6px 0; border-bottom: 1px solid #eee;'><strong>Yolcular</strong></td><td style='padding: 6px 0; text-align: right; border-bottom: 1px solid #eee;'>{yolcular}</td></tr>
-<tr><td style='padding: 6px 0; border-bottom: 1px solid #eee;'><strong>Araç Türü</strong></td><td style='padding: 6px 0; text-align: right; border-bottom: 1px solid #eee;'>{vehicleName}</td></tr>
-<tr><td style='padding: 6px 0; border-bottom: 1px solid #eee;'><strong>Fiyat</strong></td><td style='padding: 6px 0; text-align: right; border-bottom: 1px solid #eee;'>{fiyat}</td></tr>
-<tr><td style='padding: 6px 0; border-bottom: 1px solid #eee;'><strong>Yetişkin Sayısı</strong></td><td style='padding: 6px 0; text-align: right; border-bottom: 1px solid #eee;'>{yetiskin}</td></tr>
-<tr><td style='padding: 6px 0; border-bottom: 1px solid #eee;'><strong>Çocuk Sayısı</strong></td><td style='padding: 6px 0; text-align: right; border-bottom: 1px solid #eee;'>{cocuk}</td></tr>
-<tr><td style='padding: 6px 0; border-bottom: 1px solid #eee;'><strong>Çocuk Koltuğu Sayısı</strong></td><td style='padding: 6px 0; text-align: right; border-bottom: 1px solid #eee;'>{cocukKoltuk}</td></tr>
-<tr><td style='padding: 6px 0;'><strong>Özel Not</strong></td><td style='padding: 6px 0; text-align: right;'>{ozelNot}</td></tr>
-</table>";
+            var arrivalRows =
+                EmailRow(t["FullName"], reservation.CustomerName) +
+                EmailRow(t["Phone"], reservation.CustomerPhone) +
+                EmailRow(t["Email"], emailVal) +
+                EmailRow(t["PickupPoint"], reservation.PickupLocation) +
+                EmailRow(t["DropoffPoint"], reservation.DropoffLocation) +
+                EmailRow(t["ArrivalDate"], gelisTarihi) +
+                EmailRow(t["ArrivalFlight"], reservation.FlightNumber ?? "-") +
+                EmailRow(t["Airline"], reservation.AirlineCompany ?? "-") +
+                EmailRow(t["HotelName"], reservation.HotelName ?? "-") +
+                EmailRow(t["Passengers"], yolcular) +
+                EmailRow(t["VehicleType"], vehicleName) +
+                EmailRow(t["Price"], fiyat) +
+                EmailRow(t["Adults"], yetiskin.ToString()) +
+                EmailRow(t["Children"], cocuk.ToString()) +
+                EmailRow(t["ChildSeats"], cocukKoltuk.ToString()) +
+                EmailRow(t["SpecialNote"], ozelNot);
 
-            var donusTable = "";
-            var sayfaGosterge = "-- 1 of 1 --";
+            var returnSection = "";
             if (isGidisDonus)
             {
-                sayfaGosterge = "-- 1 of 2 --";
-                donusTable = $@"
-<p style='margin: 28px 0 12px 0; font-size: 16px; font-weight: bold; color: #000;'>Dönüş Bilgileri</p>
-<table style='width: 100%; border-collapse: collapse; font-size: 14px; color: #000; font-family: Arial, Helvetica, sans-serif;'>
-<tr><td style='padding: 6px 0; border-bottom: 1px solid #eee;'><strong>Dönüş Tarihi</strong></td><td style='padding: 6px 0; text-align: right; border-bottom: 1px solid #eee;'>{donusTarihiStr}</td></tr>
-<tr><td style='padding: 6px 0; border-bottom: 1px solid #eee;'><strong>Dönüş Uçuş Numarası</strong></td><td style='padding: 6px 0; text-align: right; border-bottom: 1px solid #eee;'>{donusUcusNo}</td></tr>
-<tr><td style='padding: 6px 0;'><strong>Araç Alış Saati</strong></td><td style='padding: 6px 0; text-align: right;'>{aracAlisSaati}</td></tr>
-</table>";
+                returnSection = $@"
+<tr><td style='padding:24px 30px 0 30px;'>
+<p style='font-size:16px;font-weight:bold;margin:0 0 12px 0;color:#000;'>{t["ReturnInfo"]}</p>
+<table width='100%' cellpadding='0' cellspacing='0' border='0' style='font-family:Arial,Helvetica,sans-serif;'>
+{EmailRow(t["ReturnDate"], donusTarihiStr)}
+{EmailRow(t["ReturnFlight"], donusUcusNo)}
+{EmailRow(t["PickupTime"], aracAlisSaati)}
+</table>
+</td></tr>";
             }
 
-            // Footer - PDF ve görsellerdeki gibi: koyu lacivert, Imperial VIP Transfer - 2026, iletişim bilgileri
-            var footerImgUrl = !string.IsNullOrWhiteSpace(_emailSettings.SiteBaseUrl)
-                ? $"{_emailSettings.SiteBaseUrl.TrimEnd('/')}/images/imgs/imperial-page-footer.png"
-                : "";
-            var footerBlock = !string.IsNullOrEmpty(footerImgUrl)
-                ? $@"<div style='text-align: center; margin: 28px 0 0 0;'><img src='{footerImgUrl}' alt='Imperial VIP Transfer' width='560' height='120' style='max-width: 100%; height: auto; display: block; margin: 0 auto;' /></div>"
-                : $@"<div style='background: #0a0e1a; padding: 24px 20px; text-align: center; margin: 28px 0 0 0;'>
-<p style='margin: 0; font-size: 18px; font-weight: bold; color: #d4af37; letter-spacing: 1px;'>Imperial VIP Transfer - 2026</p>
-<p style='margin: 8px 0 0 0; font-size: 14px; color: #fff;'>info@transferimperialvip.com • {footerTel}</p>
-</div>";
-
-            var donusFooter = "";
-            if (isGidisDonus)
-            {
-                donusFooter = $@"
-<p style='margin: 24px 0 0 0; font-size: 13px; color: #000;'>Imperial VIP Transfer - 2026</p>
-<p style='margin: 4px 0 0 0; font-size: 13px; color: #000;'>info@transferimperialvip.com • {footerTel}</p>
-<p style='text-align: center; margin: 16px 0 0 0; font-size: 12px; color: #94a3b8;'>-- 2 of 2 --</p>";
-            }
-
-            return $@"
-<!DOCTYPE html>
+            return $@"<!DOCTYPE html>
 <html>
 <head>
 <meta charset='utf-8'>
-<meta name='viewport' content='width=device-width, initial-scale=1.0'>
-<title>Rezervasyon Onayı - #{reservation.Id} | Imperial VIP Transfer</title>
+<meta name='viewport' content='width=device-width,initial-scale=1.0'>
 </head>
-<body style='font-family: Arial, Helvetica, sans-serif; font-size: 14px; line-height: 1.5; color: #000; max-width: 600px; margin: 0 auto; padding: 0; background: #fff;'>
-<div style='max-width: 600px; margin: 0 auto; padding: 24px;'>
-{headerHtml}
-<p style='margin: 0 0 16px 0; font-size: 16px; font-weight: bold; color: #0a0e1a;'>Geliş Bilgileri</p>
-{gelisTable}
-<p style='margin: 20px 0 0 0; font-size: 13px; color: #000;'>Imperial VIP Transfer - 2026</p>
-<p style='margin: 4px 0 0 0; font-size: 13px; color: #000;'>info@transferimperialvip.com • {footerTel}</p>
-<p style='text-align: center; margin: 20px 0 0 0; font-size: 12px; color: #94a3b8;'>{sayfaGosterge}</p>
-{donusTable}
-{donusFooter}
-{(!isGidisDonus ? footerBlock : "")}
-</div>
+<body style='margin:0;padding:0;background:#f4f4f4;font-family:Arial,Helvetica,sans-serif;'>
+<table width='100%' cellpadding='0' cellspacing='0' border='0' style='max-width:600px;margin:0 auto;background:#ffffff;'>
+<tr><td style='background:#1B1B3A;padding:18px 30px;text-align:center;'>
+<img src='cid:imperial_logo' alt='Imperial VIP' height='50' style='height:50px;display:block;margin:0 auto;' />
+</td></tr>
+<tr><td style='padding:24px 30px 0 30px;'>
+<p style='font-size:16px;font-weight:bold;margin:0 0 12px 0;color:#000;'>{t["ArrivalInfo"]}</p>
+<table width='100%' cellpadding='0' cellspacing='0' border='0' style='font-family:Arial,Helvetica,sans-serif;'>
+{arrivalRows}
+</table>
+</td></tr>
+{returnSection}
+<tr><td style='background:#1B1B3A;padding:16px 30px;text-align:center;'>
+<img src='cid:imperial_logo' alt='Imperial VIP' height='28' style='height:28px;display:block;margin:0 auto 8px auto;' />
+<p style='color:#ffffff;font-size:12px;margin:0;'>Imperial VIP Transfer - 2026</p>
+<p style='color:#ffffff;font-size:11px;margin:4px 0 0 0;'>info@transferimperialvip.com &bull; {footerTel}</p>
+</td></tr>
+</table>
 </body>
 </html>";
         }

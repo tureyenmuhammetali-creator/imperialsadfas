@@ -114,7 +114,7 @@
                     <div class="selected-item">
                         <span class="label">@txt["Vehicle"]:</span>
                         <span class="value">@selectedVehicle.Name</span>
-                        <span class="specs">@selectedVehicle.PassengerCapacity @txt["Passenger"], @selectedVehicle.LuggageCapacity @txt["Luggage"]</span>
+                        <span class="specs">@selectedVehicle.PassengerCapacity @txt["Passenger"]</span>
                     </div>
                 }
             </div>
@@ -132,6 +132,10 @@
             <input type="hidden" asp-for="DropoffLocationType" id="dropoffTypeHidden" value="0" />
             <input type="hidden" asp-for="PassengerCount" id="passengerCountHidden" value="@(initialAdults)" />
             <input type="hidden" asp-for="LuggageCount" value="0" />
+            <input type="hidden" asp-for="EstimatedPrice" id="estimatedPriceHidden" value="0" />
+            <input type="hidden" asp-for="DistanceKm" id="distanceKmHidden" value="0" />
+            <input type="hidden" asp-for="Currency" id="currencyHidden" value="EUR" />
+            <input type="hidden" name="Language" value="@currentLang" />
 
             <div class="reservation-grid">
                 <!-- Sol: Seyahat Bilgisi -->
@@ -236,9 +240,15 @@
 
                     <div class="form-group">
                         <label asp-for="TransferDate">@txt["DateTime"]</label>
-                        <div class="form-row form-row-sm">
-                            <input asp-for="TransferDate" type="date" class="form-control" required min="@DateTime.Today.ToString("yyyy-MM-dd")" id="transferDate" />
-                            <input asp-for="TransferTime" type="time" class="form-control" required id="transferTime" />
+                        <div class="datetime-row">
+                            <div class="datetime-input-wrap">
+                                <span class="dt-icon"><i class="bi bi-calendar3"></i></span>
+                                <input asp-for="TransferDate" type="date" class="form-control" required min="@DateTime.Today.ToString("yyyy-MM-dd")" id="transferDate" />
+                            </div>
+                            <div class="datetime-input-wrap">
+                                <span class="dt-icon"><i class="bi bi-clock"></i></span>
+                                <input asp-for="TransferTime" type="time" class="form-control" required id="transferTime" />
+                            </div>
                         </div>
                         <span asp-validation-for="TransferDate" class="text-danger"></span>
                         <span asp-validation-for="TransferTime" class="text-danger"></span>
@@ -268,9 +278,15 @@
                     <div id="returnTransferFields" class="return-transfer-fields" style="display: none;">
                         <div class="form-group">
                             <label asp-for="ReturnTransferDate">@txt["ReturnDateTime"]</label>
-                            <div class="form-row form-row-sm">
-                                <input asp-for="ReturnTransferDate" type="date" class="form-control" id="returnTransferDate" min="@DateTime.Today.ToString("yyyy-MM-dd")" />
-                                <input asp-for="ReturnTransferTime" type="time" class="form-control" id="returnTransferTime" />
+                            <div class="datetime-row">
+                                <div class="datetime-input-wrap">
+                                    <span class="dt-icon"><i class="bi bi-calendar3"></i></span>
+                                    <input asp-for="ReturnTransferDate" type="date" class="form-control" id="returnTransferDate" min="@DateTime.Today.ToString("yyyy-MM-dd")" />
+                                </div>
+                                <div class="datetime-input-wrap">
+                                    <span class="dt-icon"><i class="bi bi-clock"></i></span>
+                                    <input asp-for="ReturnTransferTime" type="time" class="form-control" id="returnTransferTime" />
+                                </div>
                             </div>
                         </div>
                         <div class="form-group">
@@ -317,6 +333,7 @@
                         <label>@txt["AddPassengers"]</label>
                         <div id="additionalPassengerInputs"></div>
                         <input type="hidden" name="AdditionalPassengerNames" id="additionalPassengerNamesHidden" />
+                        <input type="hidden" name="ChildNames" id="childNamesHidden" />
                     </div>
                     <div class="form-group">
                         <label asp-for="Notes">@txt["Notes"]</label>
@@ -423,6 +440,9 @@ document.addEventListener('DOMContentLoaded', function() {
         if (document.getElementById('summaryPrice')) document.getElementById('summaryPrice').textContent = singlePrice;
         if (document.getElementById('summaryTotal')) document.getElementById('summaryTotal').textContent = totalStr;
 
+        if (document.getElementById('estimatedPriceHidden')) document.getElementById('estimatedPriceHidden').value = Math.round(price);
+        if (document.getElementById('currencyHidden')) document.getElementById('currencyHidden').value = code;
+
         if (returnBlock) returnBlock.style.display = isReturn ? 'block' : 'none';
         if (isReturn) {
             if (document.getElementById('summaryReturnPickup')) document.getElementById('summaryReturnPickup').textContent = dropoff;
@@ -497,8 +517,7 @@ document.addEventListener('DOMContentLoaded', function() {
         var adultLabel = _resTxt.adultLabel || 'Yetişkin';
         var childLabel = _resTxt.childLabel || 'Çocuk';
         var container = document.getElementById('additionalPassengerInputs');
-        var hidden = document.getElementById('additionalPassengerNamesHidden');
-        if (!container || !hidden) return;
+        if (!container) return;
         container.innerHTML = '';
         var idx = 0;
         for (var i = 0; i < adults - 1; i++) {
@@ -510,12 +529,24 @@ document.addEventListener('DOMContentLoaded', function() {
             input.className = 'form-control';
             input.placeholder = _resTxt.placeholderName || 'Ad Soyad';
             input.name = 'additionalPassenger_' + (++idx);
+            input.setAttribute('data-type', 'adult');
             var div = document.createElement('div');
             div.className = 'form-group form-group-sm';
             div.style.marginBottom = '12px';
             div.appendChild(label);
             div.appendChild(input);
             container.appendChild(div);
+        }
+        if (children > 0) {
+            var sep = document.createElement('hr');
+            sep.style.margin = '16px 0 8px 0';
+            sep.style.borderColor = '#d4af37';
+            container.appendChild(sep);
+            var childTitle = document.createElement('p');
+            childTitle.style.fontWeight = '600';
+            childTitle.style.marginBottom = '8px';
+            childTitle.textContent = childLabel + ' (' + children + ')';
+            container.appendChild(childTitle);
         }
         for (var j = 0; j < children; j++) {
             var label = document.createElement('label');
@@ -525,7 +556,8 @@ document.addEventListener('DOMContentLoaded', function() {
             input.type = 'text';
             input.className = 'form-control';
             input.placeholder = _resTxt.placeholderName || 'Ad Soyad';
-            input.name = 'additionalPassenger_' + (++idx);
+            input.name = 'childPassenger_' + (j + 1);
+            input.setAttribute('data-type', 'child');
             var div = document.createElement('div');
             div.className = 'form-group form-group-sm';
             div.style.marginBottom = '12px';
@@ -538,14 +570,22 @@ document.addEventListener('DOMContentLoaded', function() {
         if (passengerCountHidden) passengerCountHidden.value = total.toString();
     }
     function collectAdditionalPassengerNames() {
-        var inputs = document.querySelectorAll('#additionalPassengerInputs input[type="text"]');
-        var names = [];
-        for (var i = 0; i < inputs.length; i++) {
-            var v = (inputs[i].value || '').trim();
-            if (v) names.push(v);
+        var adultInputs = document.querySelectorAll('#additionalPassengerInputs input[data-type="adult"]');
+        var childInputs = document.querySelectorAll('#additionalPassengerInputs input[data-type="child"]');
+        var adultNames = [];
+        var childNames = [];
+        for (var i = 0; i < adultInputs.length; i++) {
+            var v = (adultInputs[i].value || '').trim();
+            if (v) adultNames.push(v);
+        }
+        for (var i = 0; i < childInputs.length; i++) {
+            var v = (childInputs[i].value || '').trim();
+            if (v) childNames.push(v);
         }
         var hidden = document.getElementById('additionalPassengerNamesHidden');
-        if (hidden) hidden.value = names.join('; ');
+        if (hidden) hidden.value = adultNames.join('; ');
+        var childHidden = document.getElementById('childNamesHidden');
+        if (childHidden) childHidden.value = childNames.join('; ');
     }
     var adultsInput = document.querySelector('input[name="NumberOfAdults"]');
     var childrenInput = document.querySelector('input[name="NumberOfChildren"]');

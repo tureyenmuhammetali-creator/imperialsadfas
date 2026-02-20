@@ -31,9 +31,10 @@
                             <th>#</th>
                             <th>Müşteri</th>
                             <th>Transfer Tarihi</th>
-                            <th>Alış</th>
-                            <th>Bırakış</th>
+                            <th>Alış Noktası</th>
+                            <th>Varış Noktası</th>
                             <th>Araç</th>
+                            <th>Fiyat</th>
                             <th>Durum</th>
                             <th>Kayıt</th>
                             <th>İşlem</th>
@@ -49,8 +50,10 @@
                                     <br><small>@item.CustomerPhone</small>
                                 </td>
                                 <td>
-                                    @(item.TransferDate?.ToString("dd.MM.yyyy") ?? "-")
-                                    <br><small>@item.TransferTime</small>
+                                    <div class="res-date-badge">
+                                        <span class="res-date"><i class="bi bi-calendar3"></i> @(item.TransferDate?.ToString("dd MMM yyyy") ?? "-")</span>
+                                        <span class="res-time"><i class="bi bi-clock"></i> @(item.TransferTime ?? "-")</span>
+                                    </div>
                                 </td>
                                 <td>
                                     <small>@item.PickupLocation</small>
@@ -62,6 +65,16 @@
                                     @if (!string.IsNullOrEmpty(item.VehicleName))
                                     {
                                         <small>@item.VehicleName</small>
+                                    }
+                                    else
+                                    {
+                                        <small class="text-muted">-</small>
+                                    }
+                                </td>
+                                <td>
+                                    @if ((item.EstimatedPrice ?? 0) > 0)
+                                    {
+                                        <small style="font-weight:600; color:#d4af37;">@((item.EstimatedPrice ?? 0).ToString("N2")) €</small>
                                     }
                                     else
                                     {

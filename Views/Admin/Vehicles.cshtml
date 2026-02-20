@@ -20,8 +20,7 @@
                         <tr>
                             <th>Görsel</th>
                             <th>Araç</th>
-                            <th>Tip</th>
-                            <th>Kapasite</th>
+                            <th>Yolcu</th>
                             <th>Kullanım ücreti</th>
                             <th>Durum</th>
                             <th>İşlem</th>
@@ -44,12 +43,9 @@
                                 </td>
                                 <td>
                                     <strong>@item.Name</strong>
-                                    <br><small>@item.Brand @item.Model</small>
                                 </td>
-                                <td>@item.Type</td>
                                 <td>
                                     <i class="bi bi-people"></i> @item.PassengerCapacity
-                                    <i class="bi bi-briefcase ms-2"></i> @item.LuggageCapacity
                                 </td>
                                 <td>@item.MinimumPrice.ToString("N2") € / @item.MinimumPriceUsd.ToString("N2") $ / @item.MinimumPriceTry.ToString("N0") ₺</td>
                                 <td>

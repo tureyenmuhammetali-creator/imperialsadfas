@@ -22,8 +22,11 @@ namespace ImperialVip.Controllers
         private readonly IMemoryCache _cache;
         private readonly ILogger<AdminController> _logger;
         private readonly IOutputCacheStore _outputCache;
+        private readonly IEmailService _emailService;
+        private readonly IReservationPdfService _pdfService;
+        private readonly IWhatsAppService _whatsAppService;
 
-        public AdminController(ApplicationDbContext context, IWebHostEnvironment environment, DataMigrationService migrationService, ICurrencyRateService currencyRateService, IMemoryCache cache, ILogger<AdminController> logger, IOutputCacheStore outputCache)
+        public AdminController(ApplicationDbContext context, IWebHostEnvironment environment, DataMigrationService migrationService, ICurrencyRateService currencyRateService, IMemoryCache cache, ILogger<AdminController> logger, IOutputCacheStore outputCache, IEmailService emailService, IReservationPdfService pdfService, IWhatsAppService whatsAppService)
         {
             _context = context;
             _environment = environment;
@@ -32,6 +35,9 @@ namespace ImperialVip.Controllers
             _cache = cache;
             _logger = logger;
             _outputCache = outputCache;
+            _emailService = emailService;
+            _pdfService = pdfService;
+            _whatsAppService = whatsAppService;
         }
 
         /// <summary>Bölge listesi/detay önbelleğini temizler. Admin bölge ekleyince/silince/düzenleyince ana sayfa ve rezervasyon güncel veri gösterir.</summary>
@@ -143,7 +149,8 @@ namespace ImperialVip.Controllers
                     DropoffLocation = r.DropoffLocation,
                     VehicleName = r.Vehicle != null ? r.Vehicle.Name : null,
                     Status = r.Status ?? ReservationStatus.Beklemede,
-                    CreatedAt = r.CreatedAt
+                    CreatedAt = r.CreatedAt,
+                    EstimatedPrice = r.EstimatedPrice
                 })
                 .ToListAsync();
 
@@ -162,11 +169,12 @@ namespace ImperialVip.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CreateReservation(Reservation model)
         {
-            // Manuel kayıt için ModelState hatalarını gevşet (opsiyonel alanlar)
             ModelState.Remove("Vehicle");
             ModelState.Remove("Region");
             ModelState.Remove("PickupLocationDetail");
             ModelState.Remove("DropoffLocationDetail");
+            ModelState.Remove("ChildNames");
+            ModelState.Remove("Language");
 
             if (string.IsNullOrWhiteSpace(model.CustomerName))
                 ModelState.AddModelError("CustomerName", "Ad Soyad zorunludur.");
@@ -198,6 +206,33 @@ namespace ImperialVip.Controllers
 
                 _context.Reservations.Add(model);
                 await _context.SaveChangesAsync();
+
+                if (model.VehicleId.HasValue)
+                    model.Vehicle = await _context.Vehicles.AsNoTracking().FirstOrDefaultAsync(v => v.Id == model.VehicleId.Value);
+                if (model.RegionId.HasValue)
+                    model.Region = await _context.Regions.AsNoTracking().FirstOrDefaultAsync(r => r.Id == model.RegionId.Value);
+
+                try
+                {
+                    if (!string.IsNullOrEmpty(model.CustomerEmail))
+                    {
+                        await _emailService.SendReservationConfirmationAsync(model);
+                        await _emailService.SendReservationNotificationToAdminAsync(model);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Admin rezervasyon mail gönderilirken hata: {Message}", ex.Message);
+                }
+
+                try
+                {
+                    await _whatsAppService.SendReservationPdfAsync(model);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Admin rezervasyon WhatsApp gönderiminde hata: {Message}", ex.Message);
+                }
 
                 TempData["Success"] = "Rezervasyon başarıyla kaydedildi. (Site dışı manuel kayıt)";
                 return RedirectToAction(nameof(ReservationDetails), new { id = model.Id });
@@ -255,9 +290,36 @@ namespace ImperialVip.Controllers
             }
 
             await _context.SaveChangesAsync();
+
+            if (status == ReservationStatus.Onaylandi && !string.IsNullOrEmpty(reservation.CustomerEmail))
+            {
+                try
+                {
+                    if (reservation.VehicleId.HasValue)
+                        reservation.Vehicle = await _context.Vehicles.AsNoTracking().FirstOrDefaultAsync(v => v.Id == reservation.VehicleId.Value);
+                    await _emailService.SendReservationConfirmationAsync(reservation);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Onay maili gönderilirken hata: {Message}", ex.Message);
+                }
+            }
+
             TempData["Success"] = "Rezervasyon durumu güncellendi.";
 
             return RedirectToAction(nameof(ReservationDetails), new { id });
+        }
+
+        public async Task<IActionResult> DownloadPdf(int id, string lang = "tr")
+        {
+            var reservation = await _context.Reservations.AsNoTracking().FirstOrDefaultAsync(r => r.Id == id);
+            if (reservation == null) return NotFound();
+            if (reservation.VehicleId.HasValue)
+                reservation.Vehicle = await _context.Vehicles.AsNoTracking().FirstOrDefaultAsync(v => v.Id == reservation.VehicleId.Value);
+
+            var pdfBytes = _pdfService.GenerateReservationPdf(reservation, lang);
+            var fileName = $"Rezervasyon_{reservation.Id}_{lang}.pdf";
+            return File(pdfBytes, "application/pdf", fileName);
         }
 
         [HttpPost]
@@ -297,7 +359,8 @@ namespace ImperialVip.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> CreateVehicle(IFormCollection form)
+        [RequestFormLimits(MultipartBodyLengthLimit = 50 * 1024 * 1024)]
+        public async Task<IActionResult> CreateVehicle(IFormCollection form, IFormFile? mainImageFile, List<IFormFile>? albumFiles)
         {
             var name = form["Name"].ToString().Trim();
             if (string.IsNullOrEmpty(name))
@@ -315,7 +378,7 @@ namespace ImperialVip.Controllers
                 Model = form["Model"].ToString().Trim(),
                 Description = form["Description"].ToString() ?? "",
                 Features = form["Features"].ToString() ?? "",
-                ImageUrl = form["ImageUrl"].ToString()?.Trim() ?? "",
+                ImageUrl = "",
                 Currency = string.IsNullOrEmpty(form["Currency"].ToString().Trim()) ? "EUR" : form["Currency"].ToString().Trim(),
                 IsActive = FormIsActiveChecked(form) ? 1 : 0,
                 CreatedAt = DateTime.UtcNow,
@@ -324,11 +387,39 @@ namespace ImperialVip.Controllers
 
             if (int.TryParse(form["PassengerCapacity"].ToString(), out var pcap) && pcap > 0) vehicle.PassengerCapacity = pcap;
             if (int.TryParse(form["LuggageCapacity"].ToString(), out var lcap) && lcap >= 0) vehicle.LuggageCapacity = lcap;
+            else vehicle.LuggageCapacity = 0;
             if (int.TryParse(form["SortOrder"].ToString(), out var so)) vehicle.SortOrder = so;
 
             ParseAndSetDecimal(form["MinimumPrice"].ToString(), v => vehicle.MinimumPrice = v, () => vehicle.MinimumPrice);
             ParseAndSetDecimal(form["MinimumPriceUsd"].ToString(), v => vehicle.MinimumPriceUsd = v, () => vehicle.MinimumPriceUsd);
             ParseAndSetDecimal(form["MinimumPriceTry"].ToString(), v => vehicle.MinimumPriceTry = v, () => vehicle.MinimumPriceTry);
+
+            var uploadsFolder = Path.Combine(_environment.WebRootPath, "images", "aracdetay");
+            if (!Directory.Exists(uploadsFolder)) Directory.CreateDirectory(uploadsFolder);
+
+            if (mainImageFile != null && mainImageFile.Length > 0)
+            {
+                var ext = Path.GetExtension(mainImageFile.FileName).ToLowerInvariant();
+                var fileName = $"vehicle_{Guid.NewGuid():N}{ext}";
+                var filePath = Path.Combine(uploadsFolder, fileName);
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                    await mainImageFile.CopyToAsync(stream);
+                vehicle.ImageUrl = $"/images/aracdetay/{fileName}";
+            }
+
+            if (albumFiles != null)
+            {
+                int sortIdx = 0;
+                foreach (var file in albumFiles.Where(f => f.Length > 0))
+                {
+                    var ext = Path.GetExtension(file.FileName).ToLowerInvariant();
+                    var fileName = $"vehicle_{Guid.NewGuid():N}{ext}";
+                    var filePath = Path.Combine(uploadsFolder, fileName);
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                        await file.CopyToAsync(stream);
+                    vehicle.Images.Add(new VehicleImage { ImageUrl = $"/images/aracdetay/{fileName}", SortOrder = sortIdx++ });
+                }
+            }
 
             _context.Vehicles.Add(vehicle);
             await _context.SaveChangesAsync();
@@ -354,6 +445,7 @@ namespace ImperialVip.Controllers
             };
             if (int.TryParse(form["PassengerCapacity"].ToString(), out var pcap)) v.PassengerCapacity = pcap;
             if (int.TryParse(form["LuggageCapacity"].ToString(), out var lcap)) v.LuggageCapacity = lcap;
+            else v.LuggageCapacity = 0;
             if (int.TryParse(form["SortOrder"].ToString(), out var so)) v.SortOrder = so;
             ParseAndSetDecimal(form["MinimumPrice"].ToString(), x => v.MinimumPrice = x, () => v.MinimumPrice);
             ParseAndSetDecimal(form["MinimumPriceUsd"].ToString(), x => v.MinimumPriceUsd = x, () => v.MinimumPriceUsd);
@@ -373,7 +465,8 @@ namespace ImperialVip.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> EditVehicle(int id, IFormCollection form)
+        [RequestFormLimits(MultipartBodyLengthLimit = 50 * 1024 * 1024)]
+        public async Task<IActionResult> EditVehicle(int id, IFormCollection form, IFormFile? mainImageFile, List<IFormFile>? albumFiles)
         {
             var formId = form["Id"].ToString();
             if (id <= 0 && !string.IsNullOrEmpty(formId) && int.TryParse(formId, out var parsedId))
@@ -414,13 +507,43 @@ namespace ImperialVip.Controllers
                 if (!string.IsNullOrEmpty(currency)) existing.Currency = currency;
                 existing.IsActive = FormIsActiveChecked(form) ? 1 : 0;
                 if (int.TryParse(form["SortOrder"].ToString(), out var so)) existing.SortOrder = so;
-                existing.Images.Clear();
-                var albumUrls = form["AlbumUrls"].ToString();
-                if (!string.IsNullOrWhiteSpace(albumUrls))
+                var uploadsFolder = Path.Combine(_environment.WebRootPath, "images", "aracdetay");
+                if (!Directory.Exists(uploadsFolder)) Directory.CreateDirectory(uploadsFolder);
+
+                if (mainImageFile != null && mainImageFile.Length > 0)
                 {
-                    var urls = albumUrls.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries).Select(u => u.Trim()).Where(u => u.Length > 0).ToList();
-                    for (int i = 0; i < urls.Count; i++)
-                        existing.Images.Add(new VehicleImage { VehicleId = id, ImageUrl = urls[i], SortOrder = i });
+                    var ext = Path.GetExtension(mainImageFile.FileName).ToLowerInvariant();
+                    var fileName = $"vehicle_{Guid.NewGuid():N}{ext}";
+                    var filePath = Path.Combine(uploadsFolder, fileName);
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                        await mainImageFile.CopyToAsync(stream);
+                    existing.ImageUrl = $"/images/aracdetay/{fileName}";
+                }
+
+                if (albumFiles != null && albumFiles.Any(f => f.Length > 0))
+                {
+                    existing.Images.Clear();
+                    int sortIdx = 0;
+                    foreach (var file in albumFiles.Where(f => f.Length > 0))
+                    {
+                        var ext = Path.GetExtension(file.FileName).ToLowerInvariant();
+                        var fileName = $"vehicle_{Guid.NewGuid():N}{ext}";
+                        var filePath = Path.Combine(uploadsFolder, fileName);
+                        using (var stream = new FileStream(filePath, FileMode.Create))
+                            await file.CopyToAsync(stream);
+                        existing.Images.Add(new VehicleImage { VehicleId = id, ImageUrl = $"/images/aracdetay/{fileName}", SortOrder = sortIdx++ });
+                    }
+                }
+                else
+                {
+                    var albumUrls = form["AlbumUrls"].ToString();
+                    if (!string.IsNullOrWhiteSpace(albumUrls))
+                    {
+                        existing.Images.Clear();
+                        var urls = albumUrls.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries).Select(u => u.Trim()).Where(u => u.Length > 0).ToList();
+                        for (int i = 0; i < urls.Count; i++)
+                            existing.Images.Add(new VehicleImage { VehicleId = id, ImageUrl = urls[i], SortOrder = i });
+                    }
                 }
                 await _context.SaveChangesAsync();
                 InvalidateVehicleCaches();

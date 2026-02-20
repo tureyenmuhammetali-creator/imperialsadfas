@@ -4,6 +4,6 @@ namespace ImperialVip.Services
 {
     public interface IReservationPdfService
     {
-        byte[] GenerateReservationPdf(Reservation reservation);
+        byte[] GenerateReservationPdf(Reservation reservation, string lang = "tr");
     }
 }

@@ -27,7 +27,7 @@
 
     <div class="admin-card">
         <div class="card-body">
-            <form asp-action="EditVehicle" asp-controller="Admin" asp-route-id="@Model.Id" method="post" class="admin-form" id="editVehicleForm">
+            <form asp-action="EditVehicle" asp-controller="Admin" asp-route-id="@Model.Id" method="post" class="admin-form" id="editVehicleForm" enctype="multipart/form-data">
                 <input type="hidden" name="Id" id="Id" value="@Model.Id" />
                 <input type="hidden" name="CreatedAt" value="@(Model.CreatedAt?.ToString("yyyy-MM-ddTHH:mm:ssZ", System.Globalization.CultureInfo.InvariantCulture) ?? "")" />
 
@@ -45,37 +45,14 @@
                         <span asp-validation-for="Name" class="text-danger"></span>
                     </div>
                     <div class="form-group">
-                        <label asp-for="Type">Araç Tipi</label>
-                        <select asp-for="Type" class="form-control">
-                            <option value="Sedan">Sedan</option>
-                            <option value="SUV">SUV</option>
-                            <option value="VAN">VAN</option>
-                            <option value="Limuzin">Limuzin</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label asp-for="Brand">Marka</label>
-                        <input asp-for="Brand" class="form-control" />
-                    </div>
-                    <div class="form-group">
-                        <label asp-for="Model">Model</label>
-                        <input asp-for="Model" class="form-control" />
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
                         <label asp-for="PassengerCapacity">Yolcu Kapasitesi</label>
                         <input asp-for="PassengerCapacity" type="number" class="form-control" min="1" max="20" />
                     </div>
-                    <div class="form-group">
-                        <label asp-for="LuggageCapacity">Bagaj Kapasitesi</label>
-                        <input asp-for="LuggageCapacity" type="number" class="form-control" min="0" max="20" />
-                    </div>
                 </div>
+                <input type="hidden" asp-for="Type" />
+                <input type="hidden" asp-for="Brand" />
+                <input type="hidden" asp-for="Model" />
+                <input type="hidden" asp-for="LuggageCapacity" />
 
                 <div class="form-group">
                     <label asp-for="Description">Açıklama</label>
@@ -89,15 +66,35 @@
                 </div>
 
                 <div class="form-group">
-                    <label asp-for="ImageUrl">Ana Görsel URL</label>
-                    <input asp-for="ImageUrl" class="form-control" />
-                    <small class="form-hint">Araç kartında büyük görünen ana fotoğraf</small>
+                    <label>Mevcut Ana Görsel</label>
+                    @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                    {
+                        <div style="margin-bottom: 8px;">
+                            <img src="@Model.ImageUrl" alt="Ana görsel" style="max-width: 200px; border-radius: 8px;" onerror="this.style.display='none'" />
+                        </div>
+                    }
+                    <input type="hidden" asp-for="ImageUrl" />
+                    <label for="mainImageFile">Yeni Ana Görsel Yükle</label>
+                    <input type="file" name="mainImageFile" id="mainImageFile" class="form-control" accept=".jpg,.jpeg,.png,.webp" />
+                    <small class="form-hint">Boş bırakılırsa mevcut görsel korunur</small>
                 </div>
 
                 <div class="form-group">
-                    <label for="AlbumUrls">Albüm fotoğrafları (iç / dış)</label>
-                    <textarea name="AlbumUrls" id="AlbumUrls" class="form-control" rows="4" placeholder="Her satıra bir fotoğraf URL'si yazın. İç ve dış görünüm fotoğraflarını ekleyebilirsiniz.">@(Model.Images != null ? string.Join("\n", Model.Images.OrderBy(i => i.SortOrder).Select(i => i.ImageUrl)) : "")</textarea>
-                    <small class="form-hint">Her satıra bir URL. Sıralama yukarıdan aşağıya albümde görünür.</small>
+                    <label>Mevcut Albüm Görselleri</label>
+                    @if (Model.Images != null && Model.Images.Any())
+                    {
+                        <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 8px;">
+                            @foreach (var img in Model.Images.OrderBy(i => i.SortOrder))
+                            {
+                                <div style="position: relative;">
+                                    <img src="@img.ImageUrl" alt="" style="width: 80px; height: 60px; object-fit: cover; border-radius: 4px;" onerror="this.style.display='none'" />
+                                </div>
+                            }
+                        </div>
+                    }
+                    <label for="albumFiles">Yeni Albüm Görselleri Yükle</label>
+                    <input type="file" name="albumFiles" id="albumFiles" class="form-control" accept=".jpg,.jpeg,.png,.webp" multiple />
+                    <small class="form-hint">Yeni görseller yüklenirse mevcut albüm güncellenir. Birden fazla seçebilirsiniz.</small>
                 </div>
 
                 <p class="form-hint text-muted mb-3">Her para birimi için aracın kullanım ücretini girin. Sitede seçilen paraya göre ilgili ücret gösterilir.</p>

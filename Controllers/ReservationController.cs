@@ -13,13 +13,15 @@ namespace ImperialVip.Controllers
         private readonly ApplicationDbContext _context;
         private readonly IMemoryCache _cache;
         private readonly IEmailService _emailService;
+        private readonly IWhatsAppService _whatsAppService;
         private readonly ILogger<ReservationController> _logger;
 
-        public ReservationController(ApplicationDbContext context, IMemoryCache cache, IEmailService emailService, ILogger<ReservationController> logger)
+        public ReservationController(ApplicationDbContext context, IMemoryCache cache, IEmailService emailService, IWhatsAppService whatsAppService, ILogger<ReservationController> logger)
         {
             _context = context;
             _cache = cache;
             _emailService = emailService;
+            _whatsAppService = whatsAppService;
             _logger = logger;
         }
 
@@ -122,6 +124,9 @@ namespace ImperialVip.Controllers
             ModelState.Remove("NumberOfAdults");
             ModelState.Remove("NumberOfChildren");
             ModelState.Remove("ChildSeatCount");
+            ModelState.Remove("ChildNames");
+            ModelState.Remove("Language");
+            ModelState.Remove("Currency");
             
             if (!model.VehicleId.HasValue || model.VehicleId.Value < 1)
                 ModelState.AddModelError("VehicleId", "Araç seçimi zorunludur.");
@@ -153,6 +158,7 @@ namespace ImperialVip.Controllers
                 
                 model.CreatedAt = DateTime.UtcNow;
                 model.Status = ReservationStatus.Beklemede;
+                model.Language = HttpContext.GetRouteValue("lang")?.ToString() ?? "en";
                 
                 // Null alanları boş string olarak ayarla (veritabanı NOT NULL constraint için)
                 model.PickupLocationDetail ??= "";
@@ -218,6 +224,20 @@ namespace ImperialVip.Controllers
                 {
                     _logger.LogError(ex, "Rezervasyon #{Id}: Admin mail gönderilirken HATA: {Message}", model.Id, ex.Message);
                     EmailLogHelper.Write($"[MAIL HATA] Rezervasyon #{model.Id}: Admin mail - {ex.Message}");
+                }
+
+                // WhatsApp ile PDF gönder
+                try
+                {
+                    var whatsAppSent = await _whatsAppService.SendReservationPdfAsync(model);
+                    if (whatsAppSent)
+                        _logger.LogInformation("Rezervasyon #{Id}: WhatsApp PDF gönderildi.", model.Id);
+                    else
+                        _logger.LogWarning("Rezervasyon #{Id}: WhatsApp PDF gönderilemedi.", model.Id);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Rezervasyon #{Id}: WhatsApp gönderiminde hata: {Message}", model.Id, ex.Message);
                 }
 
                 TempData["Success"] = "Rezervasyonunuz başarıyla alındı. En kısa sürede size dönüş yapacağız.";

@@ -6,28 +6,28 @@
             ["Title"] = "Rezervasyon Alındı", ["Received"] = "Rezervasyonunuz Alındı", ["ThankYou"] = "Teşekkür ederiz! Rezervasyon talebiniz başarıyla oluşturuldu. Ekibimiz en kısa sürede sizinle iletişime geçecektir.",
             ["Summary"] = "Rezervasyon Özeti", ["ResNo"] = "Rezervasyon No:", ["FullName"] = "Ad Soyad:", ["Phone"] = "Telefon:", ["TransferDate"] = "Transfer Tarihi:",
             ["Pickup"] = "Alınacak Nokta:", ["Dropoff"] = "Bırakılacak Nokta:", ["Vehicle"] = "Araç:", ["PassengerCount"] = "Yolcu Sayısı:", ["Distance"] = "Mesafe:",
-            ["Info"] = "Rezervasyon detayları ve onay bilgisi telefon/WhatsApp ile tarafınıza iletilecektir.",
+            ["Info"] = "Rezervasyon detayları ve onay bilgisi mail ve WhatsApp aracılığıyla tarafınıza ulaştırılacaktır.",
             ["Home"] = "Ana Sayfa", ["WhatsApp"] = "WhatsApp ile İletişim"
         },
         ["de"] = new Dictionary<string, string> {
             ["Title"] = "Reservierung erhalten", ["Received"] = "Ihre Reservierung wurde erhalten", ["ThankYou"] = "Vielen Dank! Ihre Reservierung wurde erfolgreich erstellt. Unser Team wird sich schnellstmöglich mit Ihnen in Verbindung setzen.",
             ["Summary"] = "Reservierungsübersicht", ["ResNo"] = "Reservierungsnr.:", ["FullName"] = "Name:", ["Phone"] = "Telefon:", ["TransferDate"] = "Transferdatum:",
             ["Pickup"] = "Abholort:", ["Dropoff"] = "Ablieferort:", ["Vehicle"] = "Fahrzeug:", ["PassengerCount"] = "Passagiere:", ["Distance"] = "Entfernung:",
-            ["Info"] = "Reservierungsdetails und Bestätigung werden per Telefon/WhatsApp mitgeteilt.",
+            ["Info"] = "Reservierungsdetails und Bestätigung werden per E-Mail und WhatsApp an Sie gesendet.",
             ["Home"] = "Startseite", ["WhatsApp"] = "WhatsApp Kontakt"
         },
         ["ru"] = new Dictionary<string, string> {
             ["Title"] = "Бронирование получено", ["Received"] = "Ваше бронирование принято", ["ThankYou"] = "Спасибо! Ваш запрос на бронирование успешно создан. Наша команда свяжется с вами в ближайшее время.",
             ["Summary"] = "Итог бронирования", ["ResNo"] = "Номер:", ["FullName"] = "Имя:", ["Phone"] = "Телефон:", ["TransferDate"] = "Дата трансфера:",
             ["Pickup"] = "Место посадки:", ["Dropoff"] = "Место высадки:", ["Vehicle"] = "Автомобиль:", ["PassengerCount"] = "Пассажиров:", ["Distance"] = "Расстояние:",
-            ["Info"] = "Детали и подтверждение будут отправлены по телефону/WhatsApp.",
+            ["Info"] = "Детали и подтверждение бронирования будут отправлены вам по электронной почте и WhatsApp.",
             ["Home"] = "Главная", ["WhatsApp"] = "Связаться через WhatsApp"
         },
         ["en"] = new Dictionary<string, string> {
             ["Title"] = "Reservation Received", ["Received"] = "Your Reservation Has Been Received", ["ThankYou"] = "Thank you! Your reservation request has been successfully created. Our team will contact you shortly.",
             ["Summary"] = "Reservation Summary", ["ResNo"] = "Reservation No:", ["FullName"] = "Full Name:", ["Phone"] = "Phone:", ["TransferDate"] = "Transfer Date:",
             ["Pickup"] = "Pick-up Point:", ["Dropoff"] = "Drop-off Point:", ["Vehicle"] = "Vehicle:", ["PassengerCount"] = "Passenger Count:", ["Distance"] = "Distance:",
-            ["Info"] = "Reservation details and confirmation will be sent via phone/WhatsApp.",
+            ["Info"] = "Reservation details and confirmation will be sent to you via email and WhatsApp.",
             ["Home"] = "Home", ["WhatsApp"] = "Contact via WhatsApp"
         }
     };
@@ -66,7 +66,13 @@
                     </div>
                     <div class="summary-item">
                         <span class="summary-label">@txt["TransferDate"]</span>
-                        <span class="summary-value">@(Model.TransferDate?.ToString("dd.MM.yyyy") ?? "-") - @Model.TransferTime</span>
+                        <span class="summary-value">
+                            <i class="bi bi-calendar3" style="color:var(--color-accent); margin-right:4px;"></i>
+                            @(Model.TransferDate?.ToString("dd MMM yyyy") ?? "-")
+                            <span style="margin:0 6px; opacity:.4;">|</span>
+                            <i class="bi bi-clock" style="color:var(--color-accent); margin-right:4px;"></i>
+                            @(Model.TransferTime ?? "-")
+                        </span>
                     </div>
                     <div class="summary-item">
                         <span class="summary-label">@txt["Pickup"]</span>

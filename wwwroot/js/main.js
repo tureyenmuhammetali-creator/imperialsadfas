@@ -514,5 +514,14 @@ style.textContent = `
     .header.scrolled .nav-link:hover {
         color: #c9a962;
     }
+    .header.scrolled .header-agency-badge {
+        border-left-color: #b8860b;
+    }
+    .header.scrolled .header-agency-name {
+        color: #b8860b;
+    }
+    .header.scrolled .header-agency-belge {
+        color: #374151;
+    }
 `;
 document.head.appendChild(style);
